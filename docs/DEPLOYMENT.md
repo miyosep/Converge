@@ -107,7 +107,41 @@ refunds. The executor needs Sepolia ETH to pay the approved deposit. Record
 actual allocations and transaction hashes as evidence; do not present example
 values as completed on-chain actions.
 
-## Status
+## Executor and merchant setup
+
+The dedicated executor is `0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456`.
+It received 0.001 Sepolia ETH from the deployer; the verified receipt is in
+[`demo-executor-funding.11155111.json`](../contracts/deployments/demo-executor-funding.11155111.json).
+It has no MockUSDC minting authority. Its authority to pay a decision is granted
+only by being bound into that decision's approved policy.
+
+The public [role manifest](../contracts/deployments/demo-roles.11155111.json)
+maps the synthetic catalog IDs to these receipt-only EOAs:
+
+| Restaurant | Mock payment recipient |
+| --- | --- |
+| A | `0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8` |
+| B | `0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec` |
+| C | `0xb0d95622166845D2aFC4E4d7637482f52015a58a` |
+| D | `0x69cef213BD361B2bF6b2986D32aeD02290e01e71` |
+| E | `0x7d25Bc4deD7d7A155D324C33Fb588AA03b3a1d45` |
+
+No merchant contract deployment or gas funding is needed to receive MockUSDC.
+The private test keys remain in `.env`. `pnpm demo:roles` reuses existing keys
+and refuses to overwrite a different manifest. `pnpm demo:fund-executor`
+records the one-time 0.001 ETH allocation and rechecks its transaction on reruns.
+Do not delete funding records to request additional allocations.
+
+Run `pnpm demo:preflight` for a read-only blockchain setup check. Add
+`--check-signers` on the demo machine to require local keys for all six
+participants and the executor to match the public manifests. The command
+checks chain identity, both deployed code hashes, token configuration, role
+separation, participant balances, and executor gas, and saves a public snapshot
+in `docs/evidence/sepolia-preflight.json`. A nonzero ETH balance does not
+guarantee sufficient gas for a later transaction; estimate each transaction.
+This check does not call Kiln, authorize a policy, or submit a transaction.
+
+## Current connection settings
 
 Use these public settings in the demo machine's ignored `.env` to connect to
 the existing deployment:
@@ -129,4 +163,6 @@ and verified on Ethereum Sepolia. The public deployment manifest is
 The local Windows `.env` uses the public PublicNode Sepolia RPC and contains
 the deployed contract addresses. All six demo participants are funded. No group
 decision, payment, or refund has been performed yet; those transactions must be
-recorded after the remaining workflow and executor/merchant configuration are ready.
+recorded after the remaining workflow is implemented. Executor and merchant
+configuration is ready; the successful blockchain-only preflight is recorded
+in `docs/evidence/sepolia-preflight.json`.

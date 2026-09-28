@@ -957,7 +957,7 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
 | T11 | Kiln adapter | Real provider call, timeout/retry handling, schema validation | T02 | | | Unclaimed |
 | T12 | Usage and efficiency | Per-attempt and per-flow records with unknown/missing usage handling | T09, T11 | | | Unclaimed |
-| T13 | Restaurant fixtures | Five versioned candidates and deployment-resolved merchant mapping | T02 | | | Unclaimed |
+| T13 | Restaurant fixtures | Merchant A-E address mapping ready in the demo role manifest; five versioned candidate records remain | T02 | | | Unclaimed |
 | T14 | Decision engine | Deterministic A/B/B selection, no-match handling, documented ties | T13 | | | Unclaimed |
 | T15 | Preference workflow | Private submission, extraction, correction, confirmation, revisions | T10, T11 | | | Unclaimed |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
@@ -1064,7 +1064,7 @@ These prerequisites are tracked separately from completed integration work. Reso
 | Kiln API key and model availability | Not verified | Configure server secret and confirm `gpt-oss-120b` |
 | Provider usage and NPU metrics | Unknown | Inspect real response fields and units |
 | Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
-| Funded deployer/executor/participant accounts | Deployer and six single-operator demo accounts funded; each demo account received 30 MockUSDC and 0.001 Sepolia ETH, recorded in `contracts/deployments/demo-funding.11155111.json` | Configure and fund the executor; verify balances again before rehearsal |
+| Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
 | Runtime and persistent database | Not selected | Choose deployment-compatible persistence |
 | Solidity toolchain | Foundry v1.8.3 verified on Windows; presentation MacBook pending | Run the contract suite on the actual MacBook |
 | Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |

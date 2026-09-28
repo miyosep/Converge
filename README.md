@@ -128,7 +128,7 @@ The wallet rejects the wrong caller or merchant, insufficient approval/funding, 
 | --- | --- | --- |
 | MockUSDC | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) | [`0xf329f3...f21991`](https://sepolia.etherscan.io/tx/0xf329f33842f286b2007693d604c66779ad879bd4061c6c4852bd62a4a9f21991) |
 | ConvergeGroupWallet | [`0xd43172d5bd904b68004d69545fd01dbcfdb82a89`](https://sepolia.etherscan.io/address/0xd43172d5bd904b68004d69545fd01dbcfdb82a89) | [`0x2ba1af...33b57`](https://sepolia.etherscan.io/tx/0x2ba1af22b6ba1ea410d482c195671caec2184fa49462feea449a9cc57de33b57) |
-| Mock merchant, if used | Pending decision | Pending |
+| Mock merchants A-E | [Five receipt-only EOAs](contracts/deployments/demo-roles.11155111.json) | No contract deployment required |
 
 ## On-chain Transactions
 
@@ -173,6 +173,12 @@ pnpm contracts:abi
 `pnpm check` runs TypeScript validation, formatting checks, and foundation tests. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. The web application is not scaffolded yet: there is no `dev`, app `build`, or end-to-end demo command. See [the deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
+
+The six demo accounts and dedicated executor are now funded, and the five
+synthetic merchant recipients are configured. Run `pnpm demo:preflight` to
+check the deployed blockchain setup, or `pnpm demo:preflight --check-signers`
+to check local demo keys as well. This is a read-only check; it does not run the
+application or complete the payment/refund workflow.
 
 ## Environment Variables
 

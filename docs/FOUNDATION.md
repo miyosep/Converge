@@ -38,7 +38,7 @@ Provider usage may be partially known. Set unknown fields to `null`; use `unavai
 
 - T01: Next.js scaffold and application-specific lint/build/dev configuration.
 - T02: Candidate, group, decision, execution, and complete evidence schemas.
-- Database provider, migrations, wallet authentication, executor configuration, Kiln endpoint, and runtime deployment. A public Sepolia RPC, funded deployer, and six funded demo accounts are configured locally; do not treat them as shared production infrastructure.
+- Database provider, migrations, wallet authentication, agent execution integration, Kiln endpoint, and runtime deployment. A public Sepolia RPC, funded deployer/executor, six funded demo accounts, and five mock merchant addresses are configured locally; do not treat them as shared production infrastructure.
 - The fixture dataset, scoring engine, UI, and end-to-end demo. The token and group-wallet contracts are deployed on Ethereum Sepolia, and the initial participant allocations are recorded in the public funding manifest.
 
 Do not mark T01 or T02 Done based on this foundation alone. Sage owns the blockchain tasks in the guideline; the other work remains open for self-assignment.

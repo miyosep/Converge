@@ -41,6 +41,26 @@ the tests have passed on a Windows x64 development machine;
 they still need to be run on the actual presentation MacBook. No RPC or wallet
 key is needed for the local policy-hash tests.
 
+## Connect the existing blockchain deployment
+
+The blockchain changes are on `feat/sage-policy-encoding` until reviewed and
+merged. Check out that branch to rehearse this work before the merge. Create
+the MacBook's own ignored `.env` from `.env.example`, then use the public RPC
+and contract addresses from [DEPLOYMENT.md](DEPLOYMENT.md). Transfer the six
+demo participant keys and the executor test key privately into that file.
+The deployer and merchant keys are not required for the payment/refund rehearsal.
+Keep the public deployment, role, and funding manifests from Git.
+
+```sh
+pnpm demo:preflight
+pnpm demo:preflight --check-signers
+```
+
+The first command checks public blockchain configuration and balances. The
+second also checks that the local signing accounts match the funded addresses.
+Both are read-only. Do not generate replacement accounts for the existing
+manifest or repeat the one-off funding commands during routine setup.
+
 ## Feature Implementation Requirements
 
 - Write setup and demo orchestration in portable TypeScript/Node code or the chosen contract toolchain. Do not require PowerShell, drive-letter paths, Windows-only executables, or shell-specific environment assignments inside package scripts.
