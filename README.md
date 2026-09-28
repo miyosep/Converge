@@ -164,7 +164,7 @@ At this README's first draft, the repository contains design documentation. No a
 
 ## Team
 
-Engineering responsibilities are **not preassigned**. Contributors should enter their own names in the blank `Owner` cells of the [self-assignment task register](project_guideline.md#19-self-assignment-task-register). The team and contribution summary here will be updated from completed work before submission.
+Engineering responsibilities were not preassigned in the initial plan. Sage has claimed the policy encoding, token, escrow, payment enforcement, refunds, contract verification, and deployment tasks in the [self-assignment task register](project_guideline.md#19-self-assignment-task-register). Other contributors can enter their own names in open `Owner` cells. Claimed work is not yet completed work; this summary will be updated from actual contributions before submission.
 
 ## README Update Plan
 

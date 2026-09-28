@@ -5,7 +5,7 @@
 Document status: implementation specification, not a report of completed work.
 Reviewed on: 2026-09-28.
 Language: English for project documentation, code comments, issues, and demo evidence.
-Task ownership: intentionally unassigned. Contributors claim work by adding their own names to the task register in Section 19.
+Task ownership: self-assigned. Sage has claimed the blockchain contract and deployment work in Section 19; other tasks remain open for contributors to claim.
 
 ## 1. Purpose and Source of Truth
 
@@ -934,7 +934,7 @@ Prioritize real Kiln integration, chain enforcement, funding/refunds, and reprod
 
 ## 19. Self-Assignment Task Register
 
-No person is preassigned a role or task. The Owner and Reviewer cells are intentionally blank. A contributor claims a task by writing their own name, updating the status, and linking the implementation artifact when available. Claiming a task does not assign that person every task in the same area.
+No person was preassigned a role or task in the initial plan. Sage has since claimed the blockchain contract and deployment tasks below. The Owner cell records a person's name; the Status cell records progress. Reviewer cells remain blank until someone accepts a review. A contributor claims another task by writing their own name, updating the status, and linking the implementation artifact when available. Claiming a task does not assign that person every task in the same area.
 
 Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If multiple people collaborate on one task, list their names only after they agree. A reviewer adds their own name when accepting the review. Keep dependencies visible and document blockers with the exact missing input or prerequisite.
 
@@ -942,12 +942,12 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | --- | --- | --- | --- | --- | --- | --- |
 | T01 | Project scaffold | App starts; tool versions and lockfile recorded; env template contains no secrets | None | | | Unclaimed |
 | T02 | Shared schemas | Constraint, candidate, policy, execution, and evidence schemas validated | T01 | | | Unclaimed |
-| T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | | | Unclaimed |
-| T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | | | Unclaimed |
-| T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | | | Unclaimed |
-| T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | | | Unclaimed |
-| T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | | | Unclaimed |
-| T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | | | Unclaimed |
+| T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In progress |
+| T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In progress |
+| T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | Sage | | Claimed |
+| T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | Claimed |
+| T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | Claimed |
+| T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | Claimed |
 | T09 | Database and migrations | Core entities, revisioning, unique event identities, integer amounts | T02 | | | Unclaimed |
 | T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
 | T11 | Kiln adapter | Real provider call, timeout/retry handling, schema validation | T02 | | | Unclaimed |
@@ -959,7 +959,7 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
 | T18 | Group and input UI | Group creation/lobby plus private preference confirmation | T10, T15 | | | Unclaimed |
 | T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
-| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | | | Unclaimed |
+| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | Claimed |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
 | T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
