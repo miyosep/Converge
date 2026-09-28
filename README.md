@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. The web application, Kiln integration, and full end-to-end demo are still pending. This README remains a draft and will be updated with live evidence.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. A first Next.js group/preference workflow now runs against a Neon development branch with wallet-signature login and live Kiln extraction. Proposal, on-chain UI, and full end-to-end demo remain pending. This README remains a draft and will be updated with live evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -54,7 +54,7 @@ The $45 deposit is credited toward the synthetic $192 meal estimate. The balance
 
 ## Architecture
 
-The planned application architecture is TypeScript with server-side Kiln calls, a persistent database, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use; Next.js and wagmi remain proposed for the application.
+The application uses Next.js, TypeScript, server-side Kiln calls, Neon PostgreSQL, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use. Wallet browser integration currently uses the EIP-1193 provider; wagmi remains optional for later transaction UI.
 
 ```text
 Private input -> Kiln extraction -> participant confirmation
@@ -82,7 +82,7 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
 
-Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. Wallet sessions, invitations, and HTTP routes remain pending.
+Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. The first [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, and per-attempt usage storage. Proposal and payment routes are not connected yet.
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |
@@ -95,7 +95,7 @@ These are proposed call counts, not observed measurements. Final acceptance runs
 
 ## Kiln Token Usage by Flow
 
-No Kiln requests have been made for this repository yet. The table will be filled from provider usage records after live runs. Unknown values will remain unknown rather than be reported as zero.
+Earlier synthetic Kiln smoke checks and one live web extraction have succeeded. The table below is reserved for the final acceptance runs and will be filled from their provider usage records. Unknown values will remain unknown rather than be reported as zero.
 
 | Flow | Calls | Input tokens | Output tokens | Total tokens | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -183,7 +183,7 @@ pnpm contracts:test
 pnpm contracts:abi
 ```
 
-`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. The web application is not scaffolded yet: there is no `dev`, app `build`, or end-to-end demo command. See [the deployment guide](docs/DEPLOYMENT.md).
+`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. `pnpm dev` starts the first web workflow; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
 

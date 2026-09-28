@@ -16,7 +16,7 @@ The challenge brief in `hackathon_descrip.txt` is the source of truth for compet
 
 At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, and a verified Ethereum Sepolia deployment. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. The application, database, and live integrations remain subsequent work.
+The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, and a partial Next.js/Neon/Kiln group workflow. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. Proposal, financial UI, and full acceptance runs remain subsequent work.
 
 ### 1.1 Required README Declaration
 
@@ -958,16 +958,16 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
 | T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Versioned group/participant/revision/evaluation tables and transaction-backed preference flow tested on Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
-| T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
+| T09 | Database and migrations | Four versioned migrations for groups, preferences, evaluations, EOA sessions, invites, and Kiln attempt metadata tested on Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
+| T10 | Identity and privacy | EOA SIWE nonce/session and capped invites implemented; signed HTTP login, replay, Origin, and outsider access tested; contract-wallet and deployment hardening remain | T09 | | | In progress |
 | T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; two live synthetic extractions passed; app integration pending | T02 | | | In review |
-| T12 | Usage and efficiency | Per-attempt usage implemented with null unknowns; persistent per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
+| T12 | Usage and efficiency | Per-attempt usage persisted for live web extraction; final per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
 | T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
 | T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; API integration pending | T13 | | | In review |
-| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks and six-person dev rehearsal implemented; authenticated APIs pending | T10, T11 | | | In progress |
+| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; proposal API pending | T10, T11 | | | In progress |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
-| T18 | Group and input UI | Group creation/lobby plus private preference confirmation | T10, T15 | | | Unclaimed |
+| T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
 | T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
 | T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | In review |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |

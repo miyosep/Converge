@@ -82,17 +82,17 @@ explicit decision from the owner.
 
 ## Implementation and Demo Boundaries
 
-Project linking and database connectivity are complete. Two versioned SQL
-migrations and transaction-backed preference storage have been verified on
+Project linking and database connectivity are complete. Four versioned SQL
+migrations and transaction-backed preference, auth, invitation, and usage storage have been verified on
 `dev-preferences`; production remains untouched. The development connection
 strings live in ignored `.env.development`, while `.env` remains pinned to
 production. `pnpm db:migrate:dev` requires the direct connection and matching
 `NEON_BRANCH`; `pnpm db:rehearse:dev` uses the pooled connection and writes
 sanitized synthetic evidence. Neither command needs the Neon CLI at runtime.
 
-Wallet sessions, invitation validation, HTTP APIs, and full application runs
-remain pending. The current repository methods must only be called after the
-server authenticates the acting participant.
+EOA wallet sessions, invitation validation, and the first HTTP APIs now run on
+the development branch. The production branch has not received these migrations.
+Proposal, financial, and full end-to-end application runs remain pending.
 No empty or unavailable database should cause the application to fall back to
 in-memory production state or to fabricate confirmed preferences.
 
