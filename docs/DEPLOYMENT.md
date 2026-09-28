@@ -161,8 +161,12 @@ The contract suite passed locally on Windows, and both contracts were deployed
 and verified on Ethereum Sepolia. The public deployment manifest is
 [`contracts/deployments/11155111.json`](../contracts/deployments/11155111.json).
 The local Windows `.env` uses the public PublicNode Sepolia RPC and contains
-the deployed contract addresses. All six demo participants are funded. No group
-decision, payment, or refund has been performed yet; those transactions must be
-recorded after the remaining workflow is implemented. Executor and merchant
-configuration is ready; the successful blockchain-only preflight is recorded
-in `docs/evidence/sepolia-preflight.json`.
+the deployed contract addresses. Executor and merchant configuration is ready.
+After an authorized additional 0.003 ETH per participant, the direct-contract
+baseline completed 60 MockUSDC in contributions, a 45 MockUSDC payment, and
+six 2.5 MockUSDC refunds. The initial allocation table above is historical;
+participants now hold 22.5 MockUSDC each and have spent some ETH on gas.
+See [CHAIN_REHEARSAL.md](CHAIN_REHEARSAL.md), the
+[baseline evidence](evidence/baseline-001.json), and
+[gas top-up record](evidence/gas-topup-baseline-001.json). The application and
+Kiln acceptance workflows remain pending.

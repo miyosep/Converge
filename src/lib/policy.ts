@@ -95,31 +95,31 @@ export const POLICY_ABI = [
   },
 ] as const;
 
-export function hashPolicy(input: unknown): `0x${string}` {
+export function toContractPolicy(input: unknown) {
   const policy = policySchema.parse(input);
   const [a, b, c, d, e, f] = policy.participants;
   if (!a || !b || !c || !d || !e || !f) {
     throw new Error("Policy requires six participants");
   }
-  return keccak256(
-    encodeAbiParameters(POLICY_ABI, [
-      {
-        policyVersion: BigInt(policy.policyVersion),
-        chainId: BigInt(policy.chainId),
-        verifyingContract: policy.verifyingContract,
-        decisionId: policy.decisionId as `0x${string}`,
-        token: policy.token,
-        merchant: policy.merchant,
-        executor: policy.executor,
-        participants: [a, b, c, d, e, f],
-        approvalThreshold: BigInt(policy.approvalThreshold),
-        contributionPerParticipant: BigInt(policy.contributionPerParticipant),
-        paymentAmount: BigInt(policy.paymentAmount),
-        maxDeposit: BigInt(policy.maxDeposit),
-        maxTotalSpend: BigInt(policy.maxTotalSpend),
-        expiry: BigInt(policy.expiry),
-        reservationReference: policy.reservationReference as `0x${string}`,
-      },
-    ]),
-  );
+  return {
+    policyVersion: BigInt(policy.policyVersion),
+    chainId: BigInt(policy.chainId),
+    verifyingContract: policy.verifyingContract,
+    decisionId: policy.decisionId as `0x${string}`,
+    token: policy.token,
+    merchant: policy.merchant,
+    executor: policy.executor,
+    participants: [a, b, c, d, e, f] as const,
+    approvalThreshold: BigInt(policy.approvalThreshold),
+    contributionPerParticipant: BigInt(policy.contributionPerParticipant),
+    paymentAmount: BigInt(policy.paymentAmount),
+    maxDeposit: BigInt(policy.maxDeposit),
+    maxTotalSpend: BigInt(policy.maxTotalSpend),
+    expiry: BigInt(policy.expiry),
+    reservationReference: policy.reservationReference as `0x${string}`,
+  };
+}
+
+export function hashPolicy(input: unknown): `0x${string}` {
+  return keccak256(encodeAbiParameters(POLICY_ABI, [toContractPolicy(input)]));
 }

@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented and tested locally. Both contracts are deployed on Ethereum Sepolia. The web application, Kiln integration, and end-to-end demo are still pending. This README remains a draft and will be updated with live evidence.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. The web application, Kiln integration, and full end-to-end demo are still pending. This README remains a draft and will be updated with live evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -132,11 +132,17 @@ The wallet rejects the wrong caller or merchant, insufficient approval/funding, 
 
 ## On-chain Transactions
 
-The two deployment transactions above succeeded and were checked against their receipts and deployed bytecode; see the [public deployment manifest](contracts/deployments/11155111.json). No decision, contribution, payment, or refund transaction has been produced yet. The final README will list the Ethereum Sepolia decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
+The two deployment transactions above succeeded and were checked against their receipts and deployed bytecode; see the [public deployment manifest](contracts/deployments/11155111.json).
+
+The [blockchain-only baseline](docs/evidence/baseline-001.json) completed 20 successful Sepolia transactions: one decision creation, six token allowances, six contributions, one payment, and six refunds. Six 10 MockUSDC contributions funded the policy. An 80 MockUSDC `eth_call` simulation was rejected with `MaxDepositExceeded`; no invalid transaction was broadcast. The [45 MockUSDC payment](https://sepolia.etherscan.io/tx/0x62e3f93d6b868e5742778cc18c3d28d079cfd1288d5184463ee974c075af4ef5) then succeeded, and each participant claimed 2.5 MockUSDC. Receipts, matching wallet/token events, final decision accounting, and balance changes were verified. Each participant finished with 22.5 MockUSDC and the escrow retained none of this decision's funds.
+
+Decision ID: `0xfe4303ad9410db46828e983ed1c13cb2656b35264ca575fd81d332b2dc551abe`.
+Policy hash: `0xf5c21e9945568ab0bfcb51998257f9465f151a9636db050b71ca3614ba453a4d`.
+This direct-contract rehearsal used one operator and synthetic inputs; it did not call Kiln or exercise the web application. See [rehearsal instructions](docs/CHAIN_REHEARSAL.md).
 
 ## Condition Check Experiments
 
-The challenge requires the baseline plus two complete reruns with changed conditions. The following are expected results from the proposed fixtures, not completed experiments.
+The challenge requires the baseline plus two complete reruns with changed conditions. The following full application experiments remain pending. The separately recorded blockchain-only baseline does not complete them.
 
 | Run | Changed condition | Expected recommendation | Required chain and log evidence |
 | --- | --- | --- | --- |
@@ -179,6 +185,11 @@ synthetic merchant recipients are configured. Run `pnpm demo:preflight` to
 check the deployed blockchain setup, or `pnpm demo:preflight --check-signers`
 to check local demo keys as well. This is a read-only check; it does not run the
 application or complete the payment/refund workflow.
+
+`pnpm demo:chain baseline-001` runs or resumes the direct-contract baseline.
+For the already completed run, use `pnpm demo:chain baseline-001 --verify-only`
+to check its evidence without preparing or broadcasting transactions. A new
+run ID creates a fresh decision and spends another allocation of mock funds.
 
 ## Environment Variables
 

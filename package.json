@@ -20,6 +20,8 @@
     "demo:roles": "node --import tsx scripts/create-demo-roles.ts",
     "demo:fund-executor": "node --env-file=.env --import tsx scripts/fund-demo-executor.ts",
     "demo:preflight": "node --env-file=.env --import tsx scripts/demo-preflight.ts",
+    "demo:chain": "node --env-file=.env --import tsx scripts/demo-chain-baseline.ts",
+    "demo:gas-topup": "node --env-file=.env --import tsx scripts/top-up-demo-gas.ts",
     "demo:fund": "node --env-file=.env --import tsx scripts/fund-demo-wallets.ts",
     "format": "prettier --write src tests scripts package.json tsconfig.json .github",
     "format:check": "prettier --check src tests scripts package.json tsconfig.json .github",

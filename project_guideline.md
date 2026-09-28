@@ -884,6 +884,11 @@ Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:
 
 The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
 
+Additional implemented blockchain preparation and rehearsal commands are
+`pnpm demo:roles`, `pnpm demo:fund-executor`, `pnpm demo:preflight`,
+`pnpm demo:gas-topup`, and `pnpm demo:chain`. See `docs/CHAIN_REHEARSAL.md`
+for the completed baseline, read-only verification, and exact resume behavior.
+
 | Script | Intended behavior |
 | --- | --- |
 | `dev` | Start the web application |
@@ -970,7 +975,7 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
 | T24 | Execution and refund UI | Policy enforcement display, transaction history, claims and settlement | T07, T21-T23 | | | Unclaimed |
 | T25 | Evidence view/export | Run comparison, per-flow usage, real receipts, redacted artifacts | T12, T23, T24 | | | Unclaimed |
-| T26 | Baseline demo script | Real Kiln, invalid attempt, 45 USDC payment, six 2.5 USDC refunds | T15, T17, T20, T22, T23 | | | Unclaimed |
+| T26 | Baseline demo script | Direct-contract payment/refund rehearsal verified in `docs/evidence/baseline-001.json`; real Kiln and full application workflow remain | T15, T17, T20, T22, T23 | | | Unclaimed |
 | T27 | Changed-condition scripts | Complete lower-budget and changed-merchant runs with comparison | T26 | | | Unclaimed |
 | T28 | Integration and privacy QA | Cross-session tests, failure recovery, access-control verification | T18-T27 | | | Unclaimed |
 | T29 | README and submission | Accurate setup, architecture, evidence, limitations, prior-work disclosure | T25-T28 | | | Unclaimed |
@@ -1070,4 +1075,4 @@ These prerequisites are tracked separately from completed integration work. Reso
 | Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |
 | Submission timing and prior-work records | Not supplied | Confirm organizer rules and document actual work history |
 
-The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. Until the acceptance runs exist, keep decision/payment/refund transaction hashes, token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.
+The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. A completed blockchain-only baseline, including decision/payment/refund transactions, is recorded in `docs/evidence/baseline-001.json`; it does not complete the full application acceptance runs. Keep missing acceptance evidence, inference token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.
