@@ -29,13 +29,13 @@ The current foundation needs no database, RPC, API key, Docker, wallet extension
 - Sage must verify the chosen Foundry or Hardhat version on the MacBook and record it alongside contract setup instructions. Add contract checks to macOS CI when the contract project exists.
 - The application implementation must add real dev/build/start commands and verify the chosen browser and wallet extension on the demo MacBook.
 - Select persistence that is reachable from the MacBook. If a local database or container is chosen, document its macOS installation and architecture support; it is not an existing prerequisite of the foundation.
-- Kiln inference runs through the remote API; the MacBook does not need a local Furiosa NPU or model download. Confirm API and RPC connectivity from the demo venue.
+- Kiln inference runs through the remote API; the MacBook does not need a local Furiosa NPU or model download. The selected demo chain is Ethereum Sepolia (`11155111`). Confirm Kiln and Sepolia RPC connectivity from the demo venue, and fund the six participant accounts plus the executor/deployer with Sepolia ETH for gas.
 
 ## Final Rehearsal Gate
 
 Once the application and contracts exist, run the following on the actual presentation MacBook before marking the demo ready:
 
-1. Record hardware architecture, macOS version, Node/pnpm versions, contract toolchain version, browser/wallet version, commit SHA, and chosen network.
+1. Record hardware architecture, macOS version, Node/pnpm versions, contract toolchain version, browser/wallet version, commit SHA, and the Ethereum Sepolia RPC/chain ID.
 2. Install with `pnpm install --frozen-lockfile`, run `pnpm check`, then run the implemented app build and contract checks.
 3. Create an ignored `.env` from `.env.example` and configure live Kiln, persistence, RPC, deployed addresses, and test-only credentials. Verify configuration without printing secrets.
 4. Prepare six independent authenticated participant sessions/test accounts and test gas/mock-token balances. The UI must not depend on Windows browser profiles.

@@ -54,7 +54,7 @@ The $45 deposit is credited toward the synthetic $192 meal estimate. The balance
 
 ## Architecture
 
-The planned architecture is a TypeScript web application with server-side Kiln calls, a persistent database, deterministic decision logic, and Solidity contracts on an EVM devnet or testnet. Foundry, Next.js, Zod, viem, and wagmi are proposed tools. Final versions and commands will be recorded after implementation.
+The planned architecture is a TypeScript web application with server-side Kiln calls, a persistent database, deterministic decision logic, and Solidity contracts deployed to Ethereum Sepolia. Foundry, Next.js, Zod, viem, and wagmi are proposed tools. Final versions and commands will be recorded after implementation.
 
 ```text
 Private input -> Kiln extraction -> participant confirmation
@@ -114,7 +114,7 @@ The planned deployment has a six-decimal `MockUSDC` token and a `ConvergeGroupWa
 
 The contract is intended to reject the wrong caller or merchant, insufficient approval/funding, an expired or inactive decision, an amount above the deposit or total spending ceiling, an amount different from the exact approved deposit, and a second payment. A participant may cancel before payment; expiry and completion make eligible refunds claimable.
 
-**Network:** Pending selection. A devnet or testnet satisfies the challenge brief. Public explorer links will be included only if the selected network provides them.
+**Selected demo network:** Ethereum Sepolia (chain ID `11155111`). Contract development and automated tests may use a local EVM chain, but the final acceptance runs and transaction evidence must use Ethereum Sepolia. Each participant and the executor will need Sepolia ETH for gas; the contributed token remains the project's separate MockUSDC. The RPC provider and deployment addresses are still pending.
 
 ## Contract Addresses
 
@@ -126,7 +126,7 @@ The contract is intended to reject the wrong caller or merchant, insufficient ap
 
 ## On-chain Transactions
 
-No on-chain transactions have been produced yet. The final README will list the chain ID, decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
+No on-chain transactions have been produced yet. The final README will list the Ethereum Sepolia decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
 
 ## Condition Check Experiments
 
@@ -163,7 +163,7 @@ pnpm check
 
 `pnpm check` runs TypeScript validation, formatting checks, and the foundation tests. Individual commands are `pnpm typecheck`, `pnpm test`, `pnpm format:check`, and `pnpm format`. These require no external credentials. The web application is not scaffolded yet: there is no `dev`, app `build`, deployment, or end-to-end demo command. Those remain in [the proposed command contract](project_guideline.md#173-command-contract-to-implement).
 
-Expected external prerequisites are Kiln credentials, a persistent database, an EVM RPC, funded test accounts, and a dedicated agent executor account. Keep all secrets outside Git.
+Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
 
 ## Environment Variables
 

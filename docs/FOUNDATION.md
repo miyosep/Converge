@@ -5,6 +5,7 @@ This is the initial common foundation to merge before feature branches diverge. 
 ## Available Now
 
 - Node.js 24.19.0, pnpm 11.19.0, exact dependency versions, and one lockfile.
+- Ethereum Sepolia (`11155111`) as the final demo chain; local chains remain available for contract development.
 - Strict TypeScript, Prettier, Node's test runner through tsx, and a GitHub Actions check.
 - Git ignore rules, LF normalization, editor conventions, and environment placeholders.
 - Shared constants, amount/address/time primitives, extraction validation, status labels, a public participant projection, an API error shape, and provider usage validation.
@@ -36,7 +37,7 @@ Provider usage may be partially known. Set unknown fields to `null`; use `unavai
 - T01: Next.js scaffold and application-specific lint/build/dev configuration.
 - T02: Candidate, group, decision, execution, and complete evidence schemas.
 - T03 (Sage): Solidity policy types, encoding order, final ABI, and cross-language hash vectors.
-- Database provider, migrations, wallet authentication, chain/RPC, Kiln endpoint, and runtime deployment.
+- Database provider, migrations, wallet authentication, Sepolia RPC provider and funded test accounts, Kiln endpoint, and runtime deployment.
 - The fixture dataset, scoring engine, UI, contracts, and end-to-end demo.
 
 Do not mark T01 or T02 Done based on this foundation alone. No teammate has been assigned the remaining work. The broader architecture remains in the guideline.

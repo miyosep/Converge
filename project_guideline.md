@@ -35,7 +35,7 @@ Use this exact sentence prominently in the README:
 | Selected function | Declare the purchasing-agent and programmable-wallet function | Exact README declaration above |
 | Changed conditions | Repeat the end-to-end workflow twice with changed conditions | Baseline plus two separate recorded runs, including input changes and outcomes |
 
-The brief permits a devnet or testnet. A public testnet is useful for independently inspectable explorer links, but is not presented here as an additional organizer requirement. Record the actual network used. A local chain hash alone is not independently available after the chain is reset; preserve its receipts and deployment metadata.
+The brief permits a devnet or testnet. Converge has selected **Ethereum Sepolia (chain ID `11155111`)** for deployed contracts, final acceptance runs, and judge-facing transaction evidence. Local EVM chains remain useful for development and contract tests. Record the actual network used for each run; a local chain hash alone is not independently available after the chain is reset.
 
 ## 2. Architecture Review and Corrections
 
@@ -843,7 +843,7 @@ KILN_MODEL=gpt-oss-120b
 DATABASE_URL=
 SESSION_SECRET=
 APP_ORIGIN=
-CHAIN_ID=
+CHAIN_ID=11155111
 RPC_URL=
 GROUP_WALLET_ADDRESS=
 MOCK_USDC_ADDRESS=
@@ -860,7 +860,7 @@ KILN_MOCK_MODE=false
 CHAIN_CONFIRMATIONS=
 ```
 
-Keep only empty placeholders in `.env.example`. Deployment and demo participant keys are script-only and must not be loaded into the browser or unnecessarily deployed with the web server. The runtime executor uses a dedicated test key with only its intended role. Browser-facing chain metadata may be provided through a validated public configuration response; never expose the RPC credential if it is private.
+Keep all secret values empty in `.env.example`; the public `CHAIN_ID` is set to `11155111`. Deployment and demo participant keys are script-only and must not be loaded into the browser or unnecessarily deployed with the web server. The runtime executor uses a dedicated test key with only its intended role. Browser-facing chain metadata may be provided through a validated public configuration response; never expose the RPC credential if it is private.
 
 ### 17.2 Setup Sequence
 
@@ -870,7 +870,7 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 2. Scaffold the web application and pin the dependency/tool versions used by the team.
 3. Establish database migrations, shared schemas, and environment validation.
 4. Install the chosen Solidity toolchain and verify it in the actual development environment.
-5. Run contract tests locally and deploy mock token plus escrow to the selected chain.
+5. Run contract tests locally and deploy mock token plus escrow to Ethereum Sepolia.
 6. Export deployment addresses, ABI, chain ID, merchant map, and deployment transaction references.
 7. Configure live Kiln credentials and confirm its actual response/usage format.
 8. Start the application, run preflight, and complete the three acceptance scenarios.
@@ -1063,7 +1063,7 @@ These items are not verified or available from the reviewed repository. Resolve 
 | Kiln endpoint and authentication details | Not supplied in reviewed files | Obtain organizer documentation and verify with a real call |
 | Kiln API key and model availability | Not verified | Configure server secret and confirm `gpt-oss-120b` |
 | Provider usage and NPU metrics | Unknown | Inspect real response fields and units |
-| Selected chain and RPC | Not selected | Choose permitted devnet/testnet and record chain ID |
+| Selected chain and RPC | Ethereum Sepolia selected; RPC provider not selected | Configure an Ethereum Sepolia RPC and verify chain ID `11155111` before deployment and demo runs |
 | Funded deployer/executor/participant accounts | Not verified | Prepare dedicated test accounts and gas |
 | Runtime and persistent database | Not selected | Choose deployment-compatible persistence |
 | Solidity toolchain | Not verified | Confirm Foundry or Hardhat works in the team environment |
