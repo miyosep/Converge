@@ -5,6 +5,7 @@
 Document status: implementation specification, not a report of completed work.
 Reviewed on: 2026-09-28.
 Language: English for project documentation, code comments, issues, and demo evidence.
+Demo platform: MacBook. Native macOS support is required; the foundation targets Apple Silicon and Intel. See `docs/MACBOOK_DEMO.md` for setup and rehearsal requirements.
 Task ownership: self-assigned. Sage has claimed the blockchain contract and deployment work in Section 19; other tasks remain open for contributors to claim.
 
 ## 1. Purpose and Source of Truth
@@ -863,6 +864,8 @@ Keep only empty placeholders in `.env.example`. Deployment and demo participant 
 
 ### 17.2 Setup Sequence
 
+The presentation machine is a MacBook. Shared scripts must work in macOS Terminal and must not depend on PowerShell, Windows paths, or copied Windows binaries. Install dependencies natively from the shared lockfile. Foundation CI covers macOS arm64 and Intel, Linux, and Windows. Add app build, contract, and demo checks as those implementations become available. Verify the full live workflow on the actual MacBook before submission; hosted foundation CI alone is insufficient.
+
 1. Initialize the repository and select one package manager and lockfile.
 2. Scaffold the web application and pin the dependency/tool versions used by the team.
 3. Establish database migrations, shared schemas, and environment validation.
@@ -1048,6 +1051,7 @@ No Git history was available during this review. Do not infer that every future 
 - [ ] Contract, application, privacy, and appropriate end-to-end checks pass.
 - [ ] Pending transactions and interrupted database writes can be reconciled safely.
 - [ ] README has actual run instructions, actual deployment values, and accurate disclosure.
+- [ ] All three complete acceptance runs have been rehearsed on the presentation MacBook, with OS/architecture, tool versions, browser/wallet, commit, network, and evidence recorded.
 - [ ] No API keys, wallet secrets, fabricated transactions, or fabricated measurements are committed.
 
 ## 22. Open Prerequisites

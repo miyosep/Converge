@@ -43,6 +43,8 @@ Do not mark T01 or T02 Done based on this foundation alone. No teammate has been
 
 ## Checks
 
+The required demo platform is macOS. CI installs and checks the foundation on Linux, Windows, macOS 15 arm64, and macOS 15 Intel. See [MacBook demo readiness](MACBOOK_DEMO.md) for setup and the later full-workflow rehearsal gate.
+
 `pnpm check` runs type checking, formatting checks for source/tests/configuration, and foundation tests. Long-form project documentation is edited manually and is not reformatted by this command. CI runs the same command on pull requests and pushes to main. Solidity, app build, browser, and live-service checks will be added when those implementations exist.
 
 Initial local verification: frozen-lockfile installation, TypeScript checking, formatting checking, and all six foundation tests passed on Windows with the pinned Node/pnpm versions. This does not verify any live integration or deployed contract.

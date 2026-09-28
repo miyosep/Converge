@@ -10,6 +10,8 @@ For the implementation specification and self-assignment task register, see [pro
 
 Before starting a feature branch, read [CONTRIBUTING.md](CONTRIBUTING.md) and [the shared foundation](docs/FOUNDATION.md).
 
+**Demo platform:** MacBook. See [macOS setup and demo readiness](docs/MACBOOK_DEMO.md). Foundation CI includes Apple Silicon and Intel macOS; a full live rehearsal on the actual MacBook remains required after implementation.
+
 ## Selected Function
 
 **Converge is a multi-user purchasing agent and programmable wallet that converts private group preferences into a jointly approved purchase and allows an AI agent to execute it only within smart-contract-enforced spending conditions.**

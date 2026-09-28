@@ -4,6 +4,8 @@ Read [project_guideline.md](project_guideline.md) and [the shared foundation](do
 
 ## Local Setup
 
+The final demo machine is a MacBook. Follow [MacBook setup and rehearsal requirements](docs/MACBOOK_DEMO.md). New feature scripts and dependencies must support macOS; CI checks the foundation on Apple Silicon, Intel Mac, Linux, and Windows.
+
 Install Node.js 24.19.0 and pnpm 11.19.0. With a normal Node/npm installation, install pnpm using `npm install --global pnpm@11.19.0`.
 
 ```sh
