@@ -3,9 +3,45 @@
 ## Selected Service
 
 The project owner selected Neon Free on September 29, 2026 (KST), following the
-decision to use PostgreSQL for a multi-device web application. No paid plan or
-database project has been provisioned by this repository. Browser access to the
-Neon console was declined; account and project creation require the owner.
+decision to use PostgreSQL for a multi-device web application. The owner has
+since created project `rough-cake-92709912` (Converge). The local Neon context
+is linked to its `production` branch (`br-empty-darkness-b5hw6tyq`). No paid
+plan was selected and no additional project was created.
+
+## CLI and Agent Setup
+
+- Neon CLI 6.2.4 was installed in the Windows user npm prefix. npm was also
+  installed there because the original runtime did not expose npm/npx.
+- Eight official Neon skills were installed under `.agents/skills`, with
+  `skills-lock.json` recording their sources. These are tooling instructions,
+  not activation of Auth, Functions, Storage, or AI Gateway services.
+- The user's Codex MCP configuration now includes Neon, pinned to this project
+  with a project-scoped API key. Other existing configuration sections remain.
+  The credential is outside this repository. The MCP key has write access within
+  this project; it is not read-only. MCP tool availability in the current chat
+  has not been verified and may require reloading the Codex client.
+- `.neon` contains the local project/branch link and is git-ignored.
+- `neon.ts` contains exactly `defineConfig({})` and its import. The packages
+  `@neon/config` 1.8.2 and `@neon/env` 1.4.7 were added with pnpm.
+- `neon config plan` succeeded and reported no changes, utilizing Postgres only.
+  `neon deploy --no-env-pull` then failed because the Neon API rejected the CLI
+  bearer token. Reauthentication and a successful retry are still required.
+- Environment pulling was intentionally deferred. Existing `.env` values were
+  not overwritten; database connectivity and application migrations remain
+  unverified.
+
+The overview skill was fetched from
+https://neon.com/.well-known/agent-skills/neon/SKILL.md and the PostgreSQL child
+skill was read before setup. Existing tooling is reused rather than reinstalled.
+The application continues to use Kiln Qwen and the planned wallet-signature
+authentication; installing Neon skills does not change those decisions.
+
+After reauthentication, inspect `neon config plan`, run `neon deploy
+--no-env-pull`, and pull only the PostgreSQL variables. Preserve all unrelated
+environment values. Use pooled `DATABASE_URL` for application queries and
+`DATABASE_URL_UNPOOLED` for migration tooling. Future schema work should use an
+isolated development branch; this setup linked `production` at the owner's
+explicit request and did not apply application schema changes.
 
 Neon provides PostgreSQL; it does not host the Converge web application. The
 Next.js server will connect to the database using a server-only connection
@@ -13,7 +49,7 @@ string. Participant browsers must never receive database credentials. Wallet
 signature login remains the intended authentication model, not Neon account
 login for participants.
 
-## Owner Setup
+## Manual Connection Setup (Alternative)
 
 1. Open [the Neon console](https://console.neon.tech) and sign in or create your
    account. Complete any account verification and terms acceptance yourself.
@@ -41,7 +77,7 @@ explicit decision from the owner.
 
 ## Implementation and Demo Boundaries
 
-Database selection is complete, but connection validation, migration tooling,
+Project linking is complete, but connection validation, migration tooling,
 tables, transaction isolation tests, wallet sessions, and HTTP APIs are pending.
 The existing preference transition module is not a persistent repository.
 No empty or unavailable database should cause the application to fall back to

@@ -30,6 +30,8 @@
     "check": "tsc --noEmit && prettier --check src tests scripts package.json tsconfig.json .github && tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@neon/config": "1.8.2",
+    "@neon/env": "1.4.7",
     "viem": "2.56.9",
     "zod": "4.6.5"
   },

@@ -14,3 +14,4 @@ contracts/cache/
 contracts/broadcast/
 contracts/deployments/*.pending.json
 docs/evidence/private/
+.neon
