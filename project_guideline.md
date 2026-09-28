@@ -15,7 +15,7 @@ The challenge brief in `hackathon_descrip.txt` is the source of truth for compet
 
 Repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, smart contracts, or Git repository were present at review time. All paths and interfaces below are proposed implementation targets. No deployment, successful test, API call, energy measurement, or transaction is claimed by this document.
 
-The current deliverable is this guideline. Implementing the application is subsequent project work.
+The current documentation deliverables are this guideline and an initial `README.md`. The README is a first draft and must be revised as implementation and evidence become available. Implementing the application is subsequent project work.
 
 ### 1.1 Required README Declaration
 
@@ -998,6 +998,8 @@ Next integration step:
 - Keep ownership self-selected; an area heading does not assign a permanent lead.
 
 ## 20. README and Submission Checklist
+
+The initial `README.md` is intentionally a draft. It describes planned behavior and marks deployment addresses, transaction hashes, Kiln usage, runnable commands, test outcomes, energy measurements, and team contributions as pending. Update the README throughout implementation and complete it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
 
 The final README should contain:
 
