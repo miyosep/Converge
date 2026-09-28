@@ -21,12 +21,32 @@ An existing checkout should use `git pull --ff-only` from a clean main branch be
 
 The current foundation needs no database, RPC, API key, Docker, wallet extension, or Foundry installation. It has no web server or runnable purchasing demo yet. Follow the README for available commands rather than assuming that `pnpm dev` or `pnpm demo:baseline` exists.
 
+## Install Foundry for Contract Work
+
+The contract suite uses Foundry v1.8.3 and Solc 0.8.24. On the MacBook, install
+Foundryup using the [official installer](https://getfoundry.sh/getting-started/installation),
+then select the same Foundry version and verify it:
+
+```sh
+curl -L https://getfoundry.sh/install | bash
+export PATH="$HOME/.foundry/bin:$PATH"
+foundryup --install v1.8.3
+forge --version
+forge test --root contracts -vv
+```
+
+The installer configures the user's shell startup file for future terminals;
+the explicit `PATH` line enables the current terminal. Foundry v1.8.3 and
+the tests have passed on a Windows x64 development machine;
+they still need to be run on the actual presentation MacBook. No RPC or wallet
+key is needed for the local policy-hash tests.
+
 ## Feature Implementation Requirements
 
 - Write setup and demo orchestration in portable TypeScript/Node code or the chosen contract toolchain. Do not require PowerShell, drive-letter paths, Windows-only executables, or shell-specific environment assignments inside package scripts.
 - Use `node:path` for filesystem paths, match filename casing exactly, and keep external paths/configuration in environment variables.
 - Add dependencies supporting native macOS arm64 and x64, and keep optional platform packages in the shared lockfile. Do not hard-code a Windows esbuild or compiler package.
-- Sage must verify the chosen Foundry or Hardhat version on the MacBook and record it alongside contract setup instructions. Add contract checks to macOS CI when the contract project exists.
+- Sage must verify Foundry v1.8.3 on the presentation MacBook. Contract tests are configured for macOS arm64 and Intel CI; confirm the first CI results before treating that coverage as verified.
 - The application implementation must add real dev/build/start commands and verify the chosen browser and wallet extension on the demo MacBook.
 - Select persistence that is reachable from the MacBook. If a local database or container is chosen, document its macOS installation and architecture support; it is not an existing prerequisite of the foundation.
 - Kiln inference runs through the remote API; the MacBook does not need a local Furiosa NPU or model download. The selected demo chain is Ethereum Sepolia (`11155111`). Confirm Kiln and Sepolia RPC connectivity from the demo venue, and fund the six participant accounts plus the executor/deployer with Sepolia ETH for gas.

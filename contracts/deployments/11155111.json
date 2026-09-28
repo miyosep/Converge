@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "network": "ethereum-sepolia",
+  "deployer": "0x10D39DFCA635474Fa14E995E207CE071439A814B",
+  "mockUSDC": {
+    "transactionHash": "0xf329f33842f286b2007693d604c66779ad879bd4061c6c4852bd62a4a9f21991",
+    "address": "0x4707bde238399a27f88855a34bfb31f20b386b17",
+    "blockNumber": "11801179",
+    "blockHash": "0x91b931ea9b8e1e9b513eeb5bf4af7d760450783c88a093746ca4eb28c2119172",
+    "deployedCodeHash": "0xb42a4284b259a9add61892b56a5010538807a8b186851eca56c27e55c0af313a"
+  },
+  "convergeGroupWallet": {
+    "transactionHash": "0x2ba1af22b6ba1ea410d482c195671caec2184fa49462feea449a9cc57de33b57",
+    "address": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+    "blockNumber": "11801181",
+    "blockHash": "0xc1a97e0bb81a95be6843c17f897b3bb4909c5ae46d5df3ecc0cf50ddce59635f",
+    "deployedCodeHash": "0x9c089f2a9302b3f34c4b69428eb6b5f88bf8a84d3edce0da9ee86dd43a23c01f"
+  }
+}

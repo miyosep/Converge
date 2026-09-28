@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The repository now includes a shared TypeScript foundation: pinned tooling, input schemas, environment placeholders, focused tests, and a CI workflow. The web application, Kiln integration, contracts, and end-to-end demo are still pending. This README remains a draft and will be updated with implementation details and real evidence.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented and tested locally. Both contracts are deployed on Ethereum Sepolia. The web application, Kiln integration, and end-to-end demo are still pending. This README remains a draft and will be updated with live evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -35,7 +35,7 @@ The restaurant catalog and token are synthetic. This prototype does not make a r
 
 ## Demo
 
-The planned baseline uses six separate participant accounts: Alice, Bob, Charlie, Dana, Erin, and Farah. These are demo personas, not team assignments.
+The baseline uses six separate participant accounts: Alice, Bob, Charlie, Dana, Erin, and Farah. These are demo personas, not team assignments. Dedicated accounts have been generated for a single-operator rehearsal; this does not demonstrate six independently controlled participants. Their public addresses are in [the participant manifest](contracts/deployments/demo-participants.11155111.json).
 
 | Item | Planned baseline |
 | --- | --- |
@@ -54,7 +54,7 @@ The $45 deposit is credited toward the synthetic $192 meal estimate. The balance
 
 ## Architecture
 
-The planned architecture is a TypeScript web application with server-side Kiln calls, a persistent database, deterministic decision logic, and Solidity contracts deployed to Ethereum Sepolia. Foundry, Next.js, Zod, viem, and wagmi are proposed tools. Final versions and commands will be recorded after implementation.
+The planned application architecture is TypeScript with server-side Kiln calls, a persistent database, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use; Next.js and wagmi remain proposed for the application.
 
 ```text
 Private input -> Kiln extraction -> participant confirmation
@@ -110,23 +110,29 @@ Direct energy measurements are **not yet available**. If the Kiln API does not e
 
 ## Blockchain Integration
 
-The planned deployment has a six-decimal `MockUSDC` token and a `ConvergeGroupWallet` contract with decision-specific accounting. Each participant signs their own approval and 10 Mock USDC contribution. An approved executor may request only the single deposit bound in the immutable policy.
+### Why Blockchain Is Necessary for This Design
 
-The contract is intended to reject the wrong caller or merchant, insufficient approval/funding, an expired or inactive decision, an amount above the deposit or total spending ceiling, an amount different from the exact approved deposit, and a second payment. A participant may cancel before payment; expiry and completion make eligible refunds claimable.
+A conventional web service could collect six approvals and enforce a spending limit, but the group would have to trust its operator to keep those rules, safeguard the pooled funds, and process refunds. Converge's intended guarantee is stronger: after participants approve and fund a decision, neither the AI executor nor the application operator can change its merchant, payment amount, expiry, or recipients of unused funds. The smart contract, rather than the server's database, must be the authority for moving the escrowed tokens; it must provide no administrator withdrawal or policy-editing path around those rules.
 
-**Selected demo network:** Ethereum Sepolia (chain ID `11155111`). Contract development and automated tests may use a local EVM chain, but the final acceptance runs and transaction evidence must use Ethereum Sepolia. Each participant and the executor will need Sepolia ETH for gas; the contributed token remains the project's separate MockUSDC. The RPC provider and deployment addresses are still pending.
+Participants should also be able to verify approvals, payment, and refunds from on-chain transactions and claim eligible refunds directly through the contract if the Converge server or website is unavailable. The acceptance demo should prove this by showing an out-of-policy payment rejected by the contract and a participant refund without relying on the application server. These are the reasons to use a blockchain for the chosen trust model, not a claim that a group purchase is impossible with Web2. The prototype uses MockUSDC and synthetic merchants on a testnet, so it does not prove real-world booking or payment settlement.
+
+The implemented contracts have a six-decimal `MockUSDC` token and a `ConvergeGroupWallet` with decision-specific accounting. Only the token's deployer can mint. Each participant signs their own approval and 10 Mock USDC contribution. The approved executor may request only the single deposit bound in the immutable policy.
+
+The wallet rejects the wrong caller or merchant, insufficient approval/funding, an expired or inactive decision, an amount above the deposit or total spending ceiling, an amount different from the exact approved deposit, and a second payment. A participant may cancel before payment; expiry and completion make eligible refunds claimable. A policy expires no later than 24 hours after creation. See [the contract behavior](docs/BLOCKCHAIN.md) and [deployment procedure](docs/DEPLOYMENT.md).
+
+**Selected demo network:** Ethereum Sepolia (chain ID `11155111`). Contract development and automated tests may use a local EVM chain, but the final acceptance runs and transaction evidence must use Ethereum Sepolia. Each participant and the executor will need Sepolia ETH for gas; the contributed token remains the project's separate MockUSDC. Deployment used the public PublicNode Sepolia RPC; the demo MacBook must verify connectivity before the presentation.
 
 ## Contract Addresses
 
 | Contract | Address | Deployment transaction |
 | --- | --- | --- |
-| MockUSDC | Pending deployment | Pending |
-| ConvergeGroupWallet | Pending deployment | Pending |
+| MockUSDC | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) | [`0xf329f3...f21991`](https://sepolia.etherscan.io/tx/0xf329f33842f286b2007693d604c66779ad879bd4061c6c4852bd62a4a9f21991) |
+| ConvergeGroupWallet | [`0xd43172d5bd904b68004d69545fd01dbcfdb82a89`](https://sepolia.etherscan.io/address/0xd43172d5bd904b68004d69545fd01dbcfdb82a89) | [`0x2ba1af...33b57`](https://sepolia.etherscan.io/tx/0x2ba1af22b6ba1ea410d482c195671caec2184fa49462feea449a9cc57de33b57) |
 | Mock merchant, if used | Pending decision | Pending |
 
 ## On-chain Transactions
 
-No on-chain transactions have been produced yet. The final README will list the Ethereum Sepolia decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
+The two deployment transactions above succeeded and were checked against their receipts and deployed bytecode; see the [public deployment manifest](contracts/deployments/11155111.json). No decision, contribution, payment, or refund transaction has been produced yet. The final README will list the Ethereum Sepolia decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
 
 ## Condition Check Experiments
 
@@ -150,7 +156,7 @@ This is application-level privacy, not cryptographic anonymity. Wallet addresses
 
 The financial policy will bind six distinct participant addresses, the token, chain, escrow contract, merchant, executor, exact payment, caps, and expiry. Contract state and per-decision balances, not browser or database assertions, decide whether a transfer is allowed. Refunds will be pull-based and protected against duplicate claims. Relevant contract invariants and access controls are specified in [project_guideline.md](project_guideline.md).
 
-This is a hackathon prototype using mock funds. The final README will state which contract checks were implemented and which tests actually passed.
+This is a hackathon prototype using mock funds. The local Solidity suite currently passes 22 tests, including fuzzing and randomized state sequences. The verified Sepolia deployment is not evidence of an end-to-end application run.
 
 ## How to Run
 
@@ -159,9 +165,12 @@ The shared foundation runs with Node.js 24.19.0 and pnpm 11.19.0:
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
+pnpm contracts:build
+pnpm contracts:test
+pnpm contracts:abi
 ```
 
-`pnpm check` runs TypeScript validation, formatting checks, and the foundation tests. Individual commands are `pnpm typecheck`, `pnpm test`, `pnpm format:check`, and `pnpm format`. These require no external credentials. The web application is not scaffolded yet: there is no `dev`, app `build`, deployment, or end-to-end demo command. Those remain in [the proposed command contract](project_guideline.md#173-command-contract-to-implement).
+`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. The web application is not scaffolded yet: there is no `dev`, app `build`, or end-to-end demo command. See [the deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
 
@@ -171,7 +180,7 @@ Expected external prerequisites are Kiln credentials, a persistent database, an 
 
 ## Pre-built vs Hackathon-built Work
 
-The initial README contained only design documentation. A subsequent foundation change added repository tooling, TypeScript schemas, checks, and collaboration instructions. No Solidity contract or complete application has been implemented yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
+The initial README contained only design documentation. Subsequent work added repository tooling, TypeScript schemas, checks, collaboration instructions, Solidity contracts with local tests, and the verified Sepolia deployment. No complete application has been produced yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
 
 ## Team
 

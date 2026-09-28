@@ -9,6 +9,7 @@ This is the initial common foundation to merge before feature branches diverge. 
 - Strict TypeScript, Prettier, Node's test runner through tsx, and a GitHub Actions check.
 - Git ignore rules, LF normalization, editor conventions, and environment placeholders.
 - Shared constants, amount/address/time primitives, extraction validation, status labels, a public participant projection, an API error shape, and provider usage validation.
+- Policy encoding v1 with matching Solidity/TypeScript hash vectors and Foundry contract tests.
 - Focused tests for numeric boundaries, membership, untrusted model output, privacy projection, and unknown usage.
 
 ## Module Contract
@@ -19,6 +20,7 @@ This is the initial common foundation to merge before feature branches diverge. 
 | `src/lib/schemas/primitives.ts` | Nonzero EVM addresses via viem; integer cents; uint256 decimal strings; UTC timestamps and time zones |
 | `src/lib/schemas/constraints.ts` | Strict allowed field/operator/value combinations and bounded extraction envelope |
 | `src/lib/schemas/shared.ts` | Unique six-wallet membership; public lobby fields; sanitized API error contract; nullable provider usage |
+| `src/lib/policy.ts` and `contracts/src/PolicyHash.sol` | Policy encoding v1 and cross-language hash |
 
 Token JSON uses base-unit strings: `"10000000"` means 10 Mock USDC. Convert validated strings to `bigint` inside financial code. Restaurant estimates use integer USD cents. Do not coerce floating-point or model-generated numeric strings into token amounts. Baseline constants do not authorize payment; the deployed contract remains authoritative.
 
@@ -36,19 +38,18 @@ Provider usage may be partially known. Set unknown fields to `null`; use `unavai
 
 - T01: Next.js scaffold and application-specific lint/build/dev configuration.
 - T02: Candidate, group, decision, execution, and complete evidence schemas.
-- T03 (Sage): Solidity policy types, encoding order, final ABI, and cross-language hash vectors.
-- Database provider, migrations, wallet authentication, Sepolia RPC provider and funded test accounts, Kiln endpoint, and runtime deployment.
-- The fixture dataset, scoring engine, UI, contracts, and end-to-end demo.
+- Database provider, migrations, wallet authentication, executor configuration, Kiln endpoint, and runtime deployment. A public Sepolia RPC, funded deployer, and six funded demo accounts are configured locally; do not treat them as shared production infrastructure.
+- The fixture dataset, scoring engine, UI, and end-to-end demo. The token and group-wallet contracts are deployed on Ethereum Sepolia, and the initial participant allocations are recorded in the public funding manifest.
 
-Do not mark T01 or T02 Done based on this foundation alone. No teammate has been assigned the remaining work. The broader architecture remains in the guideline.
+Do not mark T01 or T02 Done based on this foundation alone. Sage owns the blockchain tasks in the guideline; the other work remains open for self-assignment.
 
 ## Checks
 
 The required demo platform is macOS. CI installs and checks the foundation on Linux, Windows, macOS 15 arm64, and macOS 15 Intel. See [MacBook demo readiness](MACBOOK_DEMO.md) for setup and the later full-workflow rehearsal gate.
 
-`pnpm check` runs type checking, formatting checks for source/tests/configuration, and foundation tests. Long-form project documentation is edited manually and is not reformatted by this command. CI runs the same command on pull requests and pushes to main. Solidity, app build, browser, and live-service checks will be added when those implementations exist.
+`pnpm check` runs type checking, formatting checks for source/tests/configuration, and foundation tests. Long-form project documentation is edited manually and is not reformatted by this command. CI runs the same command on pull requests and pushes to main. Separate macOS CI jobs run `forge test --root contracts -vv` with Foundry v1.8.3. App build, browser, and live-service checks will be added when those implementations exist.
 
-Initial local verification: frozen-lockfile installation, TypeScript checking, formatting checking, and all six foundation tests passed on Windows with the pinned Node/pnpm versions. This does not verify any live integration or deployed contract.
+Initial local verification covered frozen-lockfile installation, TypeScript checking, formatting, and foundation tests on Windows with the pinned Node/pnpm versions. The later blockchain suite passed 22 tests, and both contracts were deployed and verified on Sepolia; see [the deployment manifest](../contracts/deployments/11155111.json). These checks do not verify the application or live Kiln integration.
 
 ## References
 

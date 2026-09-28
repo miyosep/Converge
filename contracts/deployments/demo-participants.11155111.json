@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "mode": "single-operator-demo",
+  "participants": [
+    {
+      "persona": "Alice",
+      "address": "0x2163ea96654282508c6A1C2A2946B2521D882f6A"
+    },
+    {
+      "persona": "Bob",
+      "address": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6"
+    },
+    {
+      "persona": "Charlie",
+      "address": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72"
+    },
+    {
+      "persona": "Dana",
+      "address": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32"
+    },
+    {
+      "persona": "Erin",
+      "address": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA"
+    },
+    {
+      "persona": "Farah",
+      "address": "0x6f677023c08341985a557149a8c79b8D794F7458"
+    }
+  ]
+}
