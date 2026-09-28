@@ -29,7 +29,7 @@ Use this exact sentence prominently in the README:
 | Requirement | Implementation outcome | Required evidence |
 | --- | --- | --- |
 | User need and workflow | At least six participants move from private preferences to an approved restaurant reservation deposit | Full workflow demonstration and clear AI/code boundaries |
-| Kiln integration | Real server-side Kiln calls using `gpt-oss-120b` influence the recommendation | Request metadata, validated outputs, and per-flow usage |
+| Kiln integration | Real server-side Kiln calls using `qwen3-32b` influence the recommendation | Request metadata, validated outputs, and per-flow usage |
 | Efficiency | Limit unnecessary inference and disclose measurement limits | Calls and input/output tokens by flow; measured metrics or explicit assumptions |
 | Blockchain | Execute the selected workflow on a devnet or testnet | Successful transaction hash with matching contract event and application history |
 | Selected function | Declare the purchasing-agent and programmable-wallet function | Exact README declaration above |
@@ -121,7 +121,7 @@ These are design selections for an empty repository, not claims that dependencie
 | EVM interaction | viem; wagmi for browser wallet state | Share generated ABI and network configuration |
 | Smart contracts | Solidity and Foundry | Hardhat is acceptable if the team's environment makes it more reliable |
 | Token and transfer helpers | Established OpenZeppelin ERC-20 and safety utilities | Pin compatible versions during setup |
-| AI | Kiln, `gpt-oss-120b` | Verify the actual organizer-provided API contract before integration |
+| AI | Kiln, `qwen3-32b` | Verify the actual organizer-provided API contract before integration |
 
 Avoid introducing a separate backend service, message broker, vector database, or agent framework unless a concrete requirement cannot be met within the application.
 
@@ -337,7 +337,7 @@ participantScore = sum(weight * satisfaction) / sum(weight)
 groupScore = mean(participantScore for participants with positive soft weights)
 ```
 
-A participant with no positive soft weights is omitted from the soft-score average; their mandatory constraints still apply. If nobody supplies positive soft weights, all candidates have score zero and the documented tie-breakers decide. Implement a consistent rounding policy for stored scores. Replaying the same structured inputs and fixture version must produce the same result.
+A participant with no positive soft weights is omitted from the soft-score average; their mandatory constraints still apply. If nobody supplies positive soft weights, all candidates have score zero and the documented tie-breakers decide. Store `scoreMicros = Math.round(groupScore * 1_000_000)` and rank by that stored integer, then meal price ascending, then stable candidate ID ascending. Replaying the same structured inputs and fixture version must produce the same result. See `docs/DECISION_ENGINE.md` for implemented boundaries and fixture evidence.
 
 This normalizes each participant's influence so adding more soft-preference fields does not automatically provide more voting power. It is a pragmatic ranking rule, not a claim of mathematically optimal group fairness.
 
@@ -401,7 +401,7 @@ type KilnUsageRecord = {
   providerRequestId: string | null;
   flow: "constraint_extraction" | "candidate_analysis"
       | "decision_explanation" | "clarification";
-  model: "gpt-oss-120b";
+  model: "qwen3-32b";
   attempt: number;
   status: "success" | "provider_error" | "validation_error";
   inputTokens: number | null;
@@ -841,7 +841,7 @@ Do not call a stage complete based only on a screenshot. Contract behavior requi
 ```dotenv
 KILN_API_KEY=
 KILN_BASE_URL=
-KILN_MODEL=gpt-oss-120b
+KILN_MODEL=qwen3-32b
 DATABASE_URL=
 SESSION_SECRET=
 APP_ORIGIN=
@@ -960,10 +960,10 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
 | T09 | Database and migrations | Core entities, revisioning, unique event identities, integer amounts | T02 | | | Unclaimed |
 | T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
-| T11 | Kiln adapter | Real provider call, timeout/retry handling, schema validation | T02 | | | Unclaimed |
-| T12 | Usage and efficiency | Per-attempt and per-flow records with unknown/missing usage handling | T09, T11 | | | Unclaimed |
-| T13 | Restaurant fixtures | Merchant A-E address mapping ready in the demo role manifest; five versioned candidate records remain | T02 | | | Unclaimed |
-| T14 | Decision engine | Deterministic A/B/B selection, no-match handling, documented ties | T13 | | | Unclaimed |
+| T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; two live synthetic extractions passed; app integration pending | T02 | | | In review |
+| T12 | Usage and efficiency | Per-attempt usage implemented with null unknowns; persistent per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
+| T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
+| T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; API integration pending | T13 | | | In review |
 | T15 | Preference workflow | Private submission, extraction, correction, confirmation, revisions | T10, T11 | | | Unclaimed |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
@@ -1034,7 +1034,7 @@ No Git history was available during this review. Do not infer that every future 
 
 - [ ] A user can create a group and at least six participants can join through verified identities.
 - [ ] Private input and structured constraints are inaccessible to other participants.
-- [ ] Live Kiln `gpt-oss-120b` parses actual submitted preferences.
+- [ ] Live Kiln `qwen3-32b` parses actual submitted preferences.
 - [ ] Parsed output is schema-validated and participant-confirmed.
 - [ ] Deterministic evaluation selects A/B/B for the defined fixture scenarios.
 - [ ] No-match and unresolved-constraint cases cannot create a fundable policy.
@@ -1065,9 +1065,9 @@ These prerequisites are tracked separately from completed integration work. Reso
 
 | Prerequisite | Current status | Required resolution |
 | --- | --- | --- |
-| Kiln endpoint and authentication details | Not supplied in reviewed files | Obtain organizer documentation and verify with a real call |
-| Kiln API key and model availability | Not verified | Configure server secret and confirm `gpt-oss-120b` |
-| Provider usage and NPU metrics | Unknown | Inspect real response fields and units |
+| Kiln endpoint and authentication details | Official endpoint verified by two successful live extraction calls | Recheck credentials on the demo MacBook; see `docs/KILN.md` |
+| Kiln API key and model availability | `qwen3-32b` verified; project owner reported updated model announcement on September 29, 2026 (KST) | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
+| Provider usage and NPU metrics | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable | Keep unknown energy null; do not claim measured NPU efficiency without evidence |
 | Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
 | Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
 | Runtime and persistent database | Not selected | Choose deployment-compatible persistence |

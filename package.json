@@ -11,6 +11,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "kiln:check": "node --env-file=.env --import tsx scripts/check-kiln.ts",
+    "demo:decision": "node --import tsx scripts/demo-decision.ts",
     "contracts:build": "forge build --root contracts",
     "contracts:test": "forge test --root contracts -vv",
     "contracts:abi": "node --import tsx scripts/export-abi.ts",

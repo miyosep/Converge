@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "syntheticConfirmations": true,
+  "liveKiln": false,
+  "onChainTransactions": false,
+  "slot": {
+    "startsAt": "2030-01-05T10:00:00Z",
+    "timeZone": "Asia/Seoul"
+  },
+  "results": [
+    {
+      "scenario": {
+        "id": "baseline",
+        "budget": 3500,
+        "excludeA": false,
+        "expected": "A"
+      },
+      "result": {
+        "engineVersion": "decision-v1",
+        "fixtureVersion": "restaurants-v1",
+        "status": "PROPOSAL_READY",
+        "winnerId": "A",
+        "ranking": [
+          "A",
+          "B",
+          "D"
+        ],
+        "candidates": [
+          {
+            "id": "A",
+            "eligible": true,
+            "scoreMicros": 900000
+          },
+          {
+            "id": "B",
+            "eligible": true,
+            "scoreMicros": 700000
+          },
+          {
+            "id": "C",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "D",
+            "eligible": true,
+            "scoreMicros": 400000
+          },
+          {
+            "id": "E",
+            "eligible": false,
+            "scoreMicros": null
+          }
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "id": "lower-budget",
+        "budget": 2500,
+        "excludeA": false,
+        "expected": "B"
+      },
+      "result": {
+        "engineVersion": "decision-v1",
+        "fixtureVersion": "restaurants-v1",
+        "status": "PROPOSAL_READY",
+        "winnerId": "B",
+        "ranking": [
+          "B"
+        ],
+        "candidates": [
+          {
+            "id": "A",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "B",
+            "eligible": true,
+            "scoreMicros": 700000
+          },
+          {
+            "id": "C",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "D",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "E",
+            "eligible": false,
+            "scoreMicros": null
+          }
+        ]
+      }
+    },
+    {
+      "scenario": {
+        "id": "merchant-excluded",
+        "budget": 3500,
+        "excludeA": true,
+        "expected": "B"
+      },
+      "result": {
+        "engineVersion": "decision-v1",
+        "fixtureVersion": "restaurants-v1",
+        "status": "PROPOSAL_READY",
+        "winnerId": "B",
+        "ranking": [
+          "B",
+          "D"
+        ],
+        "candidates": [
+          {
+            "id": "A",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "B",
+            "eligible": true,
+            "scoreMicros": 700000
+          },
+          {
+            "id": "C",
+            "eligible": false,
+            "scoreMicros": null
+          },
+          {
+            "id": "D",
+            "eligible": true,
+            "scoreMicros": 400000
+          },
+          {
+            "id": "E",
+            "eligible": false,
+            "scoreMicros": null
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -25,7 +25,7 @@ Choosing and paying for a group reservation requires people to coordinate budget
 The proposed MVP supports **six participants** and one restaurant reservation deposit:
 
 1. Each person submits a private natural-language preference and confirms the structured interpretation.
-2. Kiln `gpt-oss-120b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
+2. Kiln `qwen3-32b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
 3. The group reviews an immutable policy binding the participants, token, merchant, exact deposit, spending ceilings, executor, and expiry.
 4. All six approve and contribute mock USDC. The decision becomes active only after six distinct approved contributions are confirmed on-chain.
 5. The execution agent requests one deposit payment. The smart contract enforces the approved policy and rejects invalid attempts.
@@ -70,7 +70,7 @@ The policy will have a canonical, versioned ABI encoding and a `decisionHash` ca
 
 | Layer | Planned responsibility |
 | --- | --- |
-| Kiln `gpt-oss-120b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
+| Kiln `qwen3-32b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
 | Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence. |
 | Smart contract | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable. |
 
@@ -78,7 +78,9 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 ## Kiln Integration
 
-**Planned model:** `gpt-oss-120b` through the NPU-based Kiln API. The API key will stay on the server. Model output will be checked against a restricted schema and confirmed by the submitting participant before evaluation.
+**Selected model:** `qwen3-32b` through Kiln, following the organizer update reported by the project owner on September 29, 2026 (KST). The server-side adapter has passed two live synthetic extraction checks with schema validation and provider usage records. Participant confirmation and the web workflow remain pending. NPU execution and energy are not independently attested by these responses.
+
+The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |
@@ -171,6 +173,7 @@ The shared foundation runs with Node.js 24.19.0 and pnpm 11.19.0:
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
+pnpm demo:decision
 pnpm contracts:build
 pnpm contracts:test
 pnpm contracts:abi
@@ -179,6 +182,8 @@ pnpm contracts:abi
 `pnpm check` runs TypeScript validation, formatting checks, and foundation tests. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. The web application is not scaffolded yet: there is no `dev`, app `build`, or end-to-end demo command. See [the deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
+
+With `KILN_API_KEY`, `KILN_BASE_URL`, and `KILN_MODEL=qwen3-32b` in the ignored `.env`, run `pnpm kiln:check` for two live synthetic extractions. Each invocation consumes provider usage and replaces the latest smoke evidence. It neither confirms preferences nor sends blockchain transactions.
 
 The six demo accounts and dedicated executor are now funded, and the five
 synthetic merchant recipients are configured. Run `pnpm demo:preflight` to

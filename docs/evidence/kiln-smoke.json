@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-09-28T17:01:43.125Z",
+  "model": "qwen3-32b",
+  "status": "passed",
+  "errorCode": null,
+  "syntheticInputs": true,
+  "participantConfirmed": false,
+  "scope": "Live extraction smoke test only; no app session, policy, or transaction.",
+  "attempts": [
+    {
+      "usage": {
+        "runId": "kiln-smoke",
+        "requestId": "76bd9f38-0794-4015-81bc-d29edca7b21d",
+        "providerRequestId": "836eff35-0f83-4179-af45-23bf6fe67a7a",
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "attempt": 1,
+        "status": "success",
+        "inputTokens": 1000,
+        "outputTokens": 581,
+        "totalTokens": 1581,
+        "usageSource": "provider",
+        "startedAt": "2026-09-28T17:01:27Z",
+        "completedAt": "2026-09-28T17:01:37Z",
+        "latencyMs": 10038,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1
+      },
+      "httpStatus": 200,
+      "errorCode": null,
+      "costUsd": 0.00024251999999999998,
+      "cachedInputTokens": 4,
+      "reasoningTokens": 482,
+      "energyJoules": null
+    },
+    {
+      "usage": {
+        "runId": "kiln-smoke",
+        "requestId": "3b604f70-d6f2-4c43-bb7b-7841aa537223",
+        "providerRequestId": "169f14fe-44eb-4b36-9077-cd9e61cba734",
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "attempt": 1,
+        "status": "success",
+        "inputTokens": 1004,
+        "outputTokens": 243,
+        "totalTokens": 1247,
+        "usageSource": "provider",
+        "startedAt": "2026-09-28T17:01:37Z",
+        "completedAt": "2026-09-28T17:01:43Z",
+        "latencyMs": 5535,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1
+      },
+      "httpStatus": 200,
+      "errorCode": null,
+      "costUsd": 0.00010931999999999999,
+      "cachedInputTokens": 976,
+      "reasoningTokens": 190,
+      "energyJoules": null
+    }
+  ],
+  "outputs": [
+    {
+      "persona": "Alice",
+      "text": "My maximum meal budget is 35 USD per person. I prefer a quiet restaurant.",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      }
+    },
+    {
+      "persona": "Bob",
+      "text": "I have a shellfish allergy. Shellfish-safe food is mandatory. I prefer being near a subway station.",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "non_negotiable",
+            "field": "shellfish_safe",
+            "value": true
+          },
+          {
+            "type": "soft",
+            "field": "subway_proximity",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      }
+    }
+  ]
+}

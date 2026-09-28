@@ -126,7 +126,7 @@ test("unavailable provider usage must stay null and timestamps stay ordered", ()
     requestId: "request-1",
     providerRequestId: null,
     flow: "constraint_extraction",
-    model: "gpt-oss-120b",
+    model: "qwen3-32b",
     attempt: 1,
     status: "success",
     inputTokens: null,
