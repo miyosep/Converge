@@ -116,7 +116,7 @@ These are design selections for an empty repository, not claims that dependencie
 | --- | --- | --- |
 | Web and server | Next.js with TypeScript | One application with server-side routes |
 | Shared validation | Zod | Validate all external inputs and model outputs |
-| Database | PostgreSQL, confirmed by the project owner on September 29, 2026 (KST) | Use a managed instance for multi-device access; provider and connection setup pending |
+| Database | PostgreSQL on Neon Free, confirmed by the project owner on September 29, 2026 (KST) | Managed instance for multi-device access; account/project creation and connection setup pending; see `docs/DATABASE_SETUP.md` |
 | Local-only alternative | SQLite, not selected | Do not introduce a second persistence strategy into this implementation |
 | EVM interaction | viem; wagmi for browser wallet state | Share generated ABI and network configuration |
 | Smart contracts | Solidity and Foundry | Hardhat is acceptable if the team's environment makes it more reliable |
@@ -1070,7 +1070,7 @@ These prerequisites are tracked separately from completed integration work. Reso
 | Provider usage and NPU metrics | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable | Keep unknown energy null; do not claim measured NPU efficiency without evidence |
 | Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
 | Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
-| Runtime and persistent database | PostgreSQL selected for multi-device access; provider and connection pending | Create the selected managed database, configure server-only `DATABASE_URL`, and verify migrations and access controls |
+| Runtime and persistent database | Neon Free PostgreSQL selected for multi-device access; project creation and connection pending | Follow `docs/DATABASE_SETUP.md`, configure server-only `DATABASE_URL`, and verify migrations and access controls |
 | Solidity toolchain | Foundry v1.8.3 verified on Windows; presentation MacBook pending | Run the contract suite on the actual MacBook |
 | Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |
 | Submission timing and prior-work records | Not supplied | Confirm organizer rules and document actual work history |

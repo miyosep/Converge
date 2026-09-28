@@ -82,7 +82,7 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
 
-Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks in local unit tests. [The workflow contract](docs/PREFERENCE_WORKFLOW.md) documents the required transactional integration. PostgreSQL is selected for multi-device operation; managed database setup, wallet sessions, and HTTP routes remain pending.
+Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks in local unit tests. [The workflow contract](docs/PREFERENCE_WORKFLOW.md) documents the required transactional integration. Neon Free PostgreSQL is selected for multi-device operation; [database setup](docs/DATABASE_SETUP.md), wallet sessions, and HTTP routes remain pending.
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |

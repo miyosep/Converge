@@ -5,7 +5,7 @@
 `src/lib/preferences.ts` implements validated, immutable preference transitions.
 It does not implement wallet authentication, HTTP routes, database persistence,
 or cross-process locking. PostgreSQL was selected by the project owner on
-September 29, 2026 (KST); the managed provider and connection are being prepared.
+September 29, 2026 (KST); Neon Free was subsequently selected and its project and connection are being prepared. See `docs/DATABASE_SETUP.md`.
 Do not expose these functions as an unauthenticated API.
 
 ## Transitions
