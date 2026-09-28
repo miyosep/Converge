@@ -1,0 +1,28 @@
+{
+  "name": "converge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.19.0 <25",
+    "pnpm": "11.19.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write src tests package.json tsconfig.json .github",
+    "format:check": "prettier --check src tests package.json tsconfig.json .github",
+    "check": "tsc --noEmit && prettier --check src tests package.json tsconfig.json .github && tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "viem": "2.56.9",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.0",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}

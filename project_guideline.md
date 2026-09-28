@@ -15,7 +15,7 @@ The challenge brief in `hackathon_descrip.txt` is the source of truth for compet
 
 Repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, smart contracts, or Git repository were present at review time. All paths and interfaces below are proposed implementation targets. No deployment, successful test, API call, energy measurement, or transaction is claimed by this document.
 
-The current documentation deliverables are this guideline and an initial `README.md`. The README is a first draft and must be revised as implementation and evidence become available. Implementing the application is subsequent project work.
+The current deliverables include this guideline, a draft `README.md`, and an initial shared TypeScript foundation. See `docs/FOUNDATION.md` for implemented tooling and schemas, and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. The application, database, live integrations, and contracts remain subsequent work.
 
 ### 1.1 Required README Declaration
 
@@ -829,7 +829,7 @@ Unit tests may mock Kiln for deterministic assertions. Final acceptance evidence
 
 ### 16.4 Completion Gates
 
-Do not call a stage complete based only on a screenshot. Contract behavior requires tests/receipts, AI participation requires actual provider records, and privacy requires access-control checks. Record commands and actual results once implementation exists; this guideline does not claim tests have run.
+Do not call a stage complete based only on a screenshot. Contract behavior requires tests/receipts, AI participation requires actual provider records, and privacy requires access-control checks. Record commands and actual results as implementation progresses. Foundation checks do not establish that the application or contract acceptance criteria pass.
 
 ## 17. Configuration and Operational Setup
 
@@ -875,7 +875,9 @@ Keep only empty placeholders in `.env.example`. Deployment and demo participant 
 
 ### 17.3 Command Contract to Implement
 
-These are proposed scripts, not commands currently available in the repository:
+Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, and `pnpm check`. The latter combines type checking, formatting checks, and foundation tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. The web app and live integrations are still pending.
+
+The table below remains the target command contract. `test` and `typecheck` currently cover the foundation only; other listed commands are not yet implemented:
 
 | Script | Intended behavior |
 | --- | --- |
@@ -940,8 +942,8 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 
 | ID | Work item | Deliverable and completion criterion | Depends on | Owner | Reviewer | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| T01 | Project scaffold | App starts; tool versions and lockfile recorded; env template contains no secrets | None | | | Unclaimed |
-| T02 | Shared schemas | Constraint, candidate, policy, execution, and evidence schemas validated | T01 | | | Unclaimed |
+| T01 | Project scaffold | Tooling, lockfile, CI, and env template ready; Next.js app scaffold and app lint/build remain | None | | | In progress |
+| T02 | Shared schemas | Primitives, extraction, statuses, public participant, errors, and usage ready; full group/candidate/policy/execution/evidence schemas remain | T01 | | | In progress |
 | T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In progress |
 | T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In progress |
 | T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | Sage | | Claimed |

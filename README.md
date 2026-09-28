@@ -4,9 +4,11 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** This is the initial README for a planned hackathon prototype. The repository currently contains design documentation, not a runnable application. Kiln calls, deployed contracts, transactions, tests, and measured token usage are pending. This README will be updated with real implementation details and evidence as the project develops.
+> **Project status:** The repository now includes a shared TypeScript foundation: pinned tooling, input schemas, environment placeholders, focused tests, and a CI workflow. The web application, Kiln integration, contracts, and end-to-end demo are still pending. This README remains a draft and will be updated with implementation details and real evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
+
+Before starting a feature branch, read [CONTRIBUTING.md](CONTRIBUTING.md) and [the shared foundation](docs/FOUNDATION.md).
 
 ## Selected Function
 
@@ -150,17 +152,24 @@ This is a hackathon prototype using mock funds. The final README will state whic
 
 ## How to Run
 
-**Not runnable yet.** No application scaffold, dependency manifest, database migrations, contracts, or demo scripts exist in this repository at the time of this draft. The implementation plan proposes development, build, test, deployment, preflight, and demo commands; exact working commands and tested versions will replace this paragraph after they exist. See [the setup sequence](project_guideline.md#172-setup-sequence) and [proposed command contract](project_guideline.md#173-command-contract-to-implement).
+The shared foundation runs with Node.js 24.19.0 and pnpm 11.19.0:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm check
+```
+
+`pnpm check` runs TypeScript validation, formatting checks, and the foundation tests. Individual commands are `pnpm typecheck`, `pnpm test`, `pnpm format:check`, and `pnpm format`. These require no external credentials. The web application is not scaffolded yet: there is no `dev`, app `build`, deployment, or end-to-end demo command. Those remain in [the proposed command contract](project_guideline.md#173-command-contract-to-implement).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an EVM RPC, funded test accounts, and a dedicated agent executor account. Keep all secrets outside Git.
 
 ## Environment Variables
 
-The planned `.env.example` will document `KILN_API_KEY`, `KILN_BASE_URL`, `KILN_MODEL`, `DATABASE_URL`, session and app origin settings, chain/RPC and contract addresses, an executor key for server-side execution, and script-only deployment/demo keys. Their final names and validation rules will be updated with the implementation. No credentials should be committed or pasted into evidence.
+[`.env.example`](.env.example) contains placeholders for Kiln, database, sessions, chain/RPC, deployed addresses, and executor credentials, plus separate script-only deployment/demo keys. Create an ignored local `.env` when implementing integrations. Service-specific validation will be added with each integration. No credentials should be committed or pasted into evidence.
 
 ## Pre-built vs Hackathon-built Work
 
-At this README's first draft, the repository contains design documentation. No application code or contract implementation has been verified here. The team will document any templates, libraries, or work that predated the hackathon using the actual repository history and contributor records. This section will be updated before submission; it must not claim unverified work was built during the event.
+The initial README contained only design documentation. A subsequent foundation change added repository tooling, TypeScript schemas, checks, and collaboration instructions. No Solidity contract or complete application has been implemented yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
 
 ## Team
 
