@@ -29,11 +29,23 @@ minter, and the wallet's configured token before recording a public manifest.
 pnpm deploy:sepolia
 ```
 
-The script requires a matching chain ID and Sepolia genesis hash. It saves
-transaction hashes immediately to an ignored
-`contracts/deployments/11155111.pending.json`, so a restarted run waits for
-the already submitted transaction instead of submitting it again. After
-verifying both receipts and contracts, it writes the nonsecret
+The script requires a matching chain ID and Sepolia genesis hash. Before each
+deployment broadcast, it signs the contract-creation transaction and atomically
+saves the signed bytes, hash, and expected intent to the ignored
+`contracts/deployments/11155111.pending.json`. A restarted run checks that
+journal and resends only the identical signed transaction if no receipt exists;
+it never prepares a second nonce for the same pending contract. The pending
+file contains replayable signed transactions and must remain private. A local
+deployment lock prevents two copies of the script from running at once. If a
+crash leaves `11155111.pending.lock`, inspect the pending journal and on-chain
+transaction before removing the stale lock and rerunning.
+
+The script does not accept a receipt after only one block as final evidence. It
+checks that the deployment block remains canonical and is at or below the RPC's
+`finalized` block. A reorganization, unsupported finalized-block RPC, or
+30-minute finality timeout leaves the private journal for inspection and retry;
+it does not write a final manifest. After both deployments are finalized and
+their bytecode and configuration are checked, it atomically writes the nonsecret
 `contracts/deployments/11155111.json` manifest. The manifest records each
 address, transaction hash, block number, block hash, deployed code hash,
 chain ID, and deployer address. Review these against the explorer and the RPC

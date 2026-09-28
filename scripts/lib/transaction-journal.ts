@@ -10,7 +10,7 @@ import {
 export type TransactionIntent = {
   chainId: number;
   from: Address;
-  to: Address;
+  to: Address | null;
   data: Hex;
   valueWei: string;
 };
@@ -27,7 +27,7 @@ export function assertMatchingIntent(
   if (
     actual.chainId !== expected.chainId ||
     actual.from.toLowerCase() !== expected.from.toLowerCase() ||
-    actual.to.toLowerCase() !== expected.to.toLowerCase() ||
+    actual.to?.toLowerCase() !== expected.to?.toLowerCase() ||
     actual.data.toLowerCase() !== expected.data.toLowerCase() ||
     actual.valueWei !== expected.valueWei
   ) {
@@ -66,7 +66,7 @@ export async function executeJournaled<T>(options: {
   if (keccak256(serialized) !== transaction.hash)
     throw new Error("Signed transaction hash mismatch");
   const parsed = parseTransaction(serialized);
-  if (!parsed.to || parsed.chainId === undefined)
+  if (parsed.chainId === undefined)
     throw new Error("Invalid signed transaction domain");
   assertMatchingIntent(
     {
@@ -74,7 +74,7 @@ export async function executeJournaled<T>(options: {
       from: await recoverTransactionAddress({
         serializedTransaction: serialized as TransactionSerialized,
       }),
-      to: parsed.to,
+      to: parsed.to ?? null,
       data: parsed.data ?? "0x",
       valueWei: (parsed.value ?? 0n).toString(),
     },

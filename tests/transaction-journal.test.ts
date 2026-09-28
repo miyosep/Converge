@@ -156,3 +156,59 @@ test("persistence failure prevents broadcast", async () => {
   );
   assert.equal(broadcast, false);
 });
+
+test("contract creation is journaled before broadcast and recovered without a second signature", async () => {
+  const signer = privateKeyToAccount(generatePrivateKey());
+  const intent: TransactionIntent = {
+    chainId: 11155111,
+    from: signer.address,
+    to: null,
+    data: "0x60006000",
+    valueWei: "0",
+  };
+  const serialized = await signer.signTransaction({
+    chainId: intent.chainId,
+    to: null,
+    data: intent.data,
+    value: 0n,
+    nonce: 2,
+    gas: 100_000n,
+    maxFeePerGas: 2n,
+    maxPriorityFeePerGas: 1n,
+    type: "eip1559",
+  });
+  const hash = keccak256(serialized);
+  let saved: JournalTransaction | undefined;
+  let preparations = 0;
+  let broadcasts = 0;
+  const options = {
+    intent,
+    load: async () => saved,
+    prepare: async () => {
+      preparations++;
+      return serialized;
+    },
+    save: async (record: JournalTransaction) => {
+      saved = record;
+    },
+    findReceipt: async (): Promise<string | undefined> => undefined,
+    broadcast: async (raw: Hex) => {
+      assert.equal(saved?.serialized, raw);
+      broadcasts++;
+      throw new Error("RPC disconnected after broadcast");
+    },
+    waitReceipt: async () => "mined",
+  };
+  await assert.rejects(executeJournaled(options), /RPC disconnected/);
+  const resumed = await executeJournaled({
+    ...options,
+    broadcast: async (raw) => {
+      assert.equal(raw, serialized);
+      broadcasts++;
+      return hash;
+    },
+  });
+  assert.equal(resumed.transaction.hash, hash);
+  assert.equal(preparations, 1);
+  assert.equal(broadcasts, 2);
+});

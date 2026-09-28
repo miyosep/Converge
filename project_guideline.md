@@ -969,7 +969,7 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
 | T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
 | T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
-| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | In review |
+| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks | T08 | Sage | | In review |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
 | T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
