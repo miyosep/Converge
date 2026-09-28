@@ -23,12 +23,16 @@ plan was selected and no additional project was created.
 - `.neon` contains the local project/branch link and is git-ignored.
 - `neon.ts` contains exactly `defineConfig({})` and its import. The packages
   `@neon/config` 1.8.2 and `@neon/env` 1.4.7 were added with pnpm.
-- `neon config plan` succeeded and reported no changes, utilizing Postgres only.
-  `neon deploy --no-env-pull` then failed because the Neon API rejected the CLI
-  bearer token. Reauthentication and a successful retry are still required.
-- Environment pulling was intentionally deferred. Existing `.env` values were
-  not overwritten; database connectivity and application migrations remain
-  unverified.
+- `neon config plan` reported no changes, utilizing Postgres only. The first
+  `neon deploy` attempt failed when the CLI OAuth token was rejected. A subsequent
+  deploy using the existing project-scoped MCP credential succeeded with no
+  remote changes. No other Neon service was provisioned.
+- The production branch's `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and
+  `NEON_BRANCH` were pulled into the ignored `.env`. Existing non-Neon lines,
+  including Kiln and wallet settings, were compared before and after and kept.
+- A read-only `SELECT` through the CLI connected to database `neondb` as
+  `neondb_owner` and returned `connection_ok = 1`. Application migrations and
+  the preference workflow's database integration remain pending.
 
 The overview skill was fetched from
 https://neon.com/.well-known/agent-skills/neon/SKILL.md and the PostgreSQL child
@@ -36,9 +40,9 @@ skill was read before setup. Existing tooling is reused rather than reinstalled.
 The application continues to use Kiln Qwen and the planned wallet-signature
 authentication; installing Neon skills does not change those decisions.
 
-After reauthentication, inspect `neon config plan`, run `neon deploy
---no-env-pull`, and pull only the PostgreSQL variables. Preserve all unrelated
-environment values. Use pooled `DATABASE_URL` for application queries and
+The CLI OAuth login in a separate PowerShell session is not needed to finish
+this setup. It may still require repair if a contributor wants to use the CLI
+outside Codex. Use pooled `DATABASE_URL` for application queries and
 `DATABASE_URL_UNPOOLED` for migration tooling. Future schema work should use an
 isolated development branch; this setup linked `production` at the owner's
 explicit request and did not apply application schema changes.
@@ -77,7 +81,7 @@ explicit decision from the owner.
 
 ## Implementation and Demo Boundaries
 
-Project linking is complete, but connection validation, migration tooling,
+Project linking and database connectivity are complete, but migration tooling,
 tables, transaction isolation tests, wallet sessions, and HTTP APIs are pending.
 The existing preference transition module is not a persistent repository.
 No empty or unavailable database should cause the application to fall back to
