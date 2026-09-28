@@ -82,7 +82,7 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
 
-Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks in local unit tests. [The workflow contract](docs/PREFERENCE_WORKFLOW.md) documents the required transactional integration. Neon Free PostgreSQL is selected for multi-device operation; [database setup](docs/DATABASE_SETUP.md), wallet sessions, and HTTP routes remain pending.
+Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. Wallet sessions, invitations, and HTTP routes remain pending.
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |
@@ -176,6 +176,8 @@ The shared foundation runs with Node.js 24.19.0 and pnpm 11.19.0:
 pnpm install --frozen-lockfile
 pnpm check
 pnpm demo:decision
+pnpm db:migrate:dev
+pnpm db:rehearse:dev
 pnpm contracts:build
 pnpm contracts:test
 pnpm contracts:abi

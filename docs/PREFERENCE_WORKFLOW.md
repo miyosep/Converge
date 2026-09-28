@@ -3,10 +3,13 @@
 ## Implemented Scope
 
 `src/lib/preferences.ts` implements validated, immutable preference transitions.
-It does not implement wallet authentication, HTTP routes, database persistence,
-or cross-process locking. PostgreSQL was selected by the project owner on
-September 29, 2026 (KST); Neon Free was subsequently selected and its project and connection are being prepared. See `docs/DATABASE_SETUP.md`.
-Do not expose these functions as an unauthenticated API.
+`src/lib/db/preferences.ts` now persists these transitions on Neon PostgreSQL.
+It locks the group row before each mutation, checks the current revision in the
+same transaction, and stores immutable revision history. The shared progress
+query returns participant names, addresses, and submitted/confirmed flags only.
+This repository is server-side code for a future authenticated API. It does not
+verify wallet signatures or invitations by itself; never pass an unverified
+browser-supplied address as the actor.
 
 ## Transitions
 
@@ -43,20 +46,30 @@ and feeds the existing evaluator; it does not create financial approval.
 6. Re-enter a transaction when extraction finishes. Reload the group and current
    revision, then apply the completion only if it is still current and writable.
    Record provider usage even if the result has become stale.
-7. Freeze a proposal under the same group lock after validating all six current
-   confirmed revisions. Freeze membership and the full revision snapshot
-   atomically so concurrent edits cannot invalidate the approved proposal.
+7. `evaluateAndFreeze` locks the group, checks all six current confirmed
+   revisions, evaluates the server-supplied catalog and merchant allowlist, and
+   persists the private input snapshot and internal result when a proposal is
+   ready. A `NO_MATCH` result does not freeze the group. The same transaction
+   prevents concurrent preference edits from changing the accepted snapshot.
 
-Calling these functions against an old in-memory record does not implement
-concurrency protection. PostgreSQL locking or equivalent compare-and-swap is
-mandatory in the future repository implementation. Group membership, CSRF,
-invitation validation, session expiry, and replay prevention remain separate
-security requirements and are not claimed by the transition tests.
+The database repository supplies concurrency protection for these transitions.
+Group membership is checked for reads and writes, but membership admission
+still needs a verified invitation and wallet session. The stored private
+evaluation is never a group response; return its allowlisted public projection.
+The fixture catalog, caps, and merchant list passed to `evaluateAndFreeze` must
+come from trusted server configuration and authorized group state, not client
+JSON. Session expiry, CSRF protection, proposal policy construction, and
+execution reconciliation remain separate work.
 
 ## Verification
 
 `pnpm check` covers explicit confirmation, late worker responses, stale writes,
 correction reset, unresolved requirements, owner/group mismatch, proposal freeze,
 safe failure/retry, shared progress privacy, and invalid state/input rejection.
-These are local unit tests; managed PostgreSQL and browser integration remain
-pending until implemented and separately tested.
+The first two migrations were applied to the `dev-preferences` Neon branch.
+`pnpm db:rehearse:dev` exercised six synthetic participants, concurrent writes,
+late extraction rejection, correction, group progress, incomplete/no-match
+evaluation, snapshot persistence, and post-freeze refusal against the real
+database. The sanitized outcome is in
+`docs/evidence/db-preferences-dev.json`. This test does not call Kiln or prove
+browser authentication. The production branch still has no application tables.

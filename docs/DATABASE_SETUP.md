@@ -31,8 +31,9 @@ plan was selected and no additional project was created.
   `NEON_BRANCH` were pulled into the ignored `.env`. Existing non-Neon lines,
   including Kiln and wallet settings, were compared before and after and kept.
 - A read-only `SELECT` through the CLI connected to database `neondb` as
-  `neondb_owner` and returned `connection_ok = 1`. Application migrations and
-  the preference workflow's database integration remain pending.
+  `neondb_owner` and returned `connection_ok = 1`. Subsequent application
+  migrations and preference integration were tested on the separate
+  `dev-preferences` branch, not on `production`.
 
 The overview skill was fetched from
 https://neon.com/.well-known/agent-skills/neon/SKILL.md and the PostgreSQL child
@@ -81,9 +82,17 @@ explicit decision from the owner.
 
 ## Implementation and Demo Boundaries
 
-Project linking and database connectivity are complete, but migration tooling,
-tables, transaction isolation tests, wallet sessions, and HTTP APIs are pending.
-The existing preference transition module is not a persistent repository.
+Project linking and database connectivity are complete. Two versioned SQL
+migrations and transaction-backed preference storage have been verified on
+`dev-preferences`; production remains untouched. The development connection
+strings live in ignored `.env.development`, while `.env` remains pinned to
+production. `pnpm db:migrate:dev` requires the direct connection and matching
+`NEON_BRANCH`; `pnpm db:rehearse:dev` uses the pooled connection and writes
+sanitized synthetic evidence. Neither command needs the Neon CLI at runtime.
+
+Wallet sessions, invitation validation, HTTP APIs, and full application runs
+remain pending. The current repository methods must only be called after the
+server authenticates the acting participant.
 No empty or unavailable database should cause the application to fall back to
 in-memory production state or to fabricate confirmed preferences.
 

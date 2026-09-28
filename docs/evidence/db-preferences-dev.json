@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "branch": "dev-preferences",
+  "groupId": "fcf0198d-517b-4a2a-91e2-e3603a2ca52d",
+  "sixParticipants": true,
+  "staleConcurrentWriteRejected": true,
+  "staleWorkerResultRejected": true,
+  "correctionClearedConfirmation": true,
+  "incompleteFreezeRejected": true,
+  "noMatchDidNotFreeze": true,
+  "immutableEvaluationStored": true,
+  "writesBlockedAfterFreeze": true,
+  "privateInputExcludedFromProgress": true,
+  "historicalRevisionCount": 8,
+  "publicEvaluation": {
+    "engineVersion": "decision-v1",
+    "fixtureVersion": "restaurants-v1",
+    "status": "PROPOSAL_READY",
+    "winnerId": "A",
+    "ranking": [
+      "A",
+      "B",
+      "D"
+    ],
+    "candidates": [
+      {
+        "id": "A",
+        "eligible": true,
+        "scoreMicros": 900000
+      },
+      {
+        "id": "B",
+        "eligible": true,
+        "scoreMicros": 700000
+      },
+      {
+        "id": "C",
+        "eligible": false,
+        "scoreMicros": null
+      },
+      {
+        "id": "D",
+        "eligible": true,
+        "scoreMicros": 400000
+      },
+      {
+        "id": "E",
+        "eligible": false,
+        "scoreMicros": null
+      }
+    ]
+  }
+}

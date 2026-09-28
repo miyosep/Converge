@@ -958,13 +958,13 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
 | T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Core entities, revisioning, unique event identities, integer amounts | T02 | | | Unclaimed |
+| T09 | Database and migrations | Versioned group/participant/revision/evaluation tables and transaction-backed preference flow tested on Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
 | T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
 | T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; two live synthetic extractions passed; app integration pending | T02 | | | In review |
 | T12 | Usage and efficiency | Per-attempt usage implemented with null unknowns; persistent per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
 | T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
 | T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; API integration pending | T13 | | | In review |
-| T15 | Preference workflow | Revision transitions and stale-result/confirmation/privacy unit tests implemented; authenticated APIs and PostgreSQL integration pending | T10, T11 | | | In progress |
+| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks and six-person dev rehearsal implemented; authenticated APIs pending | T10, T11 | | | In progress |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
 | T18 | Group and input UI | Group creation/lobby plus private preference confirmation | T10, T15 | | | Unclaimed |
