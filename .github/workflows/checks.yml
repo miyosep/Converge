@@ -24,3 +24,26 @@ jobs:
         run: node -p "JSON.stringify({platform:process.platform,arch:process.arch,node:process.version})"
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+  contracts:
+    name: Contracts (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.3
+      - run: forge --version
+      - run: forge fmt --check --root contracts
+      - run: forge test --root contracts -vv
+      - run: pnpm contracts:abi
+      - run: git diff --exit-code -- src/lib/abi

@@ -12,4 +12,5 @@ Thumbs.db
 contracts/out/
 contracts/cache/
 contracts/broadcast/
+contracts/deployments/*.pending.json
 docs/evidence/private/

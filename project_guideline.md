@@ -14,9 +14,9 @@ This document turns the supplied Converge architecture into a concrete hackathon
 
 The challenge brief in `hackathon_descrip.txt` is the source of truth for competition requirements. The supplied architecture is the starting design. Where that design is ambiguous or inconsistent, the decisions in this document explain the proposed resolution.
 
-Repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, smart contracts, or Git repository were present at review time. All paths and interfaces below are proposed implementation targets. No deployment, successful test, API call, energy measurement, or transaction is claimed by this document.
+At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, and an initial shared TypeScript foundation. See `docs/FOUNDATION.md` for implemented tooling and schemas, and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. The application, database, live integrations, and contracts remain subsequent work.
+The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, and a verified Ethereum Sepolia deployment. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. The application, database, and live integrations remain subsequent work.
 
 ### 1.1 Required README Declaration
 
@@ -464,6 +464,8 @@ decisionHash = keccak256(abi.encode(versionedPolicyFieldsInDeclaredOrder))
 
 The final field order and Solidity types must be frozen in the shared ABI before frontend integration. Do not hash ordinary `JSON.stringify()` output. Do not use packed encoding for ambiguous dynamic values. Solidity computes the authoritative hash; TypeScript computes the same hash for review and verifies it against the chain.
 
+Policy encoding v1 is recorded in [docs/POLICY_ENCODING.md](docs/POLICY_ENCODING.md), with matching Solidity and TypeScript definitions and a fixed hash vector. Its Solidity test passed locally with Foundry v1.8.3; macOS CI and the presentation MacBook still require verification.
+
 Add fixed test vectors proving matching TypeScript and Solidity hashes. A change to any bound field must produce a different hash. Participant order is fixed at proposal creation and reused for deterministic refund rounding.
 
 ### 9.3 Approval Semantics
@@ -521,7 +523,7 @@ function claimRefund(bytes32 decisionId) external;
 - Require the creator to be one of the listed participants; creation alone does not approve the policy.
 - Reject zero merchant/executor addresses and the escrow itself as merchant.
 - Require the configured token and the current chain/contract domain.
-- Require future expiry and a documented maximum decision lifetime, proposed as 24 hours.
+- Require future expiry and a maximum decision lifetime of 24 hours from on-chain creation.
 - Require `0 < paymentAmount <= maxDeposit <= maxTotalSpend <= plannedFunding`.
 - Freeze every policy field. No admin or executor policy-editing escape hatch.
 
@@ -795,7 +797,7 @@ General logs may contain IDs, status, sanitized errors, durations, and public tr
 | --- | --- |
 | Creation | Valid policy; duplicate ID; invalid addresses; duplicate participants; wrong threshold; past expiry; inconsistent amount/caps/funding |
 | Approval | Member only; correct expected hash; exact contribution; duplicate approval blocked; allowance failure leaves state unchanged |
-| Activation | First and second contributions remain funding; third valid contribution activates exactly once |
+| Activation | First through fifth contributions remain funding; sixth valid contribution activates exactly once |
 | Authorization | Non-executor blocked; payment before activation blocked; wrong decision blocked |
 | Spending | Valid payment succeeds; wrong merchant rejected; excessive deposit rejected; incorrect exact amount rejected; second payment rejected |
 | Expiry | Allowed before expiry; rejected exactly at and after expiry; expiry finalization enables refunds |
@@ -878,9 +880,9 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 
 ### 17.3 Command Contract to Implement
 
-Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, and `pnpm check`. The latter combines type checking, formatting checks, and foundation tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. The web app and live integrations are still pending.
+Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, and `pnpm demo:fund`. `pnpm check` combines type checking, formatting checks, and foundation tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. The web app and live integrations are still pending.
 
-The table below remains the target command contract. `test` and `typecheck` currently cover the foundation only; other listed commands are not yet implemented:
+The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
 
 | Script | Intended behavior |
 | --- | --- |
@@ -889,10 +891,8 @@ The table below remains the target command contract. `test` and `typecheck` curr
 | `lint` | Run configured lint rules |
 | `typecheck` | Validate TypeScript contracts |
 | `test` | Run decision and application tests |
-| `test:contracts` | Run the chosen contract test runner |
 | `test:e2e` | Run browser integration tests |
 | `db:migrate` | Apply versioned migrations |
-| `contracts:deploy` | Deploy and export verified deployment metadata |
 | `demo:preflight` | Validate configuration and external prerequisites |
 | `demo:baseline` | Run the baseline with evidence |
 | `demo:conditions` | Run baseline plus both changed-condition scenarios |
@@ -947,24 +947,24 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | --- | --- | --- | --- | --- | --- | --- |
 | T01 | Project scaffold | Tooling, lockfile, CI, and env template ready; Next.js app scaffold and app lint/build remain | None | | | In progress |
 | T02 | Shared schemas | Primitives, extraction, statuses, public participant, errors, and usage ready; full group/candidate/policy/execution/evidence schemas remain | T01 | | | In progress |
-| T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In progress |
-| T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In progress |
-| T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | Sage | | Claimed |
-| T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | Claimed |
-| T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | Claimed |
-| T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | Claimed |
+| T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In review |
+| T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In review |
+| T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | Sage | | In review |
+| T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
+| T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
+| T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
 | T09 | Database and migrations | Core entities, revisioning, unique event identities, integer amounts | T02 | | | Unclaimed |
 | T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
 | T11 | Kiln adapter | Real provider call, timeout/retry handling, schema validation | T02 | | | Unclaimed |
 | T12 | Usage and efficiency | Per-attempt and per-flow records with unknown/missing usage handling | T09, T11 | | | Unclaimed |
-| T13 | Restaurant fixtures | Five versioned candidates and deployment-resolved merchant mapping | T02 | | | Unclaimed |
+| T13 | Restaurant fixtures | Merchant A-E address mapping ready in the demo role manifest; five versioned candidate records remain | T02 | | | Unclaimed |
 | T14 | Decision engine | Deterministic A/B/B selection, no-match handling, documented ties | T13 | | | Unclaimed |
 | T15 | Preference workflow | Private submission, extraction, correction, confirmation, revisions | T10, T11 | | | Unclaimed |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
 | T18 | Group and input UI | Group creation/lobby plus private preference confirmation | T10, T15 | | | Unclaimed |
 | T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
-| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | Claimed |
+| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | In review |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
 | T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
@@ -1004,7 +1004,7 @@ Next integration step:
 
 ## 20. README and Submission Checklist
 
-The initial `README.md` is intentionally a draft. It describes planned behavior and marks deployment addresses, transaction hashes, Kiln usage, runnable commands, test outcomes, energy measurements, and team contributions as pending. Update the README throughout implementation and complete it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
+The initial `README.md` is intentionally a draft. It describes planned behavior and now records verified deployment addresses and transaction hashes. Kiln usage, acceptance-run transactions, energy measurements, and final team contributions remain pending. Update the README throughout implementation and complete it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
 
 The final README should contain:
 
@@ -1056,18 +1056,18 @@ No Git history was available during this review. Do not infer that every future 
 
 ## 22. Open Prerequisites
 
-These items are not verified or available from the reviewed repository. Resolve them during setup and record the outcome; none is a completed integration claim.
+These prerequisites are tracked separately from completed integration work. Resolve remaining items during setup and record the outcome; a configured RPC or contract deployment does not imply the application is complete.
 
 | Prerequisite | Current status | Required resolution |
 | --- | --- | --- |
 | Kiln endpoint and authentication details | Not supplied in reviewed files | Obtain organizer documentation and verify with a real call |
 | Kiln API key and model availability | Not verified | Configure server secret and confirm `gpt-oss-120b` |
 | Provider usage and NPU metrics | Unknown | Inspect real response fields and units |
-| Selected chain and RPC | Ethereum Sepolia selected; RPC provider not selected | Configure an Ethereum Sepolia RPC and verify chain ID `11155111` before deployment and demo runs |
-| Funded deployer/executor/participant accounts | Not verified | Prepare dedicated test accounts and gas |
+| Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
+| Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
 | Runtime and persistent database | Not selected | Choose deployment-compatible persistence |
-| Solidity toolchain | Not verified | Confirm Foundry or Hardhat works in the team environment |
+| Solidity toolchain | Foundry v1.8.3 verified on Windows; presentation MacBook pending | Run the contract suite on the actual MacBook |
 | Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |
 | Submission timing and prior-work records | Not supplied | Confirm organizer rules and document actual work history |
 
-Until the acceptance runs exist, keep deployment addresses, transaction hashes, token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.
+The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. Until the acceptance runs exist, keep decision/payment/refund transaction hashes, token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.

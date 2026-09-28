@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "deployer": "0x10D39DFCA635474Fa14E995E207CE071439A814B",
+  "token": "0x4707bde238399a27f88855a34bfb31f20b386b17",
+  "ethWeiPerParticipant": "1000000000000000",
+  "tokenBaseUnitsPerParticipant": "30000000",
+  "participants": [
+    {
+      "persona": "Alice",
+      "address": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+      "ethTransaction": "0xb472082f05433d31724eb49e80e88ad56477a27c5210f6cc4ed8cd54744fbecd",
+      "mintTransaction": "0x59024f44152fe2c10db849ee7dc00ece40ae9ed7976eb40c9a65bef1f1fefc35"
+    },
+    {
+      "persona": "Bob",
+      "address": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "ethTransaction": "0x6d89d2d5219a6ca55fc035e032433224ff2a45247f83d7a473699e02e9ca1c0f",
+      "mintTransaction": "0x390e42ebdbf86ba47108f01a88d8d0500aa0847d443ccf32c21aec4383c467b9"
+    },
+    {
+      "persona": "Charlie",
+      "address": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "ethTransaction": "0x1c98698096269c07793d3fe4b0a98a12145d29f56b2703a672706250eb9b8e04",
+      "mintTransaction": "0x65a8cb76da3791ce49a7333b85d4ca639a6ee713377994c4f9d9d5b7962a110f"
+    },
+    {
+      "persona": "Dana",
+      "address": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "ethTransaction": "0x058a8f595d7a34c19c99384a38fad517ac329ebf3c91a5610aaa8928a9afd04a",
+      "mintTransaction": "0x26dabeae809607631247ef34f398cec7231facfbff11212de716745b89bb97e0"
+    },
+    {
+      "persona": "Erin",
+      "address": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "ethTransaction": "0x4ca65d047d03450c7530bca49b1a27c4d5fea1cd8ad1981eaa76d090bec89d0f",
+      "mintTransaction": "0xf7164467a59a3a49110526d57d7b328d526f3d10df8ee7983ec39f9dedebb30d"
+    },
+    {
+      "persona": "Farah",
+      "address": "0x6f677023c08341985a557149a8c79b8D794F7458",
+      "ethTransaction": "0x9e4b411dfdd276229e99b3dc265ff26a82575d44646ffc7050ed71c60183b4a1",
+      "mintTransaction": "0xe592a109c9cdba68590d0190854d217a2bd8b877cb075da84f5c14748f1594f3"
+    }
+  ]
+}

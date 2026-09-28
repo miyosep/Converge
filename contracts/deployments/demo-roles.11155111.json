@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "chainId": 11155111,
+  "mode": "single-operator-demo",
+  "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+  "merchants": {
+    "A": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
+    "B": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+    "C": "0xb0d95622166845D2aFC4E4d7637482f52015a58a",
+    "D": "0x69cef213BD361B2bF6b2986D32aeD02290e01e71",
+    "E": "0x7d25Bc4deD7d7A155D324C33Fb588AA03b3a1d45"
+  }
+}
