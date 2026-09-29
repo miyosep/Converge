@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
     if (raw.length > 12000) throw new ApiError(413, "INPUT_TOO_LARGE");
     const input = discoveryRequestSchema.parse(JSON.parse(raw));
     const provider = process.env.RESTAURANT_SEARCH_PROVIDER || "xapi";
+    if (input.scope === "explore" && provider !== "xapi")
+      throw new ApiError(503, "PLACES_NOT_CONFIGURED");
     if (provider !== "xapi" && input.category !== "restaurant")
       throw new ApiError(400, "CATEGORY_NOT_SUPPORTED");
     if (provider !== "xapi" && provider !== "kakao" && provider !== "google")

@@ -6,7 +6,7 @@ export const EXPLORE_DEMO_SLOT = {
 } as const;
 
 export type MockReservation = {
-  source: "synthetic-restaurant";
+  source: "synthetic-restaurant" | "live-place-demo";
   reference: string;
   decisionId: string;
   restaurant: string;

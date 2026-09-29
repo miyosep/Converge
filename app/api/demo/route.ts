@@ -48,6 +48,12 @@ export async function GET(request: NextRequest) {
     if (run?.policy || run?.command)
       await notifyJob({ kind: "explore", id: run.id });
     return NextResponse.json({
+      searchConfigured: Boolean(
+        process.env.KILN_API_KEY &&
+        process.env.XAPI_KEY &&
+        (!process.env.RESTAURANT_SEARCH_PROVIDER ||
+          process.env.RESTAURANT_SEARCH_PROVIDER === "xapi"),
+      ),
       enabled: enabled(),
       accessCodeRequired: Boolean(process.env.EXPLORE_DEMO_ACCESS_CODE),
       workerOnline:

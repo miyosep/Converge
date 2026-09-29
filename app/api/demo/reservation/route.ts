@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
             run.restaurant,
             EXPLORE_DEMO_SLOT.startsAt,
           );
+          if (run.selectedPlace) run.reservation.source = "live-place-demo";
           await store.save(run);
         }
         return NextResponse.json({ reservation: run.reservation });

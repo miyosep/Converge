@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const EXPLORE_SEARCH_LOCATION = "Gangnam Station, Seoul, South Korea";
+
 export const discoveryCategories = {
   restaurant: {
     label: "Restaurants",
@@ -35,6 +37,7 @@ export const discoveryCategories = {
 export type DiscoveryCategory = keyof typeof discoveryCategories;
 
 export const discoveryRequestSchema = z.strictObject({
+  scope: z.enum(["general", "explore"]).default("general"),
   category: z
     .enum(["restaurant", "stay", "space", "sport", "class"])
     .default("restaurant"),

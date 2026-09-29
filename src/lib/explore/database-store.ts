@@ -4,6 +4,7 @@ import {
   ExploreStore,
   ExploreError,
   commandSchema,
+  validateLiveCommand,
   walletId,
 } from "./store.js";
 import type { ExploreRun } from "./types.js";
@@ -126,9 +127,12 @@ export class DatabaseExploreStore extends ExploreStore {
       if (!run || run.judge.toLowerCase() !== address.toLowerCase())
         throw new ExploreError("RUN_NOT_FOUND");
       if (run.command) throw new ExploreError("DEMO_BUSY");
-      if (command.action === "extract") {
+      if (command.action === "search" || command.action === "select_place") {
+        validateLiveCommand(run, command);
+      } else if (command.action === "extract") {
         if (
           !["preferences", "review"].includes(run.phase) ||
+          Boolean(run.searchCalls) ||
           run.extractionCalls >= 3
         )
           throw new ExploreError("EXTRACTION_LIMIT_OR_LOCKED");

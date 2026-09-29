@@ -29,6 +29,7 @@ import { createBaselinePreferences } from "../src/lib/fixtures/preferences.js";
 // remains pinned to Sepolia genesis, deployment bytecode, and public manifests.
 async function main() {
   const useDatabase = process.argv.includes("--database");
+  const livePlace = process.argv.includes("--live-place");
   if (
     useDatabase &&
     (process.env.NEON_BRANCH !== "dev-vercel-inngest" ||
@@ -228,12 +229,55 @@ async function main() {
         judge.address,
         ...bots.map((bot) => bot.address),
       ])[0]!.extraction;
+      if (livePlace) {
+        delete state.extraction;
+        state.discovery = {
+          source: "xAPI (Google Maps)",
+          query: "Japanese restaurants near Gangnam Station",
+          searchedAt: new Date().toISOString(),
+          excludedCount: 0,
+          intent: {
+            area: "Gangnam Station, Seoul",
+            cuisine: "Japanese",
+            koreanQuery: "Japanese restaurants near Gangnam Station",
+            budget: null,
+            people: 6,
+            facilities: [],
+            otherRequirements: [],
+            clarifications: [],
+          },
+          places: [
+            {
+              id: "local-fixture",
+              name: "Local chain rehearsal venue (fixture)",
+              address: "Gangnam Station",
+              mapsUrl:
+                "https://www.google.com/maps/search/?api=1&query=Gangnam",
+              websiteUrl: null,
+              price: null,
+              evidence: [],
+              attributions: [],
+            },
+          ],
+        };
+      }
       await store.withRunLock(state.id, () => store.save(state));
-      await store.queue(judge.address, {
-        action: "confirm",
-        revision: 1,
-        extraction: state.extraction,
-      });
+      await store.queue(
+        judge.address,
+        livePlace
+          ? {
+              action: "select_place",
+              revision: 1,
+              placeId: "local-fixture",
+              depositUsdc: 48,
+              acknowledgeDemo: true,
+            }
+          : {
+              action: "confirm",
+              revision: 1,
+              extraction: state.extraction,
+            },
+      );
       await advance(state.id);
       assert.equal((await store.read(state.id))!.phase, "proposal");
       await store.queue(judge.address, { action: "prepare" });
@@ -241,6 +285,18 @@ async function main() {
         if ((await advance(state.id)).phase === "approval") break;
       }
       const ready = (await store.read(state.id))!;
+      if (livePlace) {
+        assert.equal(ready.policy!.paymentAmount, "48000000");
+        assert.equal(ready.selectedPlace?.id, "local-fixture");
+        assert.equal(ready.reservation?.source, "live-place-demo");
+        await assert.rejects(
+          store.queue(judge.address, {
+            action: "search",
+            text: "New restaurant",
+          }),
+          /POLICY_LOCKED/,
+        );
+      }
       assert.equal(ready.phase, "approval");
       assert.equal(ready.reservation?.status, "REQUESTED");
       assert.equal(
@@ -331,7 +387,11 @@ async function main() {
       );
       assert.equal(
         finished.refund,
-        scenario === "payment" ? "2500000" : "10000000",
+        scenario === "payment"
+          ? livePlace
+            ? "2000000"
+            : "2500000"
+          : "10000000",
       );
       if (scenario === "payment") {
         assert.equal(finished.approvals, 6);
@@ -351,7 +411,11 @@ async function main() {
           functionName: "balanceOf",
           args: [judge.address],
         }),
-        scenario === "payment" ? 2_500_000n : 10_000_000n,
+        scenario === "payment"
+          ? livePlace
+            ? 2_000_000n
+            : 2_500_000n
+          : 10_000_000n,
       );
       const count = Object.keys(worker.ledger).length;
       await advance(state.id);

@@ -6,10 +6,10 @@ Use the existing root `app/` and light workspace styling. PR #3 is a reference f
 
 - `/group/new` redirects to `/discover`: English requests and a category drive Qwen tool calling and xAPI search for all five venue categories. Display source links, unknown conditions and up to five comparison selections. Sign-in stays on this page without losing the request.
 - `/demo/catalog` retains the 200 fictional examples and the existing group creation flow. Live search never substitutes these examples when a provider fails.
-- The hackathon assumes live candidates can be reserved with USDC; omit availability checks and label the assumption. Discovery currently does not create payment policies or merchant registrations.
+- The hackathon assumes live candidates can be reserved with USDC; omit availability checks and label the assumption. `/discover` is comparison-only. `/demo` binds a selected saved candidate and a 1–60 MockUSDC demo deposit to the existing policy/approval/payment flow, using the demo recipient rather than a real venue wallet.
 
 - `/` and `/api/groups` serve ordinary groups with independently controlled participant wallets and private persisted preferences.
-- `/demo` and `/api/demo` serve the guided session with one user and five automated participants, synthetic restaurants, and bounded test funding. Keep the demo disclosure visible.
+- `/demo` and `/api/demo` serve the guided session with one user and five automated participants, live Gangnam Station search and bounded test funding. Preserve the legacy synthetic flow for saved sessions. Keep demo assumptions, unknown conditions, and the human candidate selection explicit.
 - Share presentation components where useful, but do not share group IDs, demo session state, automated participation, or funding actions between these flows.
 - Only display results supplied by the relevant flow. Ordinary group results, approval, execution, and evidence views require their own authorized APIs before they can show data. Do not substitute demo outcomes for missing group functionality.
 - Candidate comparisons must use public evaluation projections. Do not expose private rejection reasons or participant constraints in a shared result table.

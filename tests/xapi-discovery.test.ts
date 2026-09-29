@@ -156,6 +156,33 @@ test("Qwen tool call executes one bounded xAPI search and preserves unknown fact
   );
   assert.equal(logs[0]!.totalTokens, 50);
 });
+test("Explore search pins its restaurant area even when request or model changes it", async () => {
+  let calls = 0;
+  const result = await discoverWithXapi({
+    input: { ...input, scope: "explore", location: "Busan", category: "stay" },
+    kilnKey: "test",
+    xapiKey: "test",
+    onUsage: () => {},
+    fetchImpl: async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      if (++calls === 1) {
+        const request = JSON.parse(body.messages[1].content);
+        assert.equal(request.location, "Gangnam Station, Seoul, South Korea");
+        assert.equal(request.category, "restaurant");
+        return Response.json(
+          envelope("search_places", { ...args, area: "Busan" }),
+        );
+      }
+      assert.equal(
+        body.input.q,
+        "Japanese restaurants near Gangnam Station, Seoul, South Korea",
+      );
+      return Response.json({ success: true, data: { places: [] } });
+    },
+  });
+  assert.equal(result.intent.area, "Gangnam Station, Seoul, South Korea");
+  assert.equal(calls, 2);
+});
 test("clarification never invokes search", async () => {
   let calls = 0;
   const result = await discoverWithXapi({

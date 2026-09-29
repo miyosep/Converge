@@ -32,8 +32,9 @@ New ordinary policies use the deployed v2 contract with 2–100 members and
 unanimous approval. Existing v1 policies still use their original contract.
 Archived demo groups select among 40 fictional restaurants or one of four other
 40-example categories. Migrations through `0014_catalog_forty.sql` expand saved
-shortlists while preserving existing selections. Explore Demo keeps six participants
-and its original five candidates.
+shortlists while preserving existing selections. Explore Demo keeps six participants;
+legacy sessions retain five fixtures and new sessions select live Gangnam Station
+results for demo booking policies. See [the live booking flow](LIVE_DEMO_BOOKING.md).
 See [v2 deployment and verification](GROUP_WALLET_V2.md).
 
 Run `node --env-file=.env.development --import tsx scripts/group-size-rehearsal.ts`

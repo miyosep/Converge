@@ -6,6 +6,13 @@ English request stays in place. xAPI supports restaurants, stays, spaces, sports
 and classes. Qwen supplies the requested venue or activity type to live search.
 Google/Kakao legacy adapters remain restaurant-only.
 
+Explore Demo queues a search with `scope=explore`, a fixed restaurant category and
+Gangnam Station location. The server overrides client/model location changes.
+Results are saved to the authenticated session and are vicinity candidates, not a
+verified distance radius. A judge-selected result and demo deposit can create a
+frozen booking policy payable to the configured demo recipient. See
+[Explore Demo](EXPLORE_DEMO.md) and [payment verification](LIVE_DEMO_BOOKING.md).
+
 For the hackathon, returned places are assumed reservable with USDC. Availability
 and USDC acceptance are not checked or treated as eligibility blockers. This is
 a demo assumption, not provider evidence. Search and comparison do not themselves

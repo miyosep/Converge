@@ -47,6 +47,10 @@ import {
 } from "../../src/lib/explore/mock-reservation.js";
 import { createKilnClient } from "../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../src/lib/kiln/extraction.js";
+import { discoverWithXapi } from "../../src/lib/discovery/xapi.js";
+import { EXPLORE_SEARCH_LOCATION } from "../../src/lib/discovery/types.js";
+import { proposeLivePlace } from "../../src/lib/explore/live-proposal.js";
+import { validateLiveCommand } from "../../src/lib/explore/store.js";
 import {
   assertMatchingIntent,
   executeJournaled,
@@ -431,7 +435,70 @@ export class ExploreWorker {
     if (command) {
       // Keep the command until its result is durable, so a terminated request
       // resumes it. Extraction counters are charged only once across retries.
-      if (command.action === "extract") {
+      if (command.action === "search") {
+        // An interrupted paid request is not silently repeated on worker recovery.
+        if (run.searchInFlight) {
+          delete run.searchInFlight;
+          delete run.command;
+          run.error = "SEARCH_INTERRUPTED_RETRY_EXPLICITLY";
+          await this.store.save(run);
+          return;
+        }
+        validateLiveCommand(run, command);
+        run.searchCalls = (run.searchCalls ?? 0) + 1;
+        run.revision++;
+        run.searchInFlight = true;
+        run.text = command.text;
+        run.phase = "preferences";
+        delete run.discovery;
+        delete run.extraction;
+        delete run.evaluation;
+        run.searchUsage ??= [];
+        await this.store.save(run);
+        try {
+          if (!process.env.KILN_API_KEY || !process.env.XAPI_KEY)
+            throw new Error("SEARCH_NOT_CONFIGURED");
+          run.discovery = await discoverWithXapi({
+            kilnKey: process.env.KILN_API_KEY,
+            xapiKey: process.env.XAPI_KEY,
+            input: {
+              scope: "explore",
+              category: "restaurant",
+              location: EXPLORE_SEARCH_LOCATION,
+              text: command.text,
+            },
+            onUsage: async (usage) => {
+              run.searchUsage!.push(usage);
+              await this.store.save(run);
+            },
+          });
+          if (
+            run.discovery.intent.people &&
+            run.discovery.intent.people !== 6
+          ) {
+            run.discovery.intent.clarifications.push(
+              "This demo has six participants. Please revise the request for six people.",
+            );
+            run.discovery.places = [];
+          }
+          run.phase = "review";
+        } catch {
+          run.error = "LIVE_SEARCH_FAILED";
+        }
+        delete run.searchInFlight;
+      } else if (command.action === "select_place") {
+        proposeLivePlace(run, command, {
+          escrow: this.escrow,
+          token: this.token,
+          merchant: this.roles.merchants.A,
+          executor: this.executor.address,
+          participants: [
+            run.judge,
+            ...this.bots.map((account) => account.address),
+          ],
+          blockTimestamp: Number((await this.client.getBlock()).timestamp),
+        });
+      } else if (command.action === "extract") {
         if (!run.extractionInFlight) {
           run.extractionCalls++;
           run.revision++;

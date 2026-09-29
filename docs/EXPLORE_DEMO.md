@@ -1,8 +1,21 @@
 # Wallet-Connected Explore Demo
 
-Explore Demo is available at `/demo`. It uses one judge-controlled wallet and five operator-controlled test wallets. The judge's public address is obtained after wallet connection; it does not need to be known beforehand. Every run freezes a new six-address policy. The UI labels the five automated participants and the synthetic restaurant catalog.
+Explore Demo is available at `/demo`. Its live search section fixes the category to restaurants and the area to Gangnam Station, Seoul. Judges write English cuisine, budget and atmosphere requirements or use an example prompt. The server locks the search area independently of the editable request; map results are vicinity searches, not a guaranteed walking-radius filter. xAPI and Kiln must be configured. USDC reservation availability is assumed for the hackathon.
+
+New sessions connect saved live candidates to a demo payment policy using the existing v1 escrow and the configured merchant A as a **demo booking recipient**, never as the real venue's wallet. One judge and five disclosed automated accounts each contribute 10 MockUSDC. Legacy sessions with extracted fixture preferences keep their old evaluation path.
 
 ## Judge Journey
+
+1. Connect a Sepolia wallet, sign in and start an admitted session (event access code when configured).
+2. Search in English within the fixed Gangnam Station area. Qwen chooses the search call; xAPI returns candidates. At most three searches per session are permitted. Results and usage are saved; interrupted requests are not silently repeated. Clarifications, conflicting group size (the demo has six people), and empty results cannot create a proposal.
+3. Select a saved candidate and a whole-token demo deposit from 1–60 MockUSDC. Review the unknown venue conditions and explicitly acknowledge the demo assumptions. This is a human choice from AI-searched candidates, not a claim that every condition has been verified or that five independent humans agreed.
+4. Review the frozen place, recipient and amount. A reservation-reference hash binds the selected venue snapshot, search interpretation/revision, demo slot, deposit and recipient. The existing policy hash additionally binds participants and spending terms. Policy creation locks searches and reselection for this session.
+5. Prepare test funds, approve the exact allowance and contribute 10 MockUSDC. Bots contribute only after the judge. The executor submits only the approved deposit; a receipt-checked event changes the reservation simulator to `DEMO_CONFIRMED`.
+6. Claim the remaining share. With a 48 MockUSDC deposit, 60 are collected and each participant receives 2 back. Cancellation/expiry permit recovery under the existing contract. No real booking is sent to the venue.
+
+The worker environment needs `KILN_API_KEY` and `XAPI_KEY` in addition to existing chain configuration. `/discover` remains a separate general five-category comparison tool; only the guided `/demo` session performs this booking-policy flow.
+
+## Legacy Fixture Journey and Historical Evidence
 
 1. Open **Explore Demo** and connect a browser wallet on Ethereum Sepolia. Sign the existing SIWE login challenge. This login signature does not authorize spending.
 2. Start a session. On a shared deployment, enter the event access code. Refreshing or reconnecting the same wallet resumes its existing session.

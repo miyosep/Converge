@@ -19,7 +19,9 @@ NO_MATCH if every selected restaurant exceeds its funds or other requirements.
 
 ## Compatibility and deployment
 
-Explore Demo keeps six participants, five candidates and policy version 1.
+Explore Demo keeps six participants and policy version 1. Legacy sessions use five
+fixtures; new sessions select live Gangnam Station candidates and a demo deposit,
+payable to the configured demo recipient. See `LIVE_DEMO_BOOKING.md`.
 Existing ordinary v1 policies keep their original contract, hash and history.
 New ordinary policies use the deployment in
 [`11155111-v2.json`](../contracts/deployments/11155111-v2.json):

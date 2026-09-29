@@ -2,8 +2,17 @@ import type { Extraction } from "../schemas/constraints.js";
 import type { Policy } from "../policy.js";
 import type { publicEvaluation } from "../decision-engine.js";
 import type { MockReservation } from "./mock-reservation.js";
+import type { DiscoveryResult, DiscoveredPlace } from "../discovery/types.js";
 
 export type ExploreCommand =
+  | { action: "search"; text: string }
+  | {
+      action: "select_place";
+      revision: number;
+      placeId: string;
+      depositUsdc: number;
+      acknowledgeDemo: true;
+    }
   | { action: "extract"; text: string }
   | { action: "confirm"; revision: number; extraction: Extraction }
   | { action: "prepare" };
@@ -30,6 +39,11 @@ export type ExploreRun = {
   extractionCalls: number;
   extractionInFlight?: boolean;
   extractionAttempts?: number;
+  discovery?: DiscoveryResult;
+  selectedPlace?: DiscoveredPlace;
+  searchCalls?: number;
+  searchInFlight?: boolean;
+  searchUsage?: import("../discovery/xapi.js").SearchUsage[];
   automationComplete?: boolean;
   evaluation?: ReturnType<typeof publicEvaluation>;
   restaurant?: string;
@@ -56,6 +70,7 @@ export type ExploreRun = {
 };
 
 export type ExploreView = {
+  searchConfigured?: boolean;
   enabled: boolean;
   accessCodeRequired: boolean;
   workerOnline: boolean;

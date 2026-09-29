@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant, stay, space, sports facility or class from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-In the current Explore Demo catalog, Restaurant A is presented as **KAGAMI**, a fictional storefront at `/restaurant`. Its table meal estimate is synthetic and separate from the $148 omakase shown on the concept page. Its shellfish-safety metadata is unknown. The storefront displays a simulator-only booking state after a matching Sepolia test payment; it does not accept a real reservation.
+New Explore Demo sessions search actual restaurants around Gangnam Station and bind a judge-selected candidate to a demo USDC booking policy. Legacy fixture sessions retain **KAGAMI**, a fictional storefront at `/restaurant`; its synthetic $32 meal estimate is separate from the $148 concept menu. Both flows use a reservation simulator and test tokens, not real bookings.
 
 > **Project status:** The ordinary-group baseline, lower-budget, and merchant-excluded lifecycles completed on the Neon development branch and Ethereum Sepolia, using live Kiln `qwen3-32b`, six distinct wallet keys and isolated authenticated HTTP clients. Each run has six contributions, one bounded payment, six refunds, and matching application history. Lost-broadcast and database-confirmation failures recovered across separate processes without duplicate payment. See [the acceptance record](docs/GROUP_ACCEPTANCE.md) for exact inputs, receipts, usage and finality. One test operator controlled all six keys; a six-human browser walkthrough and the presentation MacBook rehearsal remain open. Production deployment, independent review, and submission disclosures are separate remaining work.
 
@@ -52,11 +52,12 @@ The previous **200 fictional examples** (40 per category) are preserved in
 units and supported conditions. In the existing payment demonstration, all members
 approve one immutable policy and contribute before
 payment. The deployed **v2 contract supports 2–100 participants**, including four.
-Existing v1 policies remain supported. Explore Demo retains six participants and
-its original five-candidate catalog. Apply migrations through `0014`.
+Existing v1 policies remain supported. Explore Demo retains six participants;
+legacy sessions keep the five-candidate catalog, while new sessions use live search.
+Apply migrations through `0014`.
 See [variable-size payments](docs/GROUP_WALLET_V2.md) for deployment and verification.
 
-The separate payment demonstration supports one test restaurant reservation deposit:
+The legacy fixture payment demonstration supports one test restaurant reservation deposit:
 
 1. Each person submits a private natural-language preference and confirms the structured interpretation.
 2. Kiln `qwen3-32b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
@@ -71,6 +72,15 @@ The prototype does not make a real booking, handle the remaining bill, or transf
 real USDC.
 
 ## Demo
+
+`/demo` starts with a live restaurant search around Gangnam Station, Seoul.
+The area and category are fixed; judges enter English requirements or choose an
+example sentence. This is a vicinity search, not a strict walking-radius filter.
+The judge selects a saved candidate and a demo deposit of 1–60 MockUSDC, acknowledges
+unknown venue conditions, then reviews a frozen policy. The existing merchant A
+wallet acts as the demo booking recipient, not the venue's wallet. Six participants
+contribute 10 each; unused funds are refundable. Legacy fixture sessions remain supported.
+See [live candidate payment verification](docs/LIVE_DEMO_BOOKING.md).
 
 Use **Explore Demo** on the home screen, or open `/demo`, for the wallet-connected judge flow. The judge's address is discovered at connection time; missing test funds are supplied within a bounded session. See [setup and operation](docs/EXPLORE_DEMO.md). The five automated participants and sample restaurants are disclosed in the interface.
 

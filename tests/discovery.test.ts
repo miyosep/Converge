@@ -295,6 +295,19 @@ test("discovery UI labels missing setup and shows evidence without claiming veri
   assert.match(card, /rel="noopener noreferrer"/);
 });
 
+test("Explore form fixes the location and offers requirement examples without a category selector", () => {
+  const html = renderToStaticMarkup(
+    createElement(RestaurantDiscovery, {
+      configured: true,
+      source: "xAPI (Google Maps)",
+      explore: true,
+    }),
+  );
+  assert.match(html, /Dinner around Gangnam Station/);
+  assert.match(html, /readOnly=""/);
+  assert.ok(!html.includes('id="discovery-category"'));
+  assert.match(html, /Japanese food for six people/);
+});
 test("discovery endpoint rejects unsigned and cross-origin requests before paid searches", async () => {
   const previous = process.env.APP_ORIGIN;
   process.env.APP_ORIGIN = "http://localhost:3000";

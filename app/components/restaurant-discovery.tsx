@@ -11,6 +11,7 @@ import {
 import { SignInDialog } from "./sign-in-dialog";
 import {
   discoveryCategories,
+  EXPLORE_SEARCH_LOCATION,
   type DiscoveryCategory,
 } from "../../src/lib/discovery/types";
 import type {
@@ -90,11 +91,17 @@ export function DiscoveryCard({
 export function RestaurantDiscovery({
   configured,
   source,
+  explore = false,
+  onSignedIn,
 }: {
   configured: boolean;
   source: DiscoveryResult["source"];
+  explore?: boolean;
+  onSignedIn?: () => void;
 }) {
-  const [location, setLocation] = useState("Gangnam Station, Seoul");
+  const [location, setLocation] = useState(
+    explore ? EXPLORE_SEARCH_LOCATION : "Gangnam Station, Seoul",
+  );
   const [category, setCategory] = useState<DiscoveryCategory>("restaurant");
   const [text, setText] = useState("");
   const [result, setResult] = useState<DiscoveryResult | null>(null);
@@ -136,6 +143,7 @@ export function RestaurantDiscovery({
       setSignInOpen(false);
       setNeedsLogin(false);
       setError("");
+      onSignedIn?.();
     } catch (failure) {
       setSignInNotice(walletConnectionError(failure));
     } finally {
@@ -163,7 +171,12 @@ export function RestaurantDiscovery({
       const response = await fetch("/api/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category, location, text }),
+        body: JSON.stringify({
+          scope: explore ? "explore" : "general",
+          category,
+          location,
+          text,
+        }),
         signal: controller.signal,
       });
       const data = await response.json();
@@ -204,9 +217,15 @@ export function RestaurantDiscovery({
     <section className="discovery">
       <div className="discovery-intro">
         <span className="eyebrow">REAL PLACES · AI SEARCH</span>
-        <h1>A place that fits your people.</h1>
+        {explore ? (
+          <h2>Dinner around Gangnam Station</h2>
+        ) : (
+          <h1>A place that fits your people.</h1>
+        )}
         <p>
-          Tell us where you want to meet and what matters. Search real places,
+          {explore
+            ? "The area is set. Tell us what matters for dinner. Search real restaurants,"
+            : "Tell us where you want to meet and what matters. Search real places,"}
           inspect the evidence and compare up to five candidates together.
         </p>
       </div>
@@ -217,34 +236,39 @@ export function RestaurantDiscovery({
           void search();
         }}
       >
-        <label htmlFor="discovery-category">What are you planning?</label>
-        <select
-          id="discovery-category"
-          value={category}
-          onChange={(event) => {
-            invalidate();
-            setCategory(event.target.value as DiscoveryCategory);
-            setText("");
-          }}
-        >
-          {Object.entries(discoveryCategories).map(([value, item]) => (
-            <option
-              key={value}
-              value={value}
-              disabled={
-                source !== "xAPI (Google Maps)" && value !== "restaurant"
-              }
+        {!explore && (
+          <>
+            <label htmlFor="discovery-category">What are you planning?</label>
+            <select
+              id="discovery-category"
+              value={category}
+              onChange={(event) => {
+                invalidate();
+                setCategory(event.target.value as DiscoveryCategory);
+                setText("");
+              }}
             >
-              {item.label}
-            </option>
-          ))}
-        </select>
+              {Object.entries(discoveryCategories).map(([value, item]) => (
+                <option
+                  key={value}
+                  value={value}
+                  disabled={
+                    source !== "xAPI (Google Maps)" && value !== "restaurant"
+                  }
+                >
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
         <label htmlFor="discovery-location">
           City, neighborhood or landmark
         </label>
         <input
           id="discovery-location"
           value={location}
+          readOnly={explore}
           required
           minLength={2}
           maxLength={160}
@@ -253,6 +277,13 @@ export function RestaurantDiscovery({
             setLocation(event.target.value);
           }}
         />
+        {explore && (
+          <p>
+            The area is fixed for this demo. Describe cuisine, budget or
+            atmosphere below. Check candidate addresses on the map; walking
+            distance is not guaranteed.
+          </p>
+        )}
         <label htmlFor="discovery-request">What does your group need?</label>
         <textarea
           id="discovery-request"
@@ -268,6 +299,27 @@ export function RestaurantDiscovery({
             setText(event.target.value);
           }}
         />
+        {explore && (
+          <div className="discovery-links" aria-label="Example requests">
+            {[
+              "Japanese food for six people.",
+              "A quiet Italian restaurant under KRW 30,000 per person.",
+              "Korean barbecue with parking.",
+            ].map((example) => (
+              <button
+                key={example}
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  invalidate();
+                  setText(example);
+                }}
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+        )}
         <p id="discovery-help">
           Describe your needs in English. If you have a budget, state the
           currency and whether it is per person, per night, per hour or a total.

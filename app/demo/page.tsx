@@ -39,6 +39,7 @@ import type { ExploreView } from "../../src/lib/explore/types.js";
 import "./styles.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
+import { LiveDemoSearch } from "./live-search";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(
@@ -304,7 +305,17 @@ export default function ExploreDemo() {
             <Users size={14} />
             You + 5 automated participants
           </span>
-          <span>Sample restaurants · No real booking</span>
+          <span>Live places · Demo USDC reservations</span>
+        </div>
+        <div className="flow-note">
+          <h2>Dinner around Gangnam Station</h2>
+          <p>
+            The area is fixed. After signing in, describe your dinner
+            requirements in English, select a live search candidate and review
+            its demo booking policy. USDC booking availability is assumed; venue
+            conditions remain unverified. Payments use test tokens and the demo
+            booking recipient.
+          </p>
         </div>
         <ol className="demo-journey" aria-label="Demo progress">
           {[
@@ -355,7 +366,11 @@ export default function ExploreDemo() {
           <p className="explore-notice" role="status">
             {state.error.startsWith("WAITING")
               ? "Waiting for transaction confirmations."
-              : "Processing is temporarily delayed. Your progress is saved."}
+              : state.error === "LIVE_SEARCH_FAILED"
+                ? "Live search failed. No sample results were substituted. Try another search if your session has searches remaining."
+                : state.error === "SEARCH_INTERRUPTED_RETRY_EXPLICITLY"
+                  ? "The search was interrupted and was not automatically repeated. Search again if your session has searches remaining."
+                  : "Processing is temporarily delayed. Your progress is saved."}
           </p>
         )}
         {lastTx && (
@@ -482,110 +497,143 @@ export default function ExploreDemo() {
                     ),
                   )}
                 </div>
-                {["preferences", "review"].includes(state.phase) && (
-                  <section className="explore-section">
-                    <h2>Your dinner preferences</h2>
-                    <label>
-                      Preferences
-                      <textarea
-                        value={text}
-                        maxLength={4000}
-                        onChange={(event) => setText(event.target.value)}
-                        rows={3}
-                      />
-                    </label>
-                    <button
-                      className="primary"
-                      disabled={
-                        pending ||
-                        !view?.workerOnline ||
-                        state.extractionCalls >= 3
-                      }
-                      onClick={() =>
-                        void run(() => command({ action: "extract", text }))
-                      }
-                    >
-                      {state.command?.action === "extract"
-                        ? "Reading preferences..."
-                        : "Review preferences"}
-                    </button>
-                    {state.extraction && (
-                      <div className="explore-review">
-                        <h3>Confirm your conditions</h3>
-                        <ul>
-                          {state.extraction.constraints.map(
-                            (condition, index) => (
-                              <li key={index}>
-                                {condition.field.replaceAll("_", " ")}:{" "}
-                                {"value" in condition
-                                  ? typeof condition.value === "object"
-                                    ? condition.value.startsAt
-                                    : String(condition.value)
-                                  : `preference weight ${condition.weight}`}
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                        {[
-                          ...state.extraction.clarifications,
-                          ...state.extraction.unsupportedRequirements,
-                        ].map((message, index) => (
-                          <p key={index} className="explore-notice">
-                            {message}
-                          </p>
-                        ))}
-                        <details>
-                          <summary>Advanced: edit extracted conditions</summary>
-                          <textarea
-                            aria-label="Extracted conditions JSON"
-                            rows={12}
-                            value={correction}
-                            onChange={(event) =>
-                              setCorrection(event.target.value)
+                {["preferences", "review"].includes(state.phase) &&
+                  !state.extraction && (
+                    <LiveDemoSearch
+                      key={state.id}
+                      run={state}
+                      disabled={pending || !view?.workerOnline}
+                      configured={Boolean(view?.searchConfigured)}
+                      onCommand={(body) => void run(() => command(body))}
+                    />
+                  )}
+                {["preferences", "review"].includes(state.phase) &&
+                  state.extraction && (
+                    <section className="explore-section">
+                      <h2>Your dinner preferences</h2>
+                      <label>
+                        Preferences
+                        <textarea
+                          value={text}
+                          maxLength={4000}
+                          onChange={(event) => setText(event.target.value)}
+                          rows={3}
+                        />
+                      </label>
+                      <button
+                        className="primary"
+                        disabled={
+                          pending ||
+                          !view?.workerOnline ||
+                          state.extractionCalls >= 3
+                        }
+                        onClick={() =>
+                          void run(() => command({ action: "extract", text }))
+                        }
+                      >
+                        {state.command?.action === "extract"
+                          ? "Reading preferences..."
+                          : "Review preferences"}
+                      </button>
+                      {state.extraction && (
+                        <div className="explore-review">
+                          <h3>Confirm your conditions</h3>
+                          <ul>
+                            {state.extraction.constraints.map(
+                              (condition, index) => (
+                                <li key={index}>
+                                  {condition.field.replaceAll("_", " ")}:{" "}
+                                  {"value" in condition
+                                    ? typeof condition.value === "object"
+                                      ? condition.value.startsAt
+                                      : String(condition.value)
+                                    : `preference weight ${condition.weight}`}
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                          {[
+                            ...state.extraction.clarifications,
+                            ...state.extraction.unsupportedRequirements,
+                          ].map((message, index) => (
+                            <p key={index} className="explore-notice">
+                              {message}
+                            </p>
+                          ))}
+                          <details>
+                            <summary>
+                              Advanced: edit extracted conditions
+                            </summary>
+                            <textarea
+                              aria-label="Extracted conditions JSON"
+                              rows={12}
+                              value={correction}
+                              onChange={(event) =>
+                                setCorrection(event.target.value)
+                              }
+                            />
+                          </details>
+                          <button
+                            className="primary"
+                            disabled={pending}
+                            onClick={() =>
+                              void run(() =>
+                                command({
+                                  action: "confirm",
+                                  revision: state.revision,
+                                  extraction: JSON.parse(correction),
+                                }),
+                              )
                             }
-                          />
-                        </details>
-                        <button
-                          className="primary"
-                          disabled={pending}
-                          onClick={() =>
-                            void run(() =>
-                              command({
-                                action: "confirm",
-                                revision: state.revision,
-                                extraction: JSON.parse(correction),
-                              }),
-                            )
-                          }
-                        >
-                          Confirm conditions
-                        </button>
-                      </div>
-                    )}
-                    {state.evaluation &&
-                      state.evaluation.status !== "PROPOSAL_READY" && (
-                        <p className="explore-notice">
-                          {state.evaluation.status === "NO_MATCH"
-                            ? "No restaurant satisfies all conditions. Revise your preferences to try again."
-                            : "Some conditions need clarification before a proposal can be made."}
-                        </p>
+                          >
+                            Confirm conditions
+                          </button>
+                        </div>
                       )}
-                  </section>
-                )}
+                      {state.evaluation &&
+                        state.evaluation.status !== "PROPOSAL_READY" && (
+                          <p className="explore-notice">
+                            {state.evaluation.status === "NO_MATCH"
+                              ? "No restaurant satisfies all conditions. Revise your preferences to try again."
+                              : "Some conditions need clarification before a proposal can be made."}
+                          </p>
+                        )}
+                    </section>
+                  )}
                 {state.evaluation && (
                   <DemoCandidateResults result={state.evaluation} />
                 )}
                 {state.policy && (
                   <section className="explore-section">
                     <h2>{state.restaurant}</h2>
+                    {state.selectedPlace && (
+                      <div className="flow-note">
+                        <p>{state.selectedPlace.address}</p>
+                        <a
+                          href={state.selectedPlace.mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View selected venue ↗
+                        </a>
+                        <p>
+                          This place and the chosen demo deposit are locked into
+                          the policy. The recipient is a demo booking wallet,
+                          not the venue. Venue requirements remain unverified.
+                          Five automated participants accept the demo terms.
+                        </p>
+                      </div>
+                    )}
                     <p>
                       {state.phase === "proposal" || state.phase === "preparing"
-                        ? "AI recommendation based on confirmed preferences. The group policy and payment are not yet confirmed on-chain."
+                        ? state.selectedPlace
+                          ? "You selected this AI-searched candidate. Review the exact terms before preparing the policy on-chain."
+                          : "AI recommendation based on confirmed preferences. The group policy and payment are not yet confirmed on-chain."
                         : state.phase === "completed"
                           ? "The approved group payment is confirmed on-chain."
                           : "The group policy is on-chain; payment is not yet confirmed."}
                     </p>
-                    {state.restaurant === "KAGAMI" && (
+                    {!state.selectedPlace && state.restaurant === "KAGAMI" && (
                       <p>
                         <a href="/restaurant">
                           View the KAGAMI demo storefront
@@ -643,7 +691,7 @@ export default function ExploreDemo() {
                                   ? "The decision was cancelled. This demo request is closed."
                                   : state.reservation.status === "EXPIRED"
                                     ? "The policy expired. This demo request is closed."
-                                    : "Request recorded for the synthetic restaurant. Booking is not confirmed."}
+                                    : "Demo reservation request recorded. No real booking has been submitted."}
                           </p>
                           <p>
                             {state.reservation.guests} guests ·{" "}

@@ -16,6 +16,17 @@ import type { ExploreRun } from "./types.js";
 
 export const commandSchema = z.discriminatedUnion("action", [
   z.strictObject({
+    action: z.literal("search"),
+    text: z.string().trim().min(3).max(2000),
+  }),
+  z.strictObject({
+    action: z.literal("select_place"),
+    revision: z.number().int().nonnegative(),
+    placeId: z.string().min(1).max(100),
+    depositUsdc: z.number().int().min(1).max(60),
+    acknowledgeDemo: z.literal(true),
+  }),
+  z.strictObject({
     action: z.literal("extract"),
     text: z.string().trim().min(1).max(4000),
   }),
@@ -27,6 +38,28 @@ export const commandSchema = z.discriminatedUnion("action", [
   z.strictObject({ action: z.literal("prepare") }),
 ]);
 export class ExploreError extends Error {}
+export function validateLiveCommand(
+  run: ExploreRun,
+  command: Extract<
+    import("./types.js").ExploreCommand,
+    { action: "search" | "select_place" }
+  >,
+) {
+  if (run.policy || !["preferences", "review"].includes(run.phase))
+    throw new ExploreError("POLICY_LOCKED");
+  if (command.action === "search") {
+    if ((run.searchCalls ?? 0) >= 3)
+      throw new ExploreError("SEARCH_LIMIT_REACHED");
+  } else {
+    if (
+      command.revision !== run.revision ||
+      !run.discovery ||
+      run.discovery.intent.clarifications.length ||
+      !run.discovery.places.some((place) => place.id === command.placeId)
+    )
+      throw new ExploreError("STALE_OR_UNKNOWN_PLACE");
+  }
+}
 export const demoDirectory = () =>
   resolve(process.env.EXPLORE_DEMO_DIRECTORY || ".demo");
 export const walletId = (address: string) =>
@@ -163,9 +196,12 @@ export class ExploreStore {
       if (!run || run.judge.toLowerCase() !== address.toLowerCase())
         throw new ExploreError("RUN_NOT_FOUND");
       if (run.command) throw new ExploreError("DEMO_BUSY");
-      if (command.action === "extract") {
+      if (command.action === "search" || command.action === "select_place") {
+        validateLiveCommand(run, command);
+      } else if (command.action === "extract") {
         if (
           !["preferences", "review"].includes(run.phase) ||
+          Boolean(run.searchCalls) ||
           run.extractionCalls >= 3
         )
           throw new ExploreError("EXTRACTION_LIMIT_OR_LOCKED");
