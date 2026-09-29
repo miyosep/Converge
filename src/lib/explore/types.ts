@@ -29,6 +29,7 @@ export type ExploreRun = {
   id: string;
   judge: `0x${string}`;
   createdAt: string;
+  lastActiveAt?: string;
   sequence?: number;
   previousRunId?: string;
   phase:

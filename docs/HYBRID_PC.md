@@ -166,3 +166,10 @@ Release validation: 151 application tests and production build passed before
 cutover. GitHub's four OS foundation jobs passed. The contract format check
 identified V2 formatting issues, which were corrected without ABI changes;
 all 31 local contract tests, including fuzz and invariant tests, then passed.
+
+
+## Shared test payments and readiness
+
+After all real members confirm their preferences and vote for one place, the organizer can set a Sepolia MockUSDC amount and test recipient. The saved policy freezes those terms; every member must approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens and up to a 0.001 Sepolia ETH wallet balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` budget; no automated demo participant joins a real group.
+
+The worker sends a heartbeat every 20 seconds during long jobs. Idle demo sessions without policies, transactions or queued/in-flight work stop consuming admission capacity after 30 minutes. Their history remains available, and resumed work must reacquire capacity under the admission lock.

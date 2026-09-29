@@ -125,3 +125,51 @@ test("hybrid scan advances pages, isolates failures and refreshes calendar after
   assert.equal(pages, 2);
   assert.deepEqual(order, ["a", "b", "calendar", "calendar"]);
 });
+
+test("heartbeat stays fresh while a job is pending and stops when the cycle ends", async (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  let beats = 0,
+    pages = 0;
+  let release!: () => void;
+  let entered!: () => void;
+  const started = new Promise<void>((resolve) => {
+    entered = resolve;
+  });
+  const pool = {
+    query: async (sql: string) => {
+      if (sql.startsWith("SELECT"))
+        return {
+          rows:
+            pages++ === 0
+              ? [{ kind: "explore", id: "a", key: "explore:a" }]
+              : [],
+        };
+      if (sql.includes("converge_job_health")) beats++;
+      return { rows: [] };
+    },
+  } as unknown as Pool;
+  const cycle = hybridCycle(
+    pool,
+    async () => {
+      entered();
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      return false;
+    },
+    async () => {},
+  );
+  await started;
+  const initial = beats;
+  t.mock.timers.tick(20000);
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.ok(beats > initial);
+  release();
+  await cycle;
+  const final = beats;
+  t.mock.timers.tick(90000);
+  await Promise.resolve();
+  assert.equal(beats, final);
+});

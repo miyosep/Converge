@@ -93,13 +93,22 @@ export class DatabaseExploreStore extends ExploreStore {
     return latestRuns(result.rows.map((row) => row.data));
   }
   override async withAdmissionLock<T>(work: () => Promise<T>): Promise<T> {
-    return withJobLease(this.pool, "explore:admission", async (admission) => {
-      this.admissionLease = admission;
-      try {
-        return await work();
-      } finally {
-        this.admissionLease = undefined;
-      }
-    });
+    try {
+      return await withJobLease(
+        this.pool,
+        "explore:admission",
+        async (admission) => {
+          this.admissionLease = admission;
+          try {
+            return await work();
+          } finally {
+            this.admissionLease = undefined;
+          }
+        },
+      );
+    } catch (error) {
+      if (error instanceof JobBusy) throw new ExploreError("DEMO_BUSY");
+      throw error;
+    }
   }
 }

@@ -42,9 +42,11 @@ const messages: Record<string, string> = {
 export function GroupChainPanel({
   groupId,
   saved,
+  autoTestFunds = false,
 }: {
   groupId: string;
   saved: SigningPolicy;
+  autoTestFunds?: boolean;
 }) {
   const [state, setState] = useState<GroupChainState | null>(null);
   const [error, setError] = useState("");
@@ -218,7 +220,15 @@ export function GroupChainPanel({
         action,
       );
       // Simulation catches concurrent registration/contribution and token failures before signing.
-      await reader.call({ ...tx, account: actor });
+      const estimate = await reader.estimateGas({
+        ...tx,
+        account: actor,
+        gas: 16_000_000n,
+      });
+      const gas = estimate + estimate / 5n;
+      if (gas > 16_000_000n)
+        throw new Error("Transaction exceeds the supported gas limit.");
+      await reader.call({ ...tx, account: actor, gas });
       await checkAccount();
       if ((await reader.getChainId()) !== sepolia.id)
         throw new Error("WRONG_CHAIN");
@@ -227,7 +237,7 @@ export function GroupChainPanel({
         chain: sepolia,
         transport: custom(provider),
       });
-      const hash = await wallet.sendTransaction(tx);
+      const hash = await wallet.sendTransaction({ ...tx, gas });
       setLastHash(hash);
       setPending(hash);
       try {
@@ -278,7 +288,10 @@ export function GroupChainPanel({
       <h3>On-chain approval and contributions</h3>
       <p>
         Each participant signs with their own wallet. Token allowance and
-        contribution are separate transactions. You need Sepolia ETH for gas and{" "}
+        contribution are separate transactions.{" "}
+        {autoTestFunds &&
+          "Test funds for this shared plan are prepared automatically. "}
+        You need Sepolia ETH for gas and{" "}
         {money(saved.policy.contributionPerParticipant)}.
       </p>
       {state ? (

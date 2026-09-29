@@ -8,6 +8,7 @@ import {
 } from "../discovery/types.js";
 import {
   livePlanRequestSchema,
+  unanimousPlace,
   type LivePlan,
 } from "../discovery/live-plan.js";
 import type { GroupPolicyConfig } from "../group-policy.js";
@@ -16,6 +17,11 @@ import {
   livePreferenceSchema,
   type LivePreference,
 } from "../discovery/group-preferences.js";
+
+import {
+  buildLivePayment,
+  livePaymentTermsSchema,
+} from "../discovery/live-payment";
 
 export class LivePlanError extends Error {}
 const wallet = (value: string) => addressSchema.parse(value).toLowerCase();
@@ -460,9 +466,14 @@ export class LivePlanRepository {
       );
     });
   }
-  async prepare(groupId: string, actor: string, _config: GroupPolicyConfig) {
+  async prepare(
+    groupId: string,
+    actor: string,
+    config: GroupPolicyConfig,
+    rawTerms?: unknown,
+  ) {
     return transaction(this.pool, async (db) => {
-      await this.lock(db, groupId, actor);
+      const group = await this.lock(db, groupId, actor);
       const existing = (
         await db.query(
           "SELECT policy,policy_hash,created_at FROM converge_group_policies WHERE group_id=$1",
@@ -479,9 +490,72 @@ export class LivePlanRepository {
           createdAt: existing.created_at.toISOString(),
         };
       }
-      // Search listings do not provide verified booking terms or a payable venue recipient.
-      // Never turn a planning choice into a fabricated testnet payment.
-      throw new LivePlanError("BOOKING_QUOTE_UNAVAILABLE");
+      if (group.creator_wallet !== wallet(actor))
+        throw new LivePlanError("NOT_CREATOR");
+      if (group.preferences_locked) throw new LivePlanError("GROUP_LOCKED");
+      const terms = livePaymentTermsSchema.parse(rawTerms);
+      const confirmed = await this.confirmedPreferences(
+        db,
+        groupId,
+        group.target_member_count,
+      );
+      if (
+        !group.snapshot.recommendationReady ||
+        group.snapshot.recommendationRevision !==
+          terms.recommendationRevision ||
+        group.snapshot.preferenceRevision !== confirmed.revision
+      )
+        throw new LivePlanError("STALE_RECOMMENDATION");
+      const members = (
+        await db.query(
+          "SELECT wallet_address FROM converge_participants WHERE group_id=$1 ORDER BY wallet_address",
+          [groupId],
+        )
+      ).rows.map((row) => row.wallet_address as string);
+      const place = unanimousPlace(
+        { ...group.snapshot, votes: group.votes },
+        members,
+        group.target_member_count,
+      );
+      if (!place || place.id !== terms.placeId)
+        throw new LivePlanError("UNANIMOUS_CHOICE_REQUIRED");
+      let saved;
+      try {
+        saved = buildLivePayment({
+          terms,
+          config,
+          groupId,
+          members,
+          startsAt: group.reservation_starts_at.toISOString(),
+          nowSeconds: Math.floor(Date.now() / 1000),
+        });
+      } catch (error) {
+        throw new LivePlanError(
+          error instanceof Error ? error.message : "INVALID_PAYMENT_TERMS",
+        );
+      }
+      await db.query(
+        "UPDATE converge_groups SET preferences_locked=true WHERE id=$1",
+        [groupId],
+      );
+      await db.query(
+        "UPDATE converge_live_plans SET snapshot=snapshot || $2::jsonb WHERE group_id=$1",
+        [
+          groupId,
+          JSON.stringify({ merchant: terms.recipient, testPayment: true }),
+        ],
+      );
+      await db.query(
+        "INSERT INTO converge_group_policies(decision_id,group_id,evaluation_id,policy,policy_hash,created_at) VALUES($1,$2,NULL,$3::jsonb,$4,$5)",
+        [
+          saved.policy.decisionId,
+          groupId,
+          JSON.stringify(saved.policy),
+          saved.policyHash,
+          saved.createdAt,
+        ],
+      );
+      return saved;
     });
   }
 }

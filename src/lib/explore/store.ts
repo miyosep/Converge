@@ -13,7 +13,7 @@ import { z } from "zod";
 import { addressSchema } from "../schemas/primitives.js";
 import { extractionSchema } from "../schemas/constraints.js";
 import type { ExploreRun } from "./types.js";
-import { canRestartDemo, latestRuns } from "./sessions.js";
+import { canRestartDemo, latestRuns, occupiesDemoSlot } from "./sessions.js";
 import { demoReviewSchema } from "./preference-review";
 
 export const commandSchema = z.discriminatedUnion("action", [
@@ -193,11 +193,37 @@ export class ExploreStore {
     await this.init();
     return withFileLock(join(this.root, "admission.lock"), work);
   }
+  private async requireCapacity(judge: string, maxRuns: number) {
+    const newest = new Map<string, ExploreRun>();
+    for (const item of await this.listRuns()) {
+      if (!newest.has(item.judge.toLowerCase()))
+        newest.set(item.judge.toLowerCase(), item);
+    }
+    const others = [...newest.values()].filter(
+      (item) =>
+        item.judge.toLowerCase() !== judge.toLowerCase() &&
+        occupiesDemoSlot(item),
+    );
+    if (others.length >= maxRuns) throw new ExploreError("DEMO_SESSION_LIMIT");
+  }
   async create(address: string, maxRuns: number, previousRunId?: string) {
     const judge = addressSchema.parse(address);
     return this.withAdmissionLock(async () => {
       const existing = await this.owned(judge);
-      if (!previousRunId && existing) return existing;
+      if (!previousRunId && existing) {
+        if (
+          occupiesDemoSlot(existing) ||
+          ["completed", "cancelled", "expired"].includes(existing.phase)
+        )
+          return existing;
+        await this.requireCapacity(judge, maxRuns);
+        return this.withRunLock(existing.id, async () => {
+          const resumed = (await this.read(existing.id))!;
+          resumed.lastActiveAt = new Date().toISOString();
+          await this.save(resumed);
+          return resumed;
+        });
+      }
       if (previousRunId) {
         const previous = await this.owned(judge, previousRunId);
         if (!previous || !existing) throw new ExploreError("RUN_NOT_FOUND");
@@ -211,18 +237,7 @@ export class ExploreStore {
         const previous = existing ? await this.read(existing.id) : undefined;
         if (previous && !canRestartDemo(previous))
           throw new ExploreError("FINISH_CURRENT_DEMO");
-        const newest = new Map<string, ExploreRun>();
-        for (const item of await this.listRuns()) {
-          if (!newest.has(item.judge.toLowerCase()))
-            newest.set(item.judge.toLowerCase(), item);
-        }
-        const others = [...newest.values()].filter(
-          (item) =>
-            item.judge.toLowerCase() !== judge.toLowerCase() &&
-            !["completed", "cancelled", "expired"].includes(item.phase),
-        );
-        if (others.length >= maxRuns)
-          throw new ExploreError("DEMO_SESSION_LIMIT");
+        await this.requireCapacity(judge, maxRuns);
         const run: ExploreRun = {
           id,
           judge,
@@ -246,39 +261,52 @@ export class ExploreStore {
   async queue(address: string, input: unknown, runId = walletId(address)) {
     const command = commandSchema.parse(input);
     const id = runId;
-    return this.withRunLock(id, async () => {
-      const run = await this.read(id);
-      if (!run || run.judge.toLowerCase() !== address.toLowerCase())
-        throw new ExploreError("RUN_NOT_FOUND");
-      if ((await this.owned(address))?.id !== id)
-        throw new ExploreError("DEMO_SESSION_REPLACED");
-      if (run.command) throw new ExploreError("DEMO_BUSY");
-      if (
-        command.action === "search" ||
-        command.action === "group_search" ||
-        command.action === "select_place"
-      ) {
-        validateLiveCommand(run, command);
-      } else if (command.action === "extract") {
+    return this.withAdmissionLock(() =>
+      this.withRunLock(id, async () => {
+        const run = await this.read(id);
+        if (!run || run.judge.toLowerCase() !== address.toLowerCase())
+          throw new ExploreError("RUN_NOT_FOUND");
+        if ((await this.owned(address))?.id !== id)
+          throw new ExploreError("DEMO_SESSION_REPLACED");
+        if (run.command) throw new ExploreError("DEMO_BUSY");
         if (
-          !["preferences", "review"].includes(run.phase) ||
-          Boolean(run.searchCalls) ||
-          run.extractionCalls >= 3
-        )
-          throw new ExploreError("EXTRACTION_LIMIT_OR_LOCKED");
-      } else if (command.action === "confirm") {
-        if (
-          run.phase !== "review" ||
-          !run.extraction ||
-          command.revision !== run.revision
-        )
-          throw new ExploreError("STALE_REVISION");
-      } else if (run.phase !== "proposal")
-        throw new ExploreError("POLICY_NOT_READY");
-      run.command = command;
-      delete run.error;
-      await this.save(run);
-      return run;
-    });
+          command.action === "search" ||
+          command.action === "group_search" ||
+          command.action === "select_place"
+        ) {
+          validateLiveCommand(run, command);
+        } else if (command.action === "extract") {
+          if (
+            !["preferences", "review"].includes(run.phase) ||
+            Boolean(run.searchCalls) ||
+            run.extractionCalls >= 3
+          )
+            throw new ExploreError("EXTRACTION_LIMIT_OR_LOCKED");
+        } else if (command.action === "confirm") {
+          if (
+            run.phase !== "review" ||
+            !run.extraction ||
+            command.revision !== run.revision
+          )
+            throw new ExploreError("STALE_REVISION");
+        } else if (run.phase !== "proposal")
+          throw new ExploreError("POLICY_NOT_READY");
+        if (!occupiesDemoSlot(run))
+          await this.requireCapacity(
+            address,
+            z.coerce
+              .number()
+              .int()
+              .min(1)
+              .max(20)
+              .parse(process.env.EXPLORE_DEMO_MAX_RUNS || "8"),
+          );
+        run.lastActiveAt = new Date().toISOString();
+        run.command = command;
+        delete run.error;
+        await this.save(run);
+        return run;
+      }),
+    );
   }
 }

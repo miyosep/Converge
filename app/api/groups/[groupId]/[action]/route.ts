@@ -249,20 +249,23 @@ export async function POST(request: NextRequest, context: Context) {
       return NextResponse.json(await repository.getOverview(groupId, actor));
     }
     if (action === "decisions") {
-      z.strictObject({}).parse(await request.json());
+      const body: unknown = await request.json();
       const overview = await services().preferences.getOverview(groupId, actor);
       if (overview.livePlan)
         await services().livePlans.prepare(
           groupId,
           actor,
           currentGroupPolicyConfig(),
+          body,
         );
-      else
+      else {
+        z.strictObject({}).parse(body);
         await services().preferences.preparePolicy(
           groupId,
           actor,
           currentGroupPolicyConfig(),
         );
+      }
       await notifyJob({ kind: "group", id: groupId });
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),

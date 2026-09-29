@@ -6,6 +6,7 @@ import type { Category } from "./catalog-options.js";
 
 export type GroupSummary = {
   category?: Category;
+  isCreator?: boolean;
   permittedRestaurantIds?: string[];
   id: string;
   name: string;

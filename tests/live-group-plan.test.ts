@@ -130,8 +130,8 @@ test("friends review unverified venue conditions and separate place choice from 
   );
   assert.match(html, /Save my choice/);
   assert.match(html, /Needs confirmation/);
-  assert.match(html, /Group deposit: not confirmed/);
-  assert.match(html, /Payments are not available for this plan/);
+  assert.match(html, /Your shared payment/);
+  assert.match(html, /Your organizer will set the amount/);
   assert.doesNotMatch(
     html,
     /10 MockUSDC|15 MockUSDC|demo booking wallet|Prepare agreed payment/,

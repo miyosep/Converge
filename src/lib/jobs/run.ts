@@ -9,6 +9,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { databasePool } from "../db/pool.js";
+import { prepareGroupTestFunds } from "./group-test-funds";
 import { ExploreWorker } from "../../../scripts/lib/explore-worker.js";
 import { GroupExecutionWorker } from "../../../scripts/lib/group-execution-worker.js";
 import deployment from "../../../contracts/deployments/11155111.json";
@@ -122,6 +123,14 @@ export async function runJob(input: Job): Promise<boolean> {
         () => lease.assert(),
         4000n,
       );
+      const liveTest = (
+        await pool.query(
+          "SELECT 1 FROM converge_live_plans WHERE group_id=$1 AND snapshot->>'testPayment'='true'",
+          [job.id],
+        )
+      ).rowCount;
+      if (liveTest && !(await prepareGroupTestFunds(pool, lease, saved)))
+        return true;
       await worker.tick(saved);
       const progress = (
         await pool.query(

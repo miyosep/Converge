@@ -1,3 +1,4 @@
+import { buildLivePayment } from "../src/lib/discovery/live-payment";
 import { buildRehearsalPolicy } from "./lib/rehearsal-payment-policy.js";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
@@ -78,8 +79,10 @@ class MemoryExecutionStore implements ExecutionStore {
 
 // Disposable local EVM only. No environment credentials or Sepolia writes.
 async function main() {
+  const livePayment = process.argv.includes("--live-payment");
   const livePlace = process.argv.includes("--live-place");
-  const version = process.argv.includes("--v2") || livePlace ? 2 : 1;
+  const version =
+    process.argv.includes("--v2") || livePlace || livePayment ? 2 : 1;
   const memberCount =
     version === 2
       ? Number(
@@ -91,7 +94,7 @@ async function main() {
   if (!Number.isInteger(memberCount) || memberCount < 2 || memberCount > 100)
     throw new Error("Invalid member count");
   const funding = String(memberCount * 10000000);
-  const payment = String(memberCount * 7500000);
+  const payment = String(memberCount * (livePayment ? 10000000 : 7500000));
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const port = (server.address() as { port: number }).port;
@@ -262,6 +265,21 @@ async function main() {
         },
       }).policy;
     }
+    if (livePayment)
+      policy = buildLivePayment({
+        groupId: "live-payment-rehearsal",
+        config,
+        members: members.map((m) => m.address),
+        startsAt: new Date((now + 7200) * 1000).toISOString(),
+        nowSeconds: now,
+        terms: {
+          recommendationRevision: "current",
+          placeId: "venue",
+          amount: String(memberCount * 10),
+          recipient: policy.merchant,
+          acknowledgeTestPayment: true,
+        },
+      }).policy;
     const saved: SigningPolicy = {
       policy,
       policyHash: hashPolicy(policy),
@@ -479,12 +497,15 @@ async function main() {
       1,
     );
     for (let index = 0; index < memberCount; index++)
-      await send(index, "refund", pay);
+      if (!livePayment) await send(index, "refund", pay);
     await resumed.tick(pay);
-    assert.equal((await state(0, pay)).refunded, String(memberCount * 2500000));
+    assert.equal(
+      (await state(0, pay)).refunded,
+      String(memberCount * (livePayment ? 0 : 2500000)),
+    );
     assert.equal(
       store.events.filter((e) => e.kind === "RefundClaimed").length,
-      memberCount,
+      livePayment ? 0 : memberCount,
     );
     store.cursor!.blockHash = `0x${"0".repeat(64)}`;
     await resumed.tick(pay);
@@ -494,7 +515,7 @@ async function main() {
     );
     assert.equal(
       store.events.filter((e) => e.kind === "RefundClaimed").length,
-      memberCount,
+      livePayment ? 0 : memberCount,
     );
     console.log(
       "PASS: agent executes only after all contributions; lost broadcast response resumes the same signed hash; history replay is idempotent; all participant refunds recorded.",

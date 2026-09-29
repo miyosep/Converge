@@ -11,6 +11,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import type { LivePreference } from "../../src/lib/discovery/group-preferences";
 import type { GroupOverview } from "../../src/lib/group-view";
+import { LivePaymentSetup } from "./live-payment-setup";
 import { unanimousPlace } from "../../src/lib/discovery/live-plan";
 import { LeaveGroupButton } from "./leave-group-button";
 import { GroupPolicyPanel } from "./group-policy-panel";
@@ -77,7 +78,13 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
     return () => clearInterval(timer);
   }, [base]);
   async function action(
-    name: "vote" | "invite" | "live-preferences" | "live-confirm" | "recommend",
+    name:
+      | "vote"
+      | "invite"
+      | "live-preferences"
+      | "live-confirm"
+      | "recommend"
+      | "decisions",
     body: unknown = {},
   ) {
     setBusy(true);
@@ -109,7 +116,8 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
             "Your text was saved, but interpretation failed. Try submitting again.",
           BOOKING_QUOTE_UNAVAILABLE:
             "The venue’s booking amount has not been confirmed. Payment is unavailable.",
-          NOT_CREATOR: "Only the group organizer can create an invitation.",
+          NOT_CREATOR:
+            "Only the organizer can set payment terms or create invitations.",
           GROUP_FULL: "Everyone has joined. You can now agree on a place.",
           GROUP_LOCKED: "The policy is already fixed. Refresh to review it.",
           UNANIMOUS_CHOICE_REQUIRED:
@@ -143,7 +151,9 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
             ? data.livePlan?.recommendationReady
               ? "Candidates found using every member’s confirmed requirements. Review before agreeing."
               : "No candidates are ready. Review the group search result below."
-            : "Your choice is saved. No payment has been approved.",
+            : name === "decisions"
+              ? "Payment terms saved. Each person approves separately in their wallet."
+              : "Your choice is saved. No payment has been approved.",
         );
       }
     } catch (error) {
@@ -405,27 +415,16 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
               </fieldset>
               <p>
                 {agreed
-                  ? `Everyone chose ${agreed.name}. Confirm the booking terms with the venue next.`
+                  ? `Everyone chose ${agreed.name}. Review the shared payment terms next.`
                   : "Everyone must choose the same place. You can change your choice while planning."}
               </p>
-              {agreed && (
-                <section aria-labelledby="booking-terms-title">
-                  <h3 id="booking-terms-title">Booking details</h3>
-                  <p>Group deposit: not confirmed</p>
-                  <p>Your share: available once the deposit is confirmed</p>
-                  <p>
-                    Reservation prices and availability are not connected yet.
-                    Contact the venue to confirm the terms. Payments are not
-                    available for this plan.
-                  </p>
-                  <a
-                    href={agreed.websiteUrl ?? agreed.mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View venue details
-                  </a>
-                </section>
+              {agreed && !overview.signingPolicy && (
+                <LivePaymentSetup
+                  overview={overview}
+                  placeId={agreed.id}
+                  busy={busy}
+                  onSave={(terms) => void action("decisions", terms)}
+                />
               )}
             </form>
           )}

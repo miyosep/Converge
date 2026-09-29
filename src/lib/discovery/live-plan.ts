@@ -43,6 +43,7 @@ export const livePlanRequestSchema = z
   );
 
 export type LivePlan = {
+  testPayment?: boolean;
   recommendationReady?: boolean;
   recommendationRevision?: string;
   conflicts?: string[];

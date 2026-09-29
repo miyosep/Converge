@@ -91,7 +91,10 @@ export class ExploreWorker {
   readonly ledgerPath: string;
   ledger: Record<string, ExploreEntry> = {};
   snapshotBlock: bigint | undefined;
-  constructor(readonly persistence?: ExplorePersistence) {
+  constructor(
+    readonly persistence?: ExplorePersistence,
+    includeBots = true,
+  ) {
     this.store = persistence?.store ?? new ExploreStore();
     if (!process.env.RPC_URL) throw new Error("RPC_URL is required");
     this.transport = http(process.env.RPC_URL, {
@@ -112,11 +115,11 @@ export class ExploreWorker {
     };
     this.deployer = signer("DEPLOYER_PRIVATE_KEY", deployment.deployer);
     this.executor = signer("AGENT_EXECUTOR_PRIVATE_KEY", this.roles.executor);
-    this.bots = participantManifest.participants
-      .slice(1)
-      .map((person, index) =>
-        signer(`DEMO_PARTICIPANT_${index + 2}_PRIVATE_KEY`, person.address),
-      );
+    this.bots = (
+      includeBots ? participantManifest.participants.slice(1) : []
+    ).map((person, index) =>
+      signer(`DEMO_PARTICIPANT_${index + 2}_PRIVATE_KEY`, person.address),
+    );
     this.ledgerPath = join(this.store.root, "private", "transactions.json");
   }
   async init() {
@@ -335,6 +338,7 @@ export class ExploreWorker {
     name: string,
     targetEth: string,
     tokens: boolean,
+    tokenTarget = 10_000_000n,
   ) {
     const gasLabel = `Gas for ${name}`;
     const gasEntry = this.ledger[`${run.id}:${gasLabel}`];
@@ -384,7 +388,7 @@ export class ExploreWorker {
         const balance = (await this.readToken("balanceOf", [
           address,
         ])) as bigint;
-        if (balance < 10_000_000n) {
+        if (balance < tokenTarget) {
           await this.contract(
             run,
             label,
@@ -392,7 +396,7 @@ export class ExploreWorker {
             this.token,
             tokenAbi,
             "mint",
-            [address, 10_000_000n - balance],
+            [address, tokenTarget - balance],
           );
           return false;
         }

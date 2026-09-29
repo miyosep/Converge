@@ -163,3 +163,42 @@ export class ServerlessGroupRepository extends GroupExecutionRepository {
     });
   }
 }
+
+// Separate group funding journal and budget; no Explore sessions or automated members.
+export function groupFundingPersistence(
+  pool: Pool,
+  lease: JobLease,
+): ExplorePersistence {
+  const base = explorePersistence(pool, lease);
+  return {
+    ...base,
+    pendingOther: (signer, key) =>
+      pendingSigner(pool, signer, `funding:${key}`),
+    load: async () => {
+      const result = await pool.query(
+        "SELECT id,journal,reserved_wei,confirmed,failed FROM converge_job_transactions WHERE scope='group' AND id LIKE 'funding:%'",
+      );
+      return Object.fromEntries(
+        result.rows.map((r) => [
+          r.id.slice(8),
+          {
+            ...r.journal,
+            reservedWei: r.reserved_wei,
+            confirmed: r.confirmed,
+            failed: r.failed,
+          },
+        ]),
+      );
+    },
+    save: async (key, entry) =>
+      guardedTransaction(pool, [lease], (db) =>
+        putJournal(
+          db,
+          `funding:${key}`,
+          "group",
+          entry,
+          parseEther(process.env.GROUP_EXECUTION_MAX_ETH || "0.01"),
+        ),
+      ),
+  };
+}

@@ -216,6 +216,7 @@ export function GroupPolicyPanel({
         )}
         {signingPolicy && (
           <GroupChainPanel
+            autoTestFunds={Boolean(overview.livePlan?.testPayment)}
             key={signingPolicy.policyHash}
             groupId={overview.group.id}
             saved={signingPolicy}

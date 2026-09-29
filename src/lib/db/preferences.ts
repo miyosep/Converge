@@ -247,11 +247,12 @@ export class PreferenceRepository {
       signing_policy: unknown | null;
       policy_hash: string | null;
       policy_created_at: Date | null;
+      is_creator: boolean;
       live_snapshot?: import("../discovery/live-plan.js").LivePlan;
       live_votes?: Record<string, string>;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
-        g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
+        g.creator_wallet=$2 AS is_creator, g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
         e.internal_result, e.input_snapshot->'catalog' AS catalog,
         e.input_snapshot->>'contributionPerParticipant' AS contribution,
         e.input_snapshot->>'maxDeposit' AS max_deposit,
@@ -288,6 +289,7 @@ export class PreferenceRepository {
         ? { livePlan: { ...row.live_snapshot, votes: row.live_votes ?? {} } }
         : {}),
       group: {
+        isCreator: row.is_creator,
         category:
           row.live_snapshot?.category ??
           categoryForIds(row.permitted_restaurant_ids),
