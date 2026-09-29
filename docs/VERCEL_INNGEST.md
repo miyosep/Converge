@@ -1,5 +1,8 @@
 # Vercel, Neon and Inngest
 
+For Vercel with a continuously running PC and no Inngest account, see
+[the hybrid PC guide](HYBRID_PC.md). Both modes reuse the same durable DB records.
+
 This branch adds an opt-in serverless execution mode. The existing local workers
 remain available with `BACKGROUND_DRIVER=local`. Hosted mode uses Neon for Explore
 state, private signed transactions, fenced execution leases and service health.

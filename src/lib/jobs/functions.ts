@@ -1,5 +1,6 @@
 import { inngest, jobSchema } from "./client.js";
-import { jobsEnabled } from "./config.js";
+import { inngestJobsEnabled } from "./config.js";
+import { scanJobs } from "./scan.js";
 import { runJob } from "./run.js";
 import { databasePool } from "../db/pool.js";
 import { syncCalendars } from "../calendar/worker.js";
@@ -15,7 +16,7 @@ export const processJob = inngest.createFunction(
   },
   async ({ event, step }) => {
     const job = jobSchema.parse(event.data);
-    if (!jobsEnabled()) return;
+    if (!inngestJobsEnabled()) return;
     for (let i = 0; i < 30; i++) {
       const more = await step.run(`advance-${i}`, () => runJob(job));
       if (job.kind === "group" && !more && calendarConfigured())
@@ -40,29 +41,11 @@ export const recoverJobs = inngest.createFunction(
     retries: 2,
   },
   async ({ step }) => {
-    if (!jobsEnabled()) return;
+    if (!inngestJobsEnabled()) return;
     let cursor = "";
     for (let page = 0; ; page++) {
       const jobs: { kind: "explore" | "group"; id: string; key: string }[] =
-        await step.run(`scan-${page}`, async () => {
-          const pool = databasePool();
-          const result = await pool.query(
-            `SELECT * FROM (
-        SELECT 'explore' AS kind,id,'explore:' || id AS key FROM converge_explore_runs
-        WHERE $2 AND (data ? 'command' OR (data ? 'policy' AND NOT COALESCE((data->>'automationComplete')::boolean,false) AND data->>'phase' NOT IN ('preferences','review','proposal')))
-        UNION ALL
-        SELECT 'group',p.group_id::text,'group:' || p.group_id FROM converge_group_policies p
-        LEFT JOIN converge_group_execution e USING(decision_id)
-        WHERE $3 AND (e.status='pending' OR (p.policy->>'expiry')::bigint>extract(epoch FROM now())-86400 OR EXISTS(SELECT 1 FROM converge_calendar_jobs c WHERE c.group_id=p.group_id AND c.enabled AND c.status IN ('waiting','retry')))
-      ) jobs WHERE key>$1 ORDER BY key LIMIT 100`,
-            [
-              cursor,
-              process.env.EXPLORE_DEMO_ENABLED === "true",
-              process.env.GROUP_EXECUTION_ENABLED === "true",
-            ],
-          );
-          return result.rows;
-        });
+        await step.run(`scan-${page}`, () => scanJobs(databasePool(), cursor));
       if (!jobs.length) break;
       await step.sendEvent(
         `dispatch-${page}`,
@@ -90,7 +73,7 @@ export const calendarJobs = inngest.createFunction(
     retries: 2,
   },
   async ({ step }) => {
-    if (!jobsEnabled() || !calendarConfigured()) return;
+    if (!inngestJobsEnabled() || !calendarConfigured()) return;
     for (let i = 0; i < 20; i++) {
       const synced = await step.run(`sync-${i}`, () =>
         syncCalendars(databasePool(), 1),

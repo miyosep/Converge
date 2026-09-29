@@ -29,7 +29,10 @@ export class DatabaseExploreStore extends ExploreStore {
   override async online() {
     return !!(
       await this.pool.query(
-        "SELECT 1 FROM converge_job_health WHERE name='dispatcher' AND checked_at>now()-interval '12 minutes'",
+        "SELECT 1 FROM converge_job_health WHERE name=$1 AND checked_at>now()-($2::int * interval '1 second')",
+        process.env.BACKGROUND_DRIVER === "hybrid"
+          ? ["hybrid", 90]
+          : ["dispatcher", 720],
       )
     ).rowCount;
   }

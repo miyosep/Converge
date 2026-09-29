@@ -28,7 +28,7 @@ export async function notifyJob(job: Job) {
       `INSERT INTO converge_job_wakeups(name) VALUES($1) ON CONFLICT(name) DO UPDATE SET dispatched_at=now() WHERE converge_job_wakeups.dispatched_at<now()-interval '10 seconds' RETURNING name`,
       [key],
     );
-    if (claimed.rowCount)
+    if (claimed.rowCount && process.env.BACKGROUND_DRIVER === "inngest")
       await inngest.send({
         name: "converge/job.requested",
         data: { ...job, key },

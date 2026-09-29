@@ -1,0 +1,114 @@
+# Vercel web + a continuously running PC
+
+The web app writes authenticated commands to Neon. A local process scans the same
+database every five seconds after completing a pass, executes saved work and
+writes results back. No inbound connection, public PC address, tunnel, or Inngest
+account/key is needed. Larger queues take longer than five seconds. Closing the
+browser does not stop processing; losing power, sleep or internet pauses it.
+
+## Configure the shared database and web
+
+Use the same pooled `DATABASE_URL` on the PC and Vercel. Apply migration `0013`
+and any subsequent checked-in migrations before switching. Use the direct URL
+with the migration runner. Test in a Neon branch first.
+
+Set these on the Vercel production deployment:
+
+```dotenv
+BACKGROUND_DRIVER=hybrid
+BACKGROUND_JOBS_ENABLED=true
+EXPLORE_DEMO_ENABLED=true
+GROUP_EXECUTION_ENABLED=true
+```
+
+Retain `APP_ORIGIN`, database, session, RPC, Kiln and demo access-code configuration.
+Google connection/callback flows still require the Google settings on Vercel.
+**Do not put operator private keys on Vercel in hybrid mode.** Inngest functions
+are disabled in this mode, and hybrid execution is rejected inside Vercel.
+Preview deployments do not dispatch jobs or report an active processor.
+Give previews a separate Neon branch: the PC scans its database regardless of
+which deployment originally wrote a command. Never share production DB credentials
+with a preview intended to be isolated from execution.
+
+## Configure this PC once
+
+1. Install the pinned Node and pnpm versions from `CONTRIBUTING.md`; run
+   `pnpm install --frozen-lockfile`.
+2. Copy `docs/hybrid.env.example` to `.env.hybrid`. It is ignored by Git. Populate
+   the same database URL and the existing test-only RPC, Kiln and operator keys.
+   The service loads **only this file**, not `.env.development` or `.env`.
+3. Stop the old Explore/group/calendar workers and disable hosted Inngest jobs
+   using these same signers. To preserve existing file-based Explore sessions,
+   stop the source web app and use `scripts/import-explore-state.ts` as documented
+   in `VERCEL_INNGEST.md`. Do not discard pending signed journals or reset budgets.
+4. Set the desired `EXPLORE_DEMO_ENABLED` and `GROUP_EXECUTION_ENABLED` flags to
+   `true` in `.env.hybrid`. Enable Calendar by supplying the same Google settings
+   and token encryption key used by the web app.
+5. Run `pnpm hybrid:check` to check DB connectivity and migrated tables without
+   processing transactions. This does not validate live RPC/AI/Google credentials.
+6. Run `pnpm hybrid:start` for foreground operation. It restarts the child process
+   five seconds after a crash. Stop it with Ctrl+C.
+
+The default `.demo/worker.lock` prevents overlap with legacy signers on this PC.
+A stale lock is recovered only after verifying its recorded process no longer
+exists. DB leases and the shared journal prevent overlapping database-backed
+workers from preparing conflicting signatures. Never run a legacy signer on
+another computer against the same accounts; its file locks are not shared.
+
+## Windows automatic start
+
+After configuration and cutover, run from PowerShell in this repository:
+
+```powershell
+pnpm hybrid:install -StartNow
+```
+
+This checks the DB, registers `Converge Hybrid Processor` in Task Scheduler under
+the current user, starts it now, and starts it again at that user's next login.
+No administrator account or stored Windows password is required. It runs without
+a terminal window and uses the absolute Node path found during installation.
+Keep this directory and Node installation in place, and reinstall the task if
+they move. Logs are in `.hybrid/processor.log`; one previous log is retained after
+a restart when the current file exceeds 10 MB. These files are ignored by Git.
+
+```powershell
+Get-ScheduledTaskInfo -TaskName 'Converge Hybrid Processor'
+Stop-ScheduledTask -TaskName 'Converge Hybrid Processor'
+# Disable automatic start, or remove it entirely:
+Disable-ScheduledTask -TaskName 'Converge Hybrid Processor'
+Unregister-ScheduledTask -TaskName 'Converge Hybrid Processor' -Confirm:$false
+```
+
+Set Windows sleep/hibernate to Never while plugged in. Screen-off and screen lock
+are fine; logging out stops the interactive user's task. After reboot, sign into
+this Windows account. Power/sleep settings are not changed by the installer.
+
+## Recovery and availability
+
+Commands, signed transactions, gas budgets and run state live in Neon. A failed
+job does not stop other jobs in the scan. Connection failures retry; a stalled
+process is restarted by the supervisor. The next scan resumes saved work using
+the same transaction journal. Group history is checkpointed in bounded batches.
+Calendar runs after group state refresh so it can use a recent payment snapshot.
+
+The web checks a hybrid-specific heartbeat with a 90-second freshness window.
+Old Inngest heartbeats cannot make a stopped PC appear online. During outages the
+website remains available, but automatic work waits for the PC to reconnect.
+Continuous polling keeps Neon compute active; monitor the database plan's usage.
+
+Code and local rehearsals do not constitute a public deployment. The Vercel project,
+shared database selection, credentials, source-state import and enabling the local
+service must be completed together before a live demonstration.
+
+## Verification recorded on 2026-09-30
+
+- Shared-worktree `pnpm check`: 124 tests, TypeScript and formatting passed.
+- Production build with `VERCEL=1` and `BACKGROUND_DRIVER=hybrid` passed; the
+  existing viem/ox dynamic dependency warning remains.
+- `scripts/hybrid-db-rehearsal.ts` on the isolated `dev-vercel-inngest` branch
+  passed durable wakeups, recovery without a wakeup, polling, zero Inngest sends
+  and independent PC health expiry. No real signer, AI or Google calls were made.
+- The supervisor restarted a deliberately terminated test child after five
+  seconds. The production HTTP app then read `workerOnline=true` from Neon.
+- Windows task scripts passed PowerShell syntax checks. The persistent Windows
+  task has not been registered and live processing has not been enabled.
