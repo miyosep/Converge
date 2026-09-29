@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ExploreRun, ExploreCommand } from "../../src/lib/explore/types";
+import { demoMembers } from "../../src/lib/explore/demo-members";
 import type { DemoReview } from "../../src/lib/explore/preference-review";
 
 export function LiveDemoSearch({
@@ -16,7 +17,6 @@ export function LiveDemoSearch({
   onCommand: (command: ExploreCommand) => void;
 }) {
   const [text, setText] = useState(run.text ?? "");
-  const [placeId, setPlaceId] = useState("");
   const [deposit, setDeposit] = useState("45");
   const [accepted, setAccepted] = useState(false);
   const [reviewedText, setReviewedText] = useState<string | null>(null);
@@ -35,6 +35,7 @@ export function LiveDemoSearch({
     setReviewedText(null);
     setSummary(null);
     setReviewError("");
+    setAccepted(false);
     setReviewing(false);
   }
   async function review() {
@@ -67,17 +68,48 @@ export function LiveDemoSearch({
       if (sequence === reviewSequence.current) setReviewing(false);
     }
   }
-  const searching = run.command?.action === "search" || run.searchInFlight;
+  const searching =
+    run.command?.action === "group_search" ||
+    run.command?.action === "search" ||
+    run.searchInFlight;
   useEffect(() => {
-    setPlaceId("");
     setAccepted(false);
     setReviewedText(null);
     setSummary(null);
     reviewSequence.current++;
     setReviewing(false);
   }, [run.revision]);
-  const result = run.discovery;
   const amount = Number(deposit);
+  if (searching)
+    return (
+      <section
+        className="explore-section demo-group-progress"
+        aria-live="polite"
+      >
+        <h2>
+          Six perspectives.
+          <br />
+          <em>One shared plan.</em>
+        </h2>
+        <p>We’re finding one restaurant for everyone.</p>
+        <ol>
+          {[
+            ["aggregating", "Qwen brings all six opinions together"],
+            ["searching", "xAPI finds real restaurant candidates"],
+            ["choosing", "Qwen chooses one place for the group"],
+          ].map(([stage, label], index) => (
+            <li
+              key={stage}
+              className={run.groupDecision?.stage === stage ? "current" : ""}
+            >
+              <span>{index + 1}</span>
+              {label}
+            </li>
+          ))}
+        </ol>
+        <p>Your wallet will ask for approval later. No payment is made now.</p>
+      </section>
+    );
   return (
     <section className="explore-section demo-live-search">
       <h2>
@@ -159,10 +191,7 @@ export function LiveDemoSearch({
               ? "Searching Gangnam Station…"
               : "Review preferences"}
         </button>
-        <p>
-          {run.searchCalls ?? 0} of 3 searches used. Results stay fixed until
-          you search again.
-        </p>
+        <p>{run.searchCalls ?? 0} of 3 group searches used.</p>
       </form>
       {reviewing && (
         <p role="status">
@@ -207,24 +236,71 @@ export function LiveDemoSearch({
               <p>Update your request above, then review again.</p>
             </div>
           )}
-          <p>For six people near Gangnam Station. No payment at this step.</p>
+          <details className="demo-group-opinions">
+            <summary>Five more perspectives join yours</summary>
+            {demoMembers.map((member) => (
+              <div key={member.address}>
+                <strong>{member.name}</strong>
+                <span>{member.preference.requirements[0]!.text}</span>
+                <small>{member.address}</small>
+              </div>
+            ))}
+          </details>
+          <p>
+            Qwen will combine all six opinions, search real places with xAPI,
+            and choose one restaurant.
+          </p>
+          <label htmlFor="demo-deposit">Test booking deposit (MockUSDC)</label>
+          <input
+            id="demo-deposit"
+            type="number"
+            min={1}
+            max={60}
+            step={1}
+            value={deposit}
+            disabled={disabled}
+            onChange={(event) => {
+              setDeposit(event.target.value);
+              setAccepted(false);
+            }}
+          />
+          <label className="demo-consent">
+            <input
+              type="checkbox"
+              checked={accepted}
+              disabled={disabled}
+              onChange={(event) => setAccepted(event.target.checked)}
+            />
+            I understand this is a simulated booking. Each person contributes 10
+            MockUSDC on Sepolia; the deposit goes to a demo recipient, not the
+            restaurant. Approval and payment happen later.
+          </label>
           <button
             type="button"
             className="primary"
             disabled={
               disabled ||
               summary.clarifications.length > 0 ||
+              !accepted ||
+              !Number.isInteger(amount) ||
+              amount < 1 ||
+              amount > 60 ||
               !configured ||
               (run.searchCalls ?? 0) >= 3 ||
               reviewedText !== text.trim()
             }
             onClick={() => {
-              setPlaceId("");
               setAccepted(false);
-              onCommand({ action: "search", text: reviewedText });
+              onCommand({
+                action: "group_search",
+                text: reviewedText,
+                preference: summary,
+                depositUsdc: amount,
+                acknowledgeDemo: true,
+              });
             }}
           >
-            Confirm &amp; find places
+            Find our shared plan
           </button>
         </section>
       )}
@@ -239,153 +315,14 @@ export function LiveDemoSearch({
           while searches remain.
         </p>
       )}
-      {!!run.searchUsage?.length && (
-        <details>
-          <summary>Search activity</summary>
-          <ul>
-            {run.searchUsage.map((usage, index) => (
-              <li key={index}>
-                {usage.flow === "search_tool_selection"
-                  ? "Qwen tool selection"
-                  : "xAPI place search"}
-                : {usage.status ?? "no response"} · {usage.durationMs} ms
-                {usage.totalTokens !== null
-                  ? ` · ${usage.totalTokens} tokens`
-                  : ""}
-                {usage.validationError ? " · request failed validation" : ""}
-              </li>
-            ))}
-          </ul>
-        </details>
+      {run.groupDecision?.stage === "blocked" && (
+        <p role="status">{run.groupDecision.rationale}</p>
       )}
-      {result && (
-        <>
-          <h3>Review the search</h3>
-          <p>{result.query || result.intent.area}</p>
-          <p>Request used: {run.text}</p>
-          {text !== (run.text ?? "") && (
-            <p role="status">
-              Your draft has changed. Search again to use the new conditions.
-            </p>
-          )}
-          {result.intent.clarifications.map((question) => (
-            <p role="status" key={question}>
-              {question}
-            </p>
-          ))}
-          {!result.intent.clarifications.length && !result.places.length && (
-            <p>
-              No candidates found. Change your requirements and search again.
-            </p>
-          )}
-          <div className="discovery-grid">
-            {result.places.map((place) => (
-              <article className="discovery-card" key={place.id}>
-                <label>
-                  <input
-                    type="radio"
-                    name="demo-place"
-                    checked={placeId === place.id}
-                    disabled={disabled}
-                    onChange={() => {
-                      setPlaceId(place.id);
-                      setAccepted(false);
-                    }}
-                  />{" "}
-                  {place.name}
-                </label>
-                <p>{place.address}</p>
-                <p>{place.price ?? "Venue price not provided"}</p>
-                <a
-                  href={place.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View source & location ↗
-                </a>
-                <details className="demo-place-evidence">
-                  <summary>How it fits</summary>
-                  <ul>
-                    {place.evidence.map((entry, index) => (
-                      <li key={index}>
-                        {entry.condition}:{" "}
-                        {entry.status === "unknown"
-                          ? "Not verified"
-                          : entry.status}
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              </article>
-            ))}
-          </div>
-          {!!result.places.length && !result.intent.clarifications.length && (
-            <>
-              <p>
-                Source: {result.source}. Search candidates are not verified
-                matches. The five automated participants follow the demo terms;
-                their participation is not independent human approval.
-              </p>
-              <label htmlFor="demo-deposit">
-                Demo reservation deposit (whole MockUSDC, 1–60)
-              </label>
-              <input
-                id="demo-deposit"
-                type="number"
-                min={1}
-                max={60}
-                step={1}
-                value={deposit}
-                disabled={disabled}
-                onChange={(event) => {
-                  setDeposit(event.target.value);
-                  setAccepted(false);
-                }}
-              />
-              <p>
-                Each of six participants contributes 10 MockUSDC. The deposit is
-                a demo amount, not the restaurant's quote. Payment goes to the
-                configured demo booking recipient, not the real venue. Unused
-                funds are refundable.
-              </p>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={accepted}
-                  disabled={disabled}
-                  onChange={(event) => setAccepted(event.target.checked)}
-                />{" "}
-                I understand that venue conditions are unverified and USDC
-                booking availability is assumed for this demo. This does not
-                confirm a real reservation.
-              </label>
-              <button
-                type="button"
-                className="primary"
-                disabled={
-                  disabled ||
-                  !placeId ||
-                  !accepted ||
-                  text !== (run.text ?? "") ||
-                  !Number.isInteger(amount) ||
-                  amount < 1 ||
-                  amount > 60
-                }
-                onClick={() =>
-                  onCommand({
-                    action: "select_place",
-                    revision: run.revision,
-                    placeId,
-                    depositUsdc: amount,
-                    acknowledgeDemo: true,
-                  })
-                }
-              >
-                Review this booking policy
-              </button>
-            </>
-          )}
-        </>
+      {run.groupDecision?.stage === "failed" && (
+        <p role="alert">
+          We couldn’t finish the group decision. Review your preferences and try
+          again.
+        </p>
       )}
     </section>
   );

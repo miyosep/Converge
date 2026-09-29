@@ -5,6 +5,13 @@ import type { MockReservation } from "./mock-reservation.js";
 import type { DiscoveryResult, DiscoveredPlace } from "../discovery/types.js";
 
 export type ExploreCommand =
+  | {
+      action: "group_search";
+      text: string;
+      preference: import("./preference-review").DemoReview;
+      depositUsdc: number;
+      acknowledgeDemo: true;
+    }
   | { action: "search"; text: string }
   | {
       action: "select_place";
@@ -42,6 +49,7 @@ export type ExploreRun = {
   extractionInFlight?: boolean;
   extractionAttempts?: number;
   discovery?: DiscoveryResult;
+  groupDecision?: import("./group-decision").DemoGroupDecision;
   selectedPlace?: DiscoveredPlace;
   searchCalls?: number;
   searchInFlight?: boolean;

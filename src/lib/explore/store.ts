@@ -14,8 +14,16 @@ import { addressSchema } from "../schemas/primitives.js";
 import { extractionSchema } from "../schemas/constraints.js";
 import type { ExploreRun } from "./types.js";
 import { canRestartDemo, latestRuns } from "./sessions.js";
+import { demoReviewSchema } from "./preference-review";
 
 export const commandSchema = z.discriminatedUnion("action", [
+  z.strictObject({
+    action: z.literal("group_search"),
+    text: z.string().trim().min(3).max(2000),
+    preference: demoReviewSchema,
+    depositUsdc: z.number().int().min(1).max(60),
+    acknowledgeDemo: z.literal(true),
+  }),
   z.strictObject({
     action: z.literal("search"),
     text: z.string().trim().min(3).max(2000),
@@ -43,12 +51,17 @@ export function validateLiveCommand(
   run: ExploreRun,
   command: Extract<
     import("./types.js").ExploreCommand,
-    { action: "search" | "select_place" }
+    { action: "search" | "group_search" | "select_place" }
   >,
 ) {
   if (run.policy || !["preferences", "review"].includes(run.phase))
     throw new ExploreError("POLICY_LOCKED");
-  if (command.action === "search") {
+  if (command.action === "search" || command.action === "group_search") {
+    if (
+      command.action === "group_search" &&
+      command.preference.clarifications.length
+    )
+      throw new ExploreError("PREFERENCES_NOT_CONFIRMED");
     if ((run.searchCalls ?? 0) >= 3)
       throw new ExploreError("SEARCH_LIMIT_REACHED");
   } else {
@@ -56,7 +69,8 @@ export function validateLiveCommand(
       command.revision !== run.revision ||
       !run.discovery ||
       run.discovery.intent.clarifications.length ||
-      !run.discovery.places.some((place) => place.id === command.placeId)
+      !run.discovery.places.some((place) => place.id === command.placeId) ||
+      (run.groupDecision && run.groupDecision.selectedId !== command.placeId)
     )
       throw new ExploreError("STALE_OR_UNKNOWN_PLACE");
   }
@@ -245,7 +259,11 @@ export class ExploreStore {
       if ((await this.owned(address))?.id !== id)
         throw new ExploreError("DEMO_SESSION_REPLACED");
       if (run.command) throw new ExploreError("DEMO_BUSY");
-      if (command.action === "search" || command.action === "select_place") {
+      if (
+        command.action === "search" ||
+        command.action === "group_search" ||
+        command.action === "select_place"
+      ) {
         validateLiveCommand(run, command);
       } else if (command.action === "extract") {
         if (

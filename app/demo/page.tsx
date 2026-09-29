@@ -268,7 +268,7 @@ export default function ExploreDemo() {
   const journeyIndex =
     !entered || !state || ["cancelled", "expired"].includes(state.phase)
       ? -1
-      : state.command?.action === "search" ||
+      : ["search", "group_search"].includes(state.command?.action ?? "") ||
           (state.discovery && ["preferences", "review"].includes(state.phase))
         ? 1
         : ["preferences", "review"].includes(state.phase)
@@ -376,8 +376,10 @@ export default function ExploreDemo() {
               ? "Checking demo availability…"
               : demoReady
                 ? entered && state
-                  ? state.command?.action === "search"
-                    ? "Finding places for your group…"
+                  ? ["search", "group_search"].includes(
+                      state.command?.action ?? "",
+                    )
+                    ? "Bringing all six opinions together…"
                     : state.discovery &&
                         ["preferences", "review"].includes(state.phase)
                       ? "Review your search results"
@@ -657,8 +659,25 @@ export default function ExploreDemo() {
                 {state.policy && (
                   <section className="explore-section">
                     <h2>{state.restaurant}</h2>
+                    {state.groupDecision && (
+                      <div className="demo-chosen-reason">
+                        <p>{state.groupDecision.rationale}</p>
+                        {!!state.groupDecision.uncertainties?.length && (
+                          <details>
+                            <summary>What remains unverified</summary>
+                            <ul>
+                              {state.groupDecision.uncertainties.map(
+                                (note, index) => (
+                                  <li key={index}>{note}</li>
+                                ),
+                              )}
+                            </ul>
+                          </details>
+                        )}
+                      </div>
+                    )}
                     {state.selectedPlace && (
-                      <div className="flow-note">
+                      <div className="demo-chosen-venue">
                         <p>{state.selectedPlace.address}</p>
                         <a
                           href={state.selectedPlace.mapsUrl}
@@ -678,7 +697,9 @@ export default function ExploreDemo() {
                     <p>
                       {state.phase === "proposal" || state.phase === "preparing"
                         ? state.selectedPlace
-                          ? "You selected this AI-searched candidate. Review the exact terms before preparing the policy on-chain."
+                          ? state.groupDecision
+                            ? "Qwen selected this restaurant after considering all six participants. Review the plan before approving any test payment."
+                            : "Review the saved restaurant proposal before approving any test payment."
                           : "AI recommendation based on confirmed preferences. The group policy and payment are not yet confirmed on-chain."
                         : state.phase === "completed"
                           ? "The approved group payment is confirmed on-chain."

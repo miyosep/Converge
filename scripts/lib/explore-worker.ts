@@ -52,6 +52,11 @@ import { EXPLORE_SEARCH_LOCATION } from "../../src/lib/discovery/types.js";
 import { proposeLivePlace } from "../../src/lib/explore/live-proposal.js";
 import { validateLiveCommand } from "../../src/lib/explore/store.js";
 import {
+  assembleDemoMembers,
+  chooseDemoPlace,
+  findDemoGroupCandidates,
+} from "../../src/lib/explore/group-decision.js";
+import {
   assertMatchingIntent,
   executeJournaled,
   type JournalTransaction,
@@ -435,7 +440,143 @@ export class ExploreWorker {
     if (command) {
       // Keep the command until its result is durable, so a terminated request
       // resumes it. Extraction counters are charged only once across retries.
-      if (command.action === "search") {
+      if (command.action === "group_search") {
+        // Persist candidates before the second Qwen call. Recovery can resume
+        // selection without repeating a paid xAPI search.
+        const resumeChoice =
+          run.searchInFlight &&
+          run.groupDecision?.stage === "choosing" &&
+          run.discovery;
+        if (run.searchInFlight && !resumeChoice) {
+          delete run.searchInFlight;
+          delete run.command;
+          if (run.groupDecision) run.groupDecision.stage = "failed";
+          run.error = "SEARCH_INTERRUPTED_RETRY_EXPLICITLY";
+          await this.store.save(run);
+          return;
+        }
+        if (!resumeChoice) {
+          validateLiveCommand(run, command);
+          const members = assembleDemoMembers(
+            run.judge,
+            command.preference,
+            this.bots.map((bot) => bot.address),
+          );
+          run.searchCalls = (run.searchCalls ?? 0) + 1;
+          run.revision++;
+          run.text = command.text;
+          run.searchInFlight = true;
+          run.phase = "preferences";
+          run.groupDecision = { stage: "aggregating", members };
+          delete run.discovery;
+          delete run.extraction;
+          delete run.evaluation;
+          await this.store.save(run);
+        }
+        try {
+          if (!process.env.KILN_API_KEY || !process.env.XAPI_KEY)
+            throw new Error("SEARCH_NOT_CONFIGURED");
+          const kiln = createKilnClient({
+            apiKey: process.env.KILN_API_KEY,
+            maxAttempts: 2,
+            timeoutMs: 25000,
+            onAttempt: async (attempt) => {
+              if (this.persistence)
+                await this.persistence.attempt(
+                  `${run.id}:${run.revision}:${attempt.usage.requestId}:${attempt.usage.attempt}`,
+                  attempt,
+                );
+            },
+          });
+          const decision = run.groupDecision!;
+          if (!resumeChoice) {
+            const result = await findDemoGroupCandidates({
+              client: kiln,
+              xapiKey: process.env.XAPI_KEY,
+              runId: `group-${run.id.slice(0, 20)}-${run.revision}`,
+              members: decision.members,
+              onSearching: async () => {
+                decision.stage = "searching";
+                await this.store.save(run);
+              },
+            });
+            run.discovery = {
+              intent: {
+                area: EXPLORE_SEARCH_LOCATION,
+                cuisine: "",
+                koreanQuery: result.query || "Group dinner",
+                budget: null,
+                people: 6,
+                facilities: [],
+                otherRequirements: [],
+                clarifications: result.conflicts,
+              },
+              query: result.query,
+              searchedAt: result.searchedAt,
+              places: result.places,
+              excludedCount: 0,
+              source: "xAPI (Google Maps)",
+            };
+            if (result.conflicts.length || !result.places.length) {
+              decision.stage = "blocked";
+              decision.rationale =
+                result.conflicts[0] ??
+                "No places were found for the group's preferences. Update your request and try again.";
+              run.phase = "review";
+              delete run.command;
+              delete run.searchInFlight;
+              await this.store.save(run);
+              return;
+            }
+            decision.stage = "choosing";
+            await this.store.save(run);
+          }
+          const choice = await chooseDemoPlace(
+            kiln,
+            `choice-${run.id.slice(0, 20)}-${run.revision}`,
+            decision.members,
+            run.discovery!.places,
+          );
+          decision.rationale = choice.rationale;
+          decision.uncertainties = choice.uncertainties;
+          if (!choice.placeId) {
+            decision.stage = "blocked";
+            run.phase = "review";
+          } else {
+            decision.selectedId = choice.placeId;
+            proposeLivePlace(
+              run,
+              {
+                action: "select_place",
+                revision: run.revision,
+                placeId: choice.placeId,
+                depositUsdc: command.depositUsdc,
+                acknowledgeDemo: command.acknowledgeDemo,
+              },
+              {
+                escrow: this.escrow,
+                token: this.token,
+                merchant: this.roles.merchants.A,
+                executor: this.executor.address,
+                participants: decision.members.map((member) => member.address),
+                blockTimestamp: Number(
+                  (await this.client.getBlock()).timestamp,
+                ),
+              },
+            );
+            decision.stage = "ready";
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === "JOB_LEASE_LOST")
+            throw error;
+          if (run.groupDecision) run.groupDecision.stage = "failed";
+          run.error = "GROUP_DECISION_FAILED";
+        }
+        delete run.command;
+        delete run.searchInFlight;
+        await this.store.save(run);
+        return;
+      } else if (command.action === "search") {
         // An interrupted paid request is not silently repeated on worker recovery.
         if (run.searchInFlight) {
           delete run.searchInFlight;
