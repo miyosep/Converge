@@ -342,6 +342,46 @@ async function main() {
         assert.equal(store.journal, undefined);
       }
     }
+    const historyStore = new MemoryExecutionStore();
+    historyStore.cursor = structuredClone(store.cursor);
+    historyStore.events = structuredClone(store.events);
+    const paged = () =>
+      new GroupExecutionWorker(
+        reader,
+        transport,
+        accounts[memberCount]!,
+        config,
+        historyStore,
+        0n,
+        10000000000000000n,
+        undefined,
+        1n,
+      );
+    const firstPage = paged();
+    const previousBlock = BigInt(historyStore.cursor!.blockNumber);
+    await firstPage.tick(pay);
+    assert.equal(firstPage.historyPending, true);
+    assert.equal(BigInt(historyStore.cursor!.blockNumber), previousBlock + 1n);
+    assert.equal(
+      historyStore.journal,
+      undefined,
+      "Partial history must not authorize payment",
+    );
+    for (let page = 0; page < 50; page++) {
+      const resumedPage = paged();
+      await resumedPage.reconcile(pay);
+      if (!resumedPage.historyPending) break;
+    }
+    assert.equal(
+      BigInt(historyStore.cursor!.blockNumber),
+      (await reader.getBlockNumber({ cacheTime: 0 })) - 1n,
+    );
+    assert.equal(
+      historyStore.events.filter(
+        (event) => event.kind === "ParticipantApproved",
+      ).length,
+      memberCount,
+    );
     const interruptedClient = {
       ...reader,
       sendRawTransaction: async (

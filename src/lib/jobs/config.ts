@@ -1,7 +1,22 @@
 export function serverlessJobs() {
-  if (process.env.VERCEL && process.env.BACKGROUND_DRIVER !== "inngest")
-    throw new Error("Vercel requires BACKGROUND_DRIVER=inngest");
-  return process.env.BACKGROUND_DRIVER === "inngest";
+  const driver = process.env.BACKGROUND_DRIVER || "local";
+  if (!["local", "inngest", "hybrid"].includes(driver))
+    throw new Error("Unknown BACKGROUND_DRIVER");
+  if (process.env.VERCEL && driver === "local")
+    throw new Error("Vercel requires BACKGROUND_DRIVER=inngest or hybrid");
+  return driver !== "local";
+}
+
+export function inngestJobsEnabled() {
+  return jobsEnabled() && process.env.BACKGROUND_DRIVER === "inngest";
+}
+
+export function executionEnabled() {
+  return (
+    jobsEnabled() &&
+    (process.env.BACKGROUND_DRIVER !== "hybrid" ||
+      (!process.env.VERCEL && process.env.HYBRID_WORKER_PROCESS === "true"))
+  );
 }
 
 export function jobsEnabled() {
@@ -15,6 +30,6 @@ export function jobsEnabled() {
 export function assertLocalWorker() {
   if (serverlessJobs())
     throw new Error(
-      "Local workers are disabled when BACKGROUND_DRIVER=inngest",
+      "Legacy file workers are disabled with a database driver; use the hybrid worker or Inngest",
     );
 }

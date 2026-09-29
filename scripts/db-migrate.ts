@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { migrationHash, migrationHashMatches } from "./lib/migration-hash.js";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Pool } from "pg";
@@ -36,13 +36,13 @@ try {
       .sort();
     for (const name of names) {
       const sql = await readFile(join(directory, name), "utf8");
-      const digest = createHash("sha256").update(sql).digest("hex");
+      const digest = migrationHash(sql);
       const existing = await client.query<{ sha256: string }>(
         "SELECT sha256 FROM converge_schema_migrations WHERE name = $1",
         [name],
       );
       if (existing.rows.length) {
-        if (existing.rows[0]!.sha256 !== digest)
+        if (!migrationHashMatches(sql, existing.rows[0]!.sha256))
           throw new Error(`Applied migration changed: ${name}`);
         console.log(`Already applied: ${name}`);
         continue;

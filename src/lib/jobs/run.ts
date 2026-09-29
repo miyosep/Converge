@@ -19,7 +19,7 @@ import {
 } from "../server/group-config.js";
 import { explorePersistence, ServerlessGroupRepository } from "./journal.js";
 import { JobBusy, withJobLease } from "./lease.js";
-import { jobsEnabled } from "./config.js";
+import { executionEnabled } from "./config.js";
 import { jobSchema, type Job } from "./client.js";
 import type { ExploreRun } from "../explore/types.js";
 import type { ExecutionPolicy } from "../db/group-execution.js";
@@ -36,7 +36,7 @@ export function exploreNeedsWork(run: ExploreRun) {
 
 export async function runJob(input: Job): Promise<boolean> {
   const job = jobSchema.parse(input);
-  if (!jobsEnabled()) return false;
+  if (!executionEnabled()) return false;
   if (job.kind === "explore" && process.env.EXPLORE_DEMO_ENABLED !== "true")
     return false;
   if (job.kind === "group" && process.env.GROUP_EXECUTION_ENABLED !== "true")
@@ -120,6 +120,7 @@ export async function runJob(input: Job): Promise<boolean> {
         BigInt(contract.blockNumber),
         cap,
         () => lease.assert(),
+        4000n,
       );
       await worker.tick(saved);
       const progress = (
@@ -128,7 +129,11 @@ export async function runJob(input: Job): Promise<boolean> {
           [saved.policy.decisionId],
         )
       ).rows[0];
-      return progress?.status === "pending" || progress?.state.status === 1;
+      return (
+        worker.historyPending ||
+        progress?.status === "pending" ||
+        progress?.state.status === 1
+      );
     });
   } catch (error) {
     if (error instanceof JobBusy) return true;

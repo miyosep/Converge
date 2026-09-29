@@ -1,5 +1,8 @@
 # Vercel, Neon and Inngest
 
+For Vercel with a continuously running PC and no Inngest account, see
+[the hybrid PC guide](HYBRID_PC.md). Both modes reuse the same durable DB records.
+
 This branch adds an opt-in serverless execution mode. The existing local workers
 remain available with `BACKGROUND_DRIVER=local`. Hosted mode uses Neon for Explore
 state, private signed transactions, fenced execution leases and service health.
@@ -10,7 +13,7 @@ There is no `.demo` read/write on the hosted execution path.
 - Vercel hosts Next.js, authenticated APIs and `/api/inngest`.
 - Inngest calls bounded job steps, retries failures and sleeps between checks.
   SDK checkpoint batching is disabled so each step has its own Vercel invocation.
-- Neon is the durable source of truth. Events carry only opaque run/group IDs;
+- Neon is the durable source of truth. Events carry opaque run/group IDs and a dispatch timestamp;
   preference text, signing keys and signed payloads do not enter event payloads
   or step results.
 - Kiln and Sepolia remain the existing remote dependencies. User-owned wallet
@@ -23,6 +26,9 @@ signer. Journals are saved before broadcast and are reused after timeout or a
 lost RPC response. Ordinary-group history and its registry entry change in the
 same transaction. Expired lease owners cannot persist new signatures or state.
 Inngest concurrency is an additional scheduling control, not the payment lock.
+Ordinary-group history advances at most 4,000 blocks per hosted tick, persisting
+a canonical checkpoint after each batch. Payments wait until history catches up;
+an old deployment does not require replaying its entire lifetime in one invocation.
 
 ## Prepare the database
 
@@ -32,11 +38,17 @@ the **direct** connection and the existing migration runner:
 ```sh
 node --env-file=.env.inngest-test --import tsx scripts/db-migrate.ts dev-vercel-inngest
 node --env-file=.env.inngest-test --import tsx scripts/serverless-db-rehearsal.ts
+node --env-file=.env.inngest-test --import tsx scripts/explore-local-rehearsal.ts --database
 ```
 
 The test branch was created from `dev-preferences`; production was not migrated.
-The rehearsal creates and removes only synthetic records and sends no blockchain
-transactions, AI requests or calendar messages. Existing group journals are
+Apply all migrations through `0015_job_wakeup_acknowledgements.sql` before enabling
+this version of either processor. Pending wakeups now remain durable until an
+acknowledgement matches their dispatch timestamp, without resetting the cooldown.
+The DB rehearsal creates and removes only synthetic records and sends no blockchain
+transactions, AI requests or calendar messages. The Explore rehearsal uses those
+same DB adapters with disposable Anvil accounts and contracts, and reloads journals
+between ticks. It never sends Sepolia transactions. Existing group journals are
 copied into the shared registry by migration `0013`.
 
 Do not run a local signer against the same accounts while hosted jobs are enabled.
@@ -98,6 +110,13 @@ development; the hosted Inngest service handles scheduling after deployment.
 
 Do not copy real signing keys into an isolated DB rehearsal: the chain is shared.
 
+`scripts/serverless-smoke-server.ts` starts the `.next-serverless` production build
+on port 3011 with chain, AI and Calendar integrations disabled explicitly. Run it
+with `node --env-file=.env.inngest-test --import tsx scripts/serverless-smoke-server.ts`
+and point the Inngest dev server at `http://localhost:3011/api/inngest`. A
+`converge/job.requested` event with an Explore ID can verify HTTP dispatch and
+step completion without invoking a signer. This checks transport, not payment.
+
 ## Scheduling and free-tier usage
 
 Authenticated commands wake jobs immediately. Authenticated progress reads can
@@ -128,5 +147,20 @@ switching code back alone is **not** a safe data rollback: local files would be
 stale. Keep hosted signing disabled until all pending journals are reconciled and
 the chosen runtime has the latest durable state. Do not delete a pending journal.
 
-Implementation and synthetic DB tests do not establish a completed public Vercel
+## Verification recorded on 2026-09-29
+
+- `pnpm check`: type checking, formatting and 120 tests passed in the shared worktree.
+- Production Next.js build with `CONVERGE_BUILD_DIR=.next-serverless` and hosted
+  driver passed. The existing viem/ox dynamic dependency warning remains.
+- Synthetic Neon rehearsal passed persistence, duplicate delivery, cross-mode
+  signer exclusion, journal replay, transaction rollback and expired-lease fencing.
+- Explore with Neon storage and disposable Anvil passed payment, cancellation and
+  expiry, including user refunds, automated refunds and restart idempotency.
+- Ordinary-group Anvil rehearsal passed contributions, payment, cancellation,
+  expiry, refunds, uncertain broadcast recovery and bounded history resumption.
+- Inngest dev server discovered all three functions and completed an event through
+  the production HTTP endpoint with external integrations disabled. The hosted
+  endpoint test rejects unsigned invocations even when the dev flag is set.
+
+These checks do not establish a completed public Vercel
 deployment, live Inngest account integration or a new end-to-end Sepolia run.

@@ -9,6 +9,9 @@
     "pnpm": "11.19.0"
   },
   "scripts": {
+    "hybrid:start": "node --import tsx scripts/hybrid-service.ts",
+    "hybrid:check": "node --import tsx scripts/hybrid-service.ts --check",
+    "hybrid:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-hybrid-task.ps1",
     "demo:groups-verify": "node --env-file=.env --import tsx scripts/verify-group-acceptance.ts",
     "demo:groups-server": "node --import tsx scripts/group-acceptance-server.ts",
     "demo:groups-acceptance": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-acceptance.ts",

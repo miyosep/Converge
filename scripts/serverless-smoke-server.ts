@@ -8,7 +8,7 @@ const env: NodeJS.ProcessEnv = {
   ...process.env,
   NODE_ENV: "production",
   CONVERGE_BUILD_DIR: ".next-serverless",
-  BACKGROUND_DRIVER: "inngest",
+  BACKGROUND_DRIVER: process.argv.includes("--hybrid") ? "hybrid" : "inngest",
   BACKGROUND_JOBS_ENABLED: "true",
   EXPLORE_DEMO_ENABLED: "false",
   GROUP_EXECUTION_ENABLED: "false",

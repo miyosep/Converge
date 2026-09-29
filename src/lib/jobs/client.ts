@@ -25,13 +25,13 @@ export async function notifyJob(job: Job) {
   try {
     const key = `${job.kind}:${job.id}`;
     const claimed = await databasePool().query(
-      `INSERT INTO converge_job_wakeups(name) VALUES($1) ON CONFLICT(name) DO UPDATE SET dispatched_at=now() WHERE converge_job_wakeups.dispatched_at<now()-interval '10 seconds' RETURNING name`,
+      `INSERT INTO converge_job_wakeups(name) VALUES($1) ON CONFLICT(name) DO UPDATE SET dispatched_at=now() WHERE converge_job_wakeups.dispatched_at<now()-interval '10 seconds' RETURNING name,dispatched_at::text AS wakeup`,
       [key],
     );
-    if (claimed.rowCount)
+    if (claimed.rowCount && process.env.BACKGROUND_DRIVER === "inngest")
       await inngest.send({
         name: "converge/job.requested",
-        data: { ...job, key },
+        data: { ...job, key, wakeup: claimed.rows[0].wakeup },
       });
   } catch {
     console.error("Background dispatch delayed; saved work will be recovered.");

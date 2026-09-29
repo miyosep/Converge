@@ -103,6 +103,10 @@ test("RPC failures never become an unregistered policy or actionable balance", a
     },
   } as unknown as PublicClient;
   await assert.rejects(
+    readGroupChain(client, saved, policy, address(1), 2, 10n),
+    /UNCONFIRMED_SNAPSHOT_BLOCK/,
+  );
+  await assert.rejects(
     readGroupChain(client, saved, policy, address(1)),
     /RPC_UNAVAILABLE/,
   );
