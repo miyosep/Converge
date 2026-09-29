@@ -26,7 +26,6 @@ import {
   createWalletClient,
   custom,
   encodeFunctionData,
-  formatUnits,
   type Abi,
   type Address,
 } from "viem";
@@ -40,6 +39,7 @@ import "./styles.css";
 import "./redesign.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
+import { DemoSharedPlan } from "./shared-plan";
 import { LiveDemoSearch } from "./live-search";
 import { canRestartDemo } from "../../src/lib/explore/sessions";
 import {
@@ -64,7 +64,6 @@ async function api<T>(path: string, body?: unknown): Promise<T> {
 }
 const short = (address: string) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`;
-const money = (value: string) => formatUnits(BigInt(value), 6);
 const phaseNames = {
   preferences: "Your preferences",
   review: "Confirm your preferences",
@@ -286,8 +285,6 @@ export default function ExploreDemo() {
   const historical =
     !!state && !!view?.currentRunId && state.id !== view.currentRunId;
   const pending = busy || !!state?.command;
-  const terminal =
-    !!state && ["completed", "cancelled", "expired"].includes(state.phase);
   const demoReady = !!view?.enabled && view.workerOnline && !refreshError;
   const journeyIndex =
     !entered || !state || ["cancelled", "expired"].includes(state.phase)
@@ -576,6 +573,80 @@ export default function ExploreDemo() {
               </section>
             ) : (
               <>
+                <div className="explore-members" aria-label="Six participants">
+                  {["You", "Bob", "Charlie", "Dana", "Erin", "Farah"].map(
+                    (name, index) => (
+                      <div
+                        key={name}
+                        title={
+                          index === 0
+                            ? `You · ${short(state.judge)}`
+                            : `${name} · Automated participant`
+                        }
+                      >
+                        <span
+                          className={`explore-avatar ${index === 0 ? "judge" : ""}`}
+                        >
+                          {state.contributions[index] === "10000000" ? (
+                            <Check
+                              size={19}
+                              aria-label="Contribution received"
+                            />
+                          ) : (
+                            name[0]
+                          )}
+                        </span>
+                        <strong>{name}</strong>
+                        <small>
+                          {index === 0 ? short(state.judge) : "Automated"}
+                        </small>
+                      </div>
+                    ),
+                  )}
+                </div>
+                {!historical &&
+                  ["preferences", "review"].includes(state.phase) && (
+                    <LiveDemoSearch
+                      key={`search:${state.id}`}
+                      run={state}
+                      disabled={pending || !view?.workerOnline}
+                      configured={Boolean(view?.searchConfigured)}
+                      onCommand={(body) => void run(() => command(body))}
+                    />
+                  )}
+                {state.evaluation &&
+                  !["preferences", "review"].includes(state.phase) && (
+                    <DemoCandidateResults result={state.evaluation} />
+                  )}
+                {state.policy && (
+                  <DemoSharedPlan
+                    state={state}
+                    pending={pending}
+                    workerOnline={Boolean(view?.workerOnline)}
+                    historical={historical}
+                    onPrepare={() =>
+                      void run(() => command({ action: "prepare" }))
+                    }
+                    onTransaction={(action) =>
+                      void run(() => transaction(action))
+                    }
+                  />
+                )}
+                {state.transactions.length > 0 && (
+                  <details className="demo-records demo-fold">
+                    <summary>
+                      Transaction history{" "}
+                      <span>
+                        {state.transactions.length}{" "}
+                        {state.transactions.length === 1 ? "record" : "records"}
+                      </span>
+                    </summary>
+                    <DemoTransactionHistory
+                      key={`history:${state.id}`}
+                      transactions={state.transactions}
+                    />
+                  </details>
+                )}
                 <details
                   className="explore-section demo-sessions"
                   aria-label="Your demo sessions"
@@ -637,275 +708,6 @@ export default function ExploreDemo() {
                     </>
                   )}
                 </details>
-                <div className="explore-members" aria-label="Six participants">
-                  {["You", "Bob", "Charlie", "Dana", "Erin", "Farah"].map(
-                    (name, index) => (
-                      <div
-                        key={name}
-                        title={
-                          index === 0
-                            ? `You · ${short(state.judge)}`
-                            : `${name} · Automated participant`
-                        }
-                      >
-                        <span
-                          className={`explore-avatar ${index === 0 ? "judge" : ""}`}
-                        >
-                          {state.contributions[index] === "10000000" ? (
-                            <Check
-                              size={19}
-                              aria-label="Contribution received"
-                            />
-                          ) : (
-                            name[0]
-                          )}
-                        </span>
-                        <strong>{name}</strong>
-                        <small>
-                          {index === 0 ? short(state.judge) : "Automated"}
-                        </small>
-                      </div>
-                    ),
-                  )}
-                </div>
-                {!historical &&
-                  ["preferences", "review"].includes(state.phase) && (
-                    <LiveDemoSearch
-                      key={`search:${state.id}`}
-                      run={state}
-                      disabled={pending || !view?.workerOnline}
-                      configured={Boolean(view?.searchConfigured)}
-                      onCommand={(body) => void run(() => command(body))}
-                    />
-                  )}
-                {state.evaluation &&
-                  !["preferences", "review"].includes(state.phase) && (
-                    <DemoCandidateResults result={state.evaluation} />
-                  )}
-                {state.policy && (
-                  <section className="explore-section">
-                    <h2>{state.restaurant}</h2>
-                    {state.groupDecision && (
-                      <div className="demo-chosen-reason">
-                        <p>{state.groupDecision.rationale}</p>
-                        {!!state.groupDecision.uncertainties?.length && (
-                          <details>
-                            <summary>What remains unverified</summary>
-                            <ul>
-                              {state.groupDecision.uncertainties.map(
-                                (note, index) => (
-                                  <li key={index}>{note}</li>
-                                ),
-                              )}
-                            </ul>
-                          </details>
-                        )}
-                      </div>
-                    )}
-                    {state.selectedPlace && (
-                      <div className="demo-chosen-venue">
-                        <p>{state.selectedPlace.address}</p>
-                        <a
-                          href={state.selectedPlace.mapsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View selected venue ↗
-                        </a>
-                        <p>
-                          This place and the chosen demo deposit are locked into
-                          the policy. The recipient is a demo booking wallet,
-                          not the venue. Venue requirements remain unverified.
-                          Five automated participants accept the demo terms.
-                        </p>
-                      </div>
-                    )}
-                    <p>
-                      {state.phase === "proposal" || state.phase === "preparing"
-                        ? state.selectedPlace
-                          ? state.groupDecision
-                            ? "Qwen selected this restaurant after considering all six participants. Review the plan before approving any test payment."
-                            : "Review the saved restaurant proposal before approving any test payment."
-                          : "AI recommendation based on confirmed preferences. The group policy and payment are not yet confirmed on-chain."
-                        : state.phase === "completed"
-                          ? "The approved group payment is confirmed on-chain."
-                          : "The group policy is on-chain; payment is not yet confirmed."}
-                    </p>
-                    {!state.selectedPlace && state.restaurant === "KAGAMI" && (
-                      <p>
-                        <a href="/restaurant">
-                          View the KAGAMI demo storefront
-                        </a>
-                        . Its menu and story are fictional; this policy uses
-                        synthetic restaurant metadata.
-                      </p>
-                    )}
-                    <dl className="explore-policy">
-                      <div>
-                        <dt>Your contribution</dt>
-                        <dd>
-                          {money(state.policy.contributionPerParticipant)} USDC
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Reservation deposit</dt>
-                        <dd>{money(state.policy.paymentAmount)} USDC</dd>
-                      </div>
-                      <div>
-                        <dt>Total spending cap</dt>
-                        <dd>{money(state.policy.maxTotalSpend)} USDC</dd>
-                      </div>
-                      <div>
-                        <dt>Expires</dt>
-                        <dd>
-                          {new Date(
-                            state.policy.expiry * 1000,
-                          ).toLocaleString()}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Merchant</dt>
-                        <dd className="explore-address">
-                          {state.policy.merchant}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Approvals</dt>
-                        <dd>
-                          {state.approvals} / {state.policy.approvalThreshold}
-                        </dd>
-                      </div>
-                    </dl>
-                    <div className="explore-reservation">
-                      <h3>Demo reservation request</h3>
-                      {state.reservation ? (
-                        <>
-                          <p>
-                            {state.reservation.status === "DEMO_CONFIRMED"
-                              ? "The demo restaurant service recorded a booking confirmation after checking the test payment. No real table was booked."
-                              : state.reservation.status === "DEPOSIT_OBSERVED"
-                                ? "Test deposit observed on Sepolia. No restaurant has accepted a booking."
-                                : state.reservation.status === "CANCELLED"
-                                  ? "The decision was cancelled. This demo request is closed."
-                                  : state.reservation.status === "EXPIRED"
-                                    ? "The policy expired. This demo request is closed."
-                                    : "Demo reservation request recorded. No real booking has been submitted."}
-                          </p>
-                          <p>
-                            {state.reservation.guests} guests ·{" "}
-                            {new Date(
-                              state.reservation.startsAt,
-                            ).toLocaleString()}
-                          </p>
-                          <p className="explore-address">
-                            Reservation reference: {state.reservation.reference}
-                          </p>
-                        </>
-                      ) : (
-                        <p>
-                          No demo reservation request is recorded for this run.
-                        </p>
-                      )}
-                    </div>
-                    <details className="explore-policy-details">
-                      <summary>Policy details</summary>
-                      <p>Policy hash: {state.policyHash}</p>
-                      <p>Escrow: {state.policy.verifyingContract}</p>
-                      <p>Token: {state.policy.token}</p>
-                      <p>Network: Ethereum Sepolia (11155111)</p>
-                      <p>
-                        Maximum deposit: {money(state.policy.maxDeposit)} USDC
-                      </p>
-                    </details>
-                    {!historical && state.phase === "proposal" && (
-                      <button
-                        className="primary"
-                        disabled={pending || !view?.workerOnline}
-                        onClick={() =>
-                          void run(() => command({ action: "prepare" }))
-                        }
-                      >
-                        Prepare group payment
-                      </button>
-                    )}
-                    {state.phase === "preparing" && (
-                      <p>
-                        Preparing test funds and the group policy. Next, approve
-                        your contribution in your wallet; the other five
-                        participants will then approve and contribute
-                        automatically.
-                      </p>
-                    )}
-                    {state.phase === "approval" && (
-                      <div className="explore-actions">
-                        <p>
-                          Your approval comes first. Once your contribution is
-                          confirmed, the other five participants automatically
-                          approve and contribute to the same plan. Your wallet
-                          may request two confirmations: token allowance, then
-                          contribution. Changing policy terms requires a new
-                          decision and fresh approvals.
-                        </p>
-                        <button
-                          className="primary"
-                          disabled={pending}
-                          onClick={() =>
-                            void run(() => transaction("contribute"))
-                          }
-                        >
-                          Approve &amp; contribute{" "}
-                          {money(state.policy.contributionPerParticipant)} USDC
-                        </button>
-                      </div>
-                    )}
-                    {state.phase === "contributing" && (
-                      <p>
-                        Automated participants are contributing to the same
-                        policy.
-                      </p>
-                    )}
-                    {["approval", "contributing"].includes(state.phase) && (
-                      <button
-                        className="text-button"
-                        disabled={pending}
-                        onClick={() => void run(() => transaction("cancel"))}
-                      >
-                        Cancel decision
-                      </button>
-                    )}
-                    {terminal && (
-                      <div className="explore-actions">
-                        <ShieldCheck size={20} />
-                        <strong>{phaseNames[state.phase]}</strong>
-                        {BigInt(state.refund) > 0n && !state.refunded && (
-                          <button
-                            className="primary"
-                            disabled={pending}
-                            onClick={() =>
-                              void run(() => transaction("refund"))
-                            }
-                          >
-                            Claim {money(state.refund)} USDC refund
-                          </button>
-                        )}
-                        {state.refunded && (
-                          <span>Your refund has been claimed.</span>
-                        )}
-                      </div>
-                    )}
-                    {state.rejection && (
-                      <p className="explore-check">
-                        <ShieldCheck size={18} />
-                        80 USDC request rejected by the contract's read-only
-                        check. No rejection transaction was submitted.
-                      </p>
-                    )}
-                  </section>
-                )}
-                <DemoTransactionHistory
-                  key={`history:${state.id}`}
-                  transactions={state.transactions}
-                />
               </>
             )}
           </div>
