@@ -75,11 +75,14 @@ function shortAddress(value: string) {
 export function GroupWorkspace({
   initialGroupId = "",
   mode = "home",
+  landing = false,
 }: {
   initialGroupId?: string;
   mode?: "home" | "create" | "preferences";
+  landing?: boolean;
 }) {
   const [signInOpen, setSignInOpen] = useState(false);
+  const startAfterSignIn = useRef(false);
   const [wallet, setWallet] = useState<string | null>(null);
 
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -161,7 +164,7 @@ export function GroupWorkspace({
   }, [initialGroupId, mode]);
 
   useEffect(() => {
-    if (!wallet || mode !== "home") return;
+    if (!wallet || mode !== "home" || (landing && !groupId)) return;
     let active = true;
     setGroupsLoading(true);
     setGroupsError(false);
@@ -178,7 +181,7 @@ export function GroupWorkspace({
     return () => {
       active = false;
     };
-  }, [wallet, mode, groupsRevision]);
+  }, [wallet, mode, groupsRevision, landing, groupId]);
 
   useEffect(() => {
     if (wallet && groupId) void refresh(groupId);
@@ -224,7 +227,10 @@ export function GroupWorkspace({
       setWallet(session.walletAddress);
       setSignInOpen(false);
       setNotice("");
-      if (mode === "home" && !groupId) window.location.assign("/group/new");
+      if (startAfterSignIn.current && !groupId) {
+        startAfterSignIn.current = false;
+        window.location.assign("/plans");
+      }
     });
   }
 
@@ -346,7 +352,7 @@ export function GroupWorkspace({
   const hasUnsavedCorrection =
     !!preference?.extraction &&
     correction !== JSON.stringify(preference.extraction, null, 2);
-  if (!wallet)
+  if (!wallet || (landing && !groupId))
     return (
       <div className="shell landing-shell">
         <AppHeader
@@ -355,11 +361,26 @@ export function GroupWorkspace({
             <button
               className="wallet-button"
               type="button"
-              onClick={() => setSignInOpen(true)}
+              onClick={() => {
+                startAfterSignIn.current = false;
+                if (wallet) {
+                  void run(async () => {
+                    await api("/api/auth/logout", {});
+                    setWallet(null);
+                  });
+                } else setSignInOpen(true);
+              }}
+              aria-label={
+                wallet
+                  ? `Sign out of wallet ${shortAddress(wallet)}`
+                  : undefined
+              }
+              title={wallet ? "Sign out" : undefined}
               disabled={busy || sessionLoading}
             >
               <Wallet size={16} aria-hidden="true" />{" "}
-              {busy ? "Connecting…" : "Sign in"}
+              {wallet ? shortAddress(wallet) : busy ? "Connecting…" : "Sign in"}
+              {wallet && <LogOut size={15} aria-hidden="true" />}
             </button>
           }
         />
@@ -369,14 +390,24 @@ export function GroupWorkspace({
             loading={sessionLoading}
             notice={notice}
             invited={!!inviteToken}
-            onConnect={() => setSignInOpen(true)}
+            connected={!!wallet}
+            onConnect={() => {
+              if (wallet) window.location.assign("/plans");
+              else {
+                startAfterSignIn.current = landing && !groupId;
+                setSignInOpen(true);
+              }
+            }}
           />
         </main>
         <SignInDialog
           open={signInOpen}
           busy={busy}
           notice={notice}
-          onClose={() => setSignInOpen(false)}
+          onClose={() => {
+            startAfterSignIn.current = false;
+            setSignInOpen(false);
+          }}
           onConnect={() => void connect()}
         />
       </div>
@@ -423,7 +454,7 @@ export function GroupWorkspace({
             <nav aria-label="Workspace navigation">
               <Link
                 className={`nav-row ${mode !== "create" ? "active" : ""}`}
-                href="/"
+                href="/plans"
                 aria-current={mode !== "create" ? "page" : undefined}
               >
                 <Users size={18} />

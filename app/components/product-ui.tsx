@@ -46,7 +46,7 @@ export function AppHeader({
         <Brand />
         <nav className="main-nav" aria-label="Main navigation">
           <Link
-            href={publicView ? "#how-it-works" : "/"}
+            href={publicView ? "#how-it-works" : "/plans"}
             aria-current={
               !publicView && active === "workspace" ? "page" : undefined
             }
@@ -123,12 +123,14 @@ export function WelcomeWorkspace({
   loading = false,
   notice = "",
   invited = false,
+  connected = false,
   onConnect,
 }: {
   busy: boolean;
   loading?: boolean;
   notice?: string;
   invited?: boolean;
+  connected?: boolean;
   onConnect: () => void;
 }) {
   return (
@@ -174,7 +176,9 @@ export function WelcomeWorkspace({
             </Link>
           </div>
           <p className="human-signin">
-            Sign in with MetaMask. No payment to get started.
+            {connected
+              ? "Wallet connected. No payment to start planning."
+              : "Sign in with MetaMask. No payment to get started."}
           </p>
           {invited && (
             <p className="landing-invitation">
