@@ -32,7 +32,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-acceptance/types/**/*.ts",
-    ".next-acceptance/dev/types/**/*.ts"
+    ".next-acceptance/dev/types/**/*.ts",
+    ".next-serverless/types/**/*.ts",
+    ".next-serverless/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

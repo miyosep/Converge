@@ -2,7 +2,7 @@ import { errorDiagnostics } from "../diagnostics/errors.js";
 import { Pool } from "pg";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { verifiedPostgresUrl } from "../db/connection.js";
+import { databasePool } from "../db/pool.js";
 import {
   PreferenceRepository,
   PreferenceRepositoryError,
@@ -25,11 +25,7 @@ let pool: Pool | undefined;
 export function services() {
   if (!databaseUrl || !origin)
     throw new Error("DATABASE_URL and APP_ORIGIN are required");
-  pool ??= new Pool({
-    connectionString: verifiedPostgresUrl(databaseUrl),
-    max: 5,
-    connectionTimeoutMillis: 15000,
-  });
+  pool ??= databasePool();
   return {
     auth: new WalletAuthRepository(pool, origin),
     preferences: new PreferenceRepository(pool),

@@ -9,15 +9,17 @@ import {
 
 // Calendar work is independent of the payment executor: provider failures never
 // prevent settlement. No preferences, wallet addresses or attendee lists leave here.
-export async function syncCalendars(pool: Pool) {
-  const candidates =
-    await pool.query(`SELECT j.group_id,j.wallet_address FROM converge_calendar_jobs j
+export async function syncCalendars(pool: Pool, limit = 20) {
+  const candidates = await pool.query(
+    `SELECT j.group_id,j.wallet_address FROM converge_calendar_jobs j
  JOIN converge_calendar_connections c USING(wallet_address)
  JOIN converge_group_policies p USING(group_id)
  JOIN converge_group_execution e USING(decision_id)
  JOIN converge_group_chain_snapshots s USING(decision_id)
  WHERE e.status='confirmed' AND s.state->>'status'='2' AND s.state->>'spent'=p.policy->>'paymentAmount' AND s.checked_at>now()-interval '2 minutes' AND j.enabled AND j.status IN ('waiting','retry') AND j.next_attempt_at<=now()
- AND NOT c.needs_reconnect AND j.google_subject=c.google_subject ORDER BY j.next_attempt_at LIMIT 20`);
+ AND NOT c.needs_reconnect AND j.google_subject=c.google_subject ORDER BY j.next_attempt_at LIMIT $1`,
+    [limit],
+  );
   let synced = 0;
   for (const candidate of candidates.rows) {
     const db = await pool.connect();

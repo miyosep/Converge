@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { assertLocalWorker } from "../src/lib/jobs/config.js";
 import { setTimeout as sleep } from "node:timers/promises";
 import {
   ExploreError,
@@ -8,6 +9,7 @@ import {
 import { ExploreWorker } from "./lib/explore-worker.js";
 
 async function main() {
+  assertLocalWorker();
   const worker = new ExploreWorker();
   await worker.store.init();
   await withFileLock(join(worker.store.root, "worker.lock"), async () => {

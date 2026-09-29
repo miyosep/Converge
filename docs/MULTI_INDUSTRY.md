@@ -1,9 +1,9 @@
 # Multi-industry sample catalog
 
-Ordinary groups choose from five categories with 20 fictional examples each:
+Ordinary groups choose from five categories with 40 fictional examples each:
 restaurants, stays, spaces, sports and classes. `/group/new` shows the project introduction until wallet sign-in succeeds.
 Planning, searching and shortlisting become available after the server verifies
-the wallet login signature. Search matches names, types, areas and facility labels.
+the wallet login signature. Natural-language search extracts budget, capacity, beds, facilities, names, types and areas, and displays any conditions it cannot verify. Names and searchable condition combinations are distinct within each category.
 Changing category resets the shortlist and search. Each group uses one category.
 
 New inventory includes cabins and guesthouses, meeting rooms and studios,
@@ -30,8 +30,8 @@ users can shortlist the desired activity type directly.
 
 ## Compatibility and persistence
 
-Apply `0011_multi_industry_catalog.sql` with `pnpm db:migrate:dev` before saving
-new categories on the development branch. The migration extends the existing
+Apply migrations through `0014_catalog_forty.sql` with `pnpm db:migrate:dev` before saving
+the expanded shortlists on the development branch. The migration extends the existing
 shortlist check without rewriting any group or frozen snapshot. It rejects mixed
 categories. The application also checks uniqueness and candidate identities.
 Category is derived from immutable saved candidate IDs, rather than a separate

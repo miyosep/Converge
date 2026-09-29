@@ -11,12 +11,12 @@ import { RESTAURANT_IDS } from "../src/lib/restaurant-options.js";
 import { evaluateDecision } from "../src/lib/decision-engine.js";
 import { permittedGroupMerchants } from "../src/lib/group-conditions.js";
 
-test("ordinary catalog exposes twenty selectable candidates while Explore retains five", () => {
+test("ordinary catalog exposes forty selectable candidates while Explore retains five", () => {
   const options = groupEvaluationOptions("2030-01-05T10:00:00Z");
-  assert.equal(options.catalog.restaurants.length, 20);
+  assert.equal(options.catalog.restaurants.length, 40);
   assert.equal(
     new Set(options.catalog.restaurants.map((r) => r.merchant)).size,
-    20,
+    40,
   );
   assert.deepEqual(
     options.catalog.restaurants.map((r) => r.id),
@@ -33,7 +33,7 @@ test("ordinary catalog exposes twenty selectable candidates while Explore retain
   );
   assert.match(html, /Plant Studio/);
   assert.match(html, /fictional samples/);
-  assert.equal((html.match(/type="checkbox"/g) ?? []).length, 20);
+  assert.equal((html.match(/type="checkbox"/g) ?? []).length, 40);
 });
 
 test("a new dietary candidate can win and saved shortlists cannot be bypassed", () => {

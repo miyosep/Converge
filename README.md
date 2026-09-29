@@ -31,13 +31,13 @@ contribution remains 10 MockUSDC; recommendation spending limits cannot exceed
 the actual group's total contribution (and retain the configured 60 MockUSDC cap).
 Migration `0009_group_size.sql` preserves existing groups at six members.
 
-Ordinary groups can search and select from **100 fictional examples** across
-restaurants, stays, spaces, sports and classes, with 20 examples per category.
-Connect your wallet to sign in, then search by name, type, area or facility.
+Ordinary groups can search and select from **200 fictional examples** across
+restaurants, stays, spaces, sports and classes, with 40 examples per category.
+Connect your wallet to sign in, then describe your requirements in a sentence to search.
 See [multi-industry examples](docs/MULTI_INDUSTRY.md) for price units and supported conditions. All members approve one immutable policy and contribute before
 payment. The deployed **v2 contract supports 2–100 participants**, including four.
 Existing v1 policies remain supported. Explore Demo retains six participants and
-its original five-candidate catalog. Apply migrations through `0011`.
+its original five-candidate catalog. Apply migrations through `0014`.
 See [variable-size payments](docs/GROUP_WALLET_V2.md) for deployment and verification.
 
 The payment flow supports one test restaurant reservation deposit:

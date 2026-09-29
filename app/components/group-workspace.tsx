@@ -1,7 +1,7 @@
 "use client";
 import { SignInDialog } from "./sign-in-dialog";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ConstraintSummary } from "./constraint-summary";
 import { GroupNavigation } from "./workspace-frame";
@@ -93,6 +93,8 @@ export function GroupWorkspace({
   const [diagnostics, setDiagnostics] = useState<PublicDiagnostic[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [preference, setPreference] = useState<Preference | null>(null);
+  const inviteStarted = useRef(false);
+  const [initialPreferences, setInitialPreferences] = useState("");
   const [name, setName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [when, setWhen] = useState("");
@@ -236,6 +238,7 @@ export function GroupWorkspace({
         displayName,
         targetMemberCount: Number(sizeInput),
         permittedRestaurantIds,
+        initialPreferences,
         slot: {
           startsAt: timestamp.toISOString().replace(/\.\d{3}Z$/, "Z"),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -246,7 +249,9 @@ export function GroupWorkspace({
       setNotice(
         `Group created. Invite ${Number(sizeInput) - 1} others to join.`,
       );
-      window.location.assign(`/group/${encodeURIComponent(result.groupId)}`);
+      window.location.assign(
+        `/group/${encodeURIComponent(result.groupId)}/preferences?created=1`,
+      );
     });
   }
 
@@ -272,8 +277,24 @@ export function GroupWorkspace({
       url.searchParams.set("group", groupId);
       url.searchParams.set("invite", result.token);
       setInviteLink(url.toString());
+      setNotice(
+        "Share the invite link with your friends. You can review your preferences on this page.",
+      );
     });
   }
+
+  useEffect(() => {
+    if (
+      !wallet ||
+      !groupId ||
+      mode !== "preferences" ||
+      inviteStarted.current ||
+      new URLSearchParams(window.location.search).get("created") !== "1"
+    )
+      return;
+    inviteStarted.current = true;
+    void invite();
+  }, [wallet, groupId, mode]);
 
   async function submit() {
     await run(async () => {
@@ -574,7 +595,8 @@ export function GroupWorkspace({
                   setSizeInput={setSizeInput}
                   category={category}
                   setCategory={setCategory}
-                  permittedRestaurantIds={permittedRestaurantIds}
+                  initialPreferences={initialPreferences}
+                  setInitialPreferences={setInitialPreferences}
                   setPermittedRestaurantIds={setPermittedRestaurantIds}
                   busy={busy}
                   onCreate={() => void createGroup()}
@@ -783,7 +805,12 @@ export function GroupWorkspace({
                       participants.length >= targetMemberCount
                     }
                   >
-                    <Link2 size={16} /> Create invite link
+                    <Link2 size={16} />{" "}
+                    {inviteLink
+                      ? "Create a new invite link"
+                      : busy
+                        ? "Preparing invite link…"
+                        : "Create invite link"}
                   </button>
                   {inviteLink && (
                     <div className="invite-link">

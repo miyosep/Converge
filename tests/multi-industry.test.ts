@@ -60,19 +60,40 @@ function inputFor(
   };
 }
 
-test("five categories have twenty distinct selectable examples and stable unique merchants", () => {
-  assert.equal(catalogOptions.length, 100);
-  assert.equal(new Set(catalogOptions.map((item) => item.id)).size, 100);
+test("five categories have forty distinct selectable examples and stable unique merchants", () => {
+  assert.equal(catalogOptions.length, 200);
+  assert.equal(new Set(catalogOptions.map((item) => item.id)).size, 200);
   const merchants: string[] = [];
   for (const category of CATEGORY_IDS) {
     const options = optionsForCategory(category);
-    assert.equal(options.length, 20);
+    assert.equal(options.length, 40);
+    assert.equal(
+      new Set(options.map((item) => item.name.toLowerCase())).size,
+      40,
+    );
+    // Names, IDs and deposits must not disguise duplicate searchable profiles.
+    const profiles = options.map((item) =>
+      JSON.stringify({
+        kind: item.kind,
+        area: item.area,
+        price: item.price,
+        capacity: item.capacity ?? null,
+        beds: item.beds ?? null,
+        facilities: [...item.facilities].sort(),
+        wheelchairAccessible: item.wheelchairAccessible ?? null,
+      }),
+    );
+    assert.equal(
+      new Set(profiles).size,
+      40,
+      `${category}: duplicate search profile`,
+    );
     assert.ok(
       permittedRestaurantIdsSchema.safeParse(options.map((item) => item.id))
         .success,
     );
     const input = inputFor(category);
-    assert.equal(input.catalog.restaurants.length, 20);
+    assert.equal(input.catalog.restaurants.length, 40);
     merchants.push(...input.permittedMerchants);
     const html = renderToStaticMarkup(
       createElement(RestaurantPicker, {
@@ -82,7 +103,7 @@ test("five categories have twenty distinct selectable examples and stable unique
         onCategoryChange: () => {},
       }),
     );
-    assert.equal((html.match(/type="checkbox"/g) ?? []).length, 20);
+    assert.equal((html.match(/type="checkbox"/g) ?? []).length, 40);
     assert.match(html, /fictional samples/);
     assert.ok(html.includes(categories[category].priceUnit));
     assert.ok(html.includes('aria-pressed="true"'));
@@ -90,12 +111,12 @@ test("five categories have twenty distinct selectable examples and stable unique
   }
   assert.equal(
     new Set(merchants.map((value) => value.toLowerCase())).size,
-    100,
+    200,
   );
   for (const ids of [
     ["A", "stay-01"],
     ["stay-01", "space-01"],
-    ["class-21"],
+    ["class-41"],
     ["sport-01", "sport-01"],
   ])
     assert.equal(permittedRestaurantIdsSchema.safeParse(ids).success, false);

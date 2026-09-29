@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 import type { Hex } from "viem";
 import type { SigningPolicy } from "../group-policy.js";
 import type { GroupChainState } from "../group-chain.js";
@@ -8,7 +8,10 @@ import type { JournalTransaction } from "../../../scripts/lib/transaction-journa
 export type ExecutionPolicy = SigningPolicy & { groupId: string };
 export type ChainCheckpoint = { blockNumber: string; blockHash: Hex };
 export class GroupExecutionRepository {
-  constructor(readonly pool: Pool) {}
+  constructor(
+    readonly pool: Pool,
+    readonly fence?: (db: PoolClient) => Promise<void>,
+  ) {}
   async policies(): Promise<ExecutionPolicy[]> {
     const result = await this.pool.query(
       `SELECT p.group_id, p.policy, p.policy_hash, p.created_at FROM converge_group_policies p LEFT JOIN converge_group_execution e USING(decision_id) ORDER BY (e.status = 'pending') DESC NULLS LAST, p.created_at`,
@@ -42,6 +45,7 @@ export class GroupExecutionRepository {
     const db = await this.pool.connect();
     try {
       await db.query("BEGIN");
+      await this.fence?.(db);
       await db.query(
         "DELETE FROM converge_group_chain_events WHERE decision_id=$1 AND block_number >= $2",
         [id, String(fromBlock)],

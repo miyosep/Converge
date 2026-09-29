@@ -355,7 +355,7 @@ export default function ExploreDemo() {
           <p className="explore-notice" role="status">
             {state.error.startsWith("WAITING")
               ? "Waiting for transaction confirmations."
-              : "The demo runner needs attention. Your progress is saved."}
+              : "Processing is temporarily delayed. Your progress is saved."}
           </p>
         )}
         {lastTx && (
@@ -598,8 +598,7 @@ export default function ExploreDemo() {
                       <div>
                         <dt>Your contribution</dt>
                         <dd>
-                          {money(state.policy.contributionPerParticipant)}{" "}
-                          USDC
+                          {money(state.policy.contributionPerParticipant)} USDC
                         </dd>
                       </div>
                       <div>
@@ -669,8 +668,7 @@ export default function ExploreDemo() {
                       <p>Token: {state.policy.token}</p>
                       <p>Network: Ethereum Sepolia (11155111)</p>
                       <p>
-                        Maximum deposit: {money(state.policy.maxDeposit)}{" "}
-                        USDC
+                        Maximum deposit: {money(state.policy.maxDeposit)} USDC
                       </p>
                     </details>
                     {state.phase === "proposal" && (
@@ -686,8 +684,7 @@ export default function ExploreDemo() {
                     )}
                     {state.phase === "preparing" && (
                       <p>
-                        Preparing your USDC, gas allowance, and group
-                        policy...
+                        Preparing your USDC, gas allowance, and group policy...
                       </p>
                     )}
                     {state.phase === "approval" && (
@@ -706,8 +703,7 @@ export default function ExploreDemo() {
                           }
                         >
                           Approve &amp; contribute{" "}
-                          {money(state.policy.contributionPerParticipant)}{" "}
-                          USDC
+                          {money(state.policy.contributionPerParticipant)} USDC
                         </button>
                       </div>
                     )}

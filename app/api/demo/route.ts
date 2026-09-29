@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { join } from "node:path";
+import { exploreStore } from "../../../src/lib/explore/runtime-store.js";
+import { notifyJob } from "../../../src/lib/jobs/client.js";
+import { jobsEnabled, serverlessJobs } from "../../../src/lib/jobs/config.js";
 import {
   api,
   ApiError,
@@ -9,8 +11,6 @@ import {
 } from "../../../src/lib/server/api.js";
 import {
   ExploreError,
-  ExploreStore,
-  optionalJson,
   verifyAccessCode,
   walletId,
 } from "../../../src/lib/explore/store.js";
@@ -41,18 +41,17 @@ async function demoApi(work: () => Promise<NextResponse>) {
 }
 export async function GET(request: NextRequest) {
   return demoApi(async () => {
-    const store = new ExploreStore();
-    const heartbeat = await optionalJson<{ at: string }>(
-      join(store.root, "heartbeat.json"),
-    );
+    const store = exploreStore();
     let run = null;
     if (request.cookies.has("converge_session"))
       run = (await store.read(walletId(await sessionWallet(request)))) ?? null;
+    if (run?.policy || run?.command)
+      await notifyJob({ kind: "explore", id: run.id });
     return NextResponse.json({
       enabled: enabled(),
       accessCodeRequired: Boolean(process.env.EXPLORE_DEMO_ACCESS_CODE),
       workerOnline:
-        !!heartbeat && Date.now() - Date.parse(heartbeat.at) < 30_000,
+        (!serverlessJobs() || jobsEnabled()) && (await store.online()),
       run,
     });
   });
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
     const raw = await request.text();
     if (raw.length > 16000) throw new ApiError(413, "INPUT_TOO_LARGE");
     const body: unknown = JSON.parse(raw);
-    const store = new ExploreStore();
+    const store = exploreStore();
     if ((body as { action?: string })?.action === "start") {
       const start = z
         .strictObject({
@@ -82,6 +81,8 @@ export async function POST(request: NextRequest) {
         .parse(process.env.EXPLORE_DEMO_MAX_RUNS || "8");
       return NextResponse.json({ run: await store.create(actor, maxRuns) });
     }
-    return NextResponse.json({ run: await store.queue(actor, body) });
+    const run = await store.queue(actor, body);
+    await notifyJob({ kind: "explore", id: run.id });
+    return NextResponse.json({ run });
   });
 }

@@ -34,8 +34,7 @@ const messages: Record<string, string> = {
   WRONG_WALLET:
     "Select the wallet used to sign in. Reconnect from the workspace if you want to use another account.",
   WRONG_CHAIN: "Select Ethereum Sepolia in your wallet.",
-  INSUFFICIENT_MOCKUSDC:
-    "Your wallet needs enough USDC for this contribution.",
+  INSUFFICIENT_MOCKUSDC: "Your wallet needs enough USDC for this contribution.",
   TRANSACTION_REVERTED:
     "The transaction reverted. Refresh the chain status before retrying.",
 };

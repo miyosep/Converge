@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { notifyJob } from "../../../../../src/lib/jobs/client.js";
 import { z } from "zod";
 import { createPublicClient, getAddress, http } from "viem";
 import { sepolia } from "viem/chains";
@@ -21,6 +22,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 type Context = { params: Promise<{ groupId: string; action: string }> };
 
 export async function GET(request: NextRequest, context: Context) {
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest, context: Context) {
     const actor = await sessionWallet(request);
     if (action === "history") {
       await services().preferences.getOverview(groupId, actor);
+      await notifyJob({ kind: "group", id: groupId });
       return NextResponse.json(
         await services().execution.history(groupId, actor),
       );
@@ -36,6 +39,7 @@ export async function GET(request: NextRequest, context: Context) {
     if (action === "chain") {
       const overview = await services().preferences.getOverview(groupId, actor);
       if (!overview.signingPolicy) return apiFailure(409, "NO_POLICY");
+      await notifyJob({ kind: "group", id: groupId });
       if (!process.env.RPC_URL) return apiFailure(503, "CHAIN_UNAVAILABLE");
       try {
         const client = createPublicClient({
@@ -108,6 +112,7 @@ export async function POST(request: NextRequest, context: Context) {
         actor,
         currentGroupPolicyConfig(),
       );
+      await notifyJob({ kind: "group", id: groupId });
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),
       );

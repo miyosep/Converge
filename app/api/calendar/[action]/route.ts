@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { notifyJob } from "../../../../src/lib/jobs/client.js";
 import { z } from "zod";
 import {
   api,
@@ -132,6 +133,7 @@ export async function POST(request: NextRequest, context: Context) {
           wallet,
           body.durationMinutes,
         );
+        await notifyJob({ kind: "group", id: body.group });
       } catch {
         throw new ApiError(409, "CALENDAR_ENABLE_FAILED");
       }

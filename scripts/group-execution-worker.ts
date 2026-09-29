@@ -1,4 +1,5 @@
 import { mkdir } from "node:fs/promises";
+import { assertLocalWorker } from "../src/lib/jobs/config.js";
 import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { Pool } from "pg";
@@ -25,6 +26,7 @@ import deployment from "../contracts/deployments/11155111.json";
 import { GroupExecutionWorker } from "./lib/group-execution-worker.js";
 
 async function main() {
+  assertLocalWorker();
   if (
     !process.env.DATABASE_URL_UNPOOLED ||
     !process.env.RPC_URL ||

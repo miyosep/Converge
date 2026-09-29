@@ -50,6 +50,7 @@ export class GroupExecutionWorker {
     readonly store: ExecutionStore,
     readonly startBlock: bigint,
     readonly gasCap: bigint,
+    readonly guard?: () => Promise<void>,
   ) {}
 
   async reconcile(saved: ExecutionPolicy) {
@@ -261,6 +262,7 @@ export class GroupExecutionWorker {
         intent,
         load: () => this.store.load(id),
         prepare: async () => {
+          await this.guard?.();
           if (await this.store.pendingOther(id))
             throw new Error("WAITING_FOR_OTHER_TRANSACTION");
           const latest = await readGroupChain(
@@ -300,8 +302,12 @@ export class GroupExecutionWorker {
         },
         save: (entry) => this.store.save(id, entry, reserved, this.gasCap),
         findReceipt,
-        broadcast: (serialized) =>
-          this.client.sendRawTransaction({ serializedTransaction: serialized }),
+        broadcast: async (serialized) => {
+          await this.guard?.();
+          return this.client.sendRawTransaction({
+            serializedTransaction: serialized,
+          });
+        },
         waitReceipt: async () => null,
       });
       if (result.receipt) {

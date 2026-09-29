@@ -68,15 +68,15 @@ export function GroupExecutionPanel({
               {money(snapshot.state.refunded)}
             </p>
             <p>
-              Worker checked block {snapshot.blockNumber} at{" "}
+              Last checked block {snapshot.blockNumber} at{" "}
               {new Date(snapshot.checkedAt).toLocaleString()}. These saved
               records have two block confirmations, not finalized status.
             </p>
           </>
         ) : (
           <p>
-            No worker snapshot is recorded yet. The configured group executor
-            must be running to record history and execute eligible payments.
+            No confirmed transaction history yet. This page updates as
+            contributions and payment are verified.
           </p>
         )}
         {history?.execution && (

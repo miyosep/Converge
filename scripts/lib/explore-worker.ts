@@ -56,13 +56,21 @@ import {
 const tokenAbi = tokenAbiJson as Abi;
 const walletAbi = walletAbiJson as Abi;
 type Account = ReturnType<typeof privateKeyToAccount>;
-type Entry = JournalTransaction & {
+export type ExploreEntry = JournalTransaction & {
   reservedWei: string;
   confirmed: boolean;
   failed?: boolean;
 };
+export type ExplorePersistence = {
+  store: ExploreStore;
+  load: () => Promise<Record<string, ExploreEntry>>;
+  save: (key: string, entry: ExploreEntry) => Promise<void>;
+  attempt: (id: string, data: unknown) => Promise<void>;
+  guard: () => Promise<void>;
+  pendingOther: (signer: string, key: string) => Promise<boolean>;
+};
 export class ExploreWorker {
-  readonly store = new ExploreStore();
+  readonly store: ExploreStore;
   readonly roles = demoRolesSchema.parse(roleManifest);
   readonly token = deployment.mockUSDC.address as Address;
   readonly escrow = deployment.convergeGroupWallet.address as Address;
@@ -72,9 +80,10 @@ export class ExploreWorker {
   readonly deployer: Account;
   readonly executor: Account;
   readonly ledgerPath: string;
-  ledger: Record<string, Entry> = {};
+  ledger: Record<string, ExploreEntry> = {};
   snapshotBlock: bigint | undefined;
-  constructor() {
+  constructor(readonly persistence?: ExplorePersistence) {
+    this.store = persistence?.store ?? new ExploreStore();
     if (!process.env.RPC_URL) throw new Error("RPC_URL is required");
     this.transport = http(process.env.RPC_URL, {
       timeout: 15000,
@@ -103,12 +112,15 @@ export class ExploreWorker {
   }
   async init() {
     await this.store.init();
-    await mkdir(join(this.store.root, "private"), {
-      recursive: true,
-      mode: 0o700,
-    });
-    this.ledger =
-      (await optionalJson<Record<string, Entry>>(this.ledgerPath)) ?? {};
+    if (!this.persistence)
+      await mkdir(join(this.store.root, "private"), {
+        recursive: true,
+        mode: 0o700,
+      });
+    this.ledger = this.persistence
+      ? await this.persistence.load()
+      : ((await optionalJson<Record<string, ExploreEntry>>(this.ledgerPath)) ??
+        {});
     if (
       (await this.client.getChainId()) !== sepolia.id ||
       (await this.client.getBlock({ blockNumber: 0n })).hash !==
@@ -128,6 +140,10 @@ export class ExploreWorker {
     const owner = (await this.readToken("minter", [])) as Address;
     if (owner.toLowerCase() !== this.deployer.address.toLowerCase())
       throw new Error("MockUSDC owner mismatch");
+  }
+  async saveEntry(key: string) {
+    if (this.persistence) await this.persistence.save(key, this.ledger[key]!);
+    else await atomicJson(this.ledgerPath, this.ledger);
   }
   readToken(functionName: string, args: unknown[]) {
     return this.client.readContract({
@@ -190,6 +206,9 @@ export class ExploreWorker {
       intent,
       load: async () => this.ledger[key],
       prepare: async () => {
+        await this.persistence?.guard();
+        if (await this.persistence?.pendingOther(account.address, key))
+          throw new Error("WAITING_FOR_OTHER_TRANSACTION");
         if (
           Object.values(this.ledger).some(
             (entry) =>
@@ -220,7 +239,7 @@ export class ExploreWorker {
       },
       save: async (transaction) => {
         this.ledger[key] = { ...transaction, reservedWei, confirmed: false };
-        await atomicJson(this.ledgerPath, this.ledger);
+        await this.saveEntry(key);
         run.transactions.push({
           label,
           hash: transaction.hash,
@@ -229,10 +248,14 @@ export class ExploreWorker {
         await this.store.save(run);
       },
       findReceipt: receipt,
-      broadcast: (serialized) =>
-        this.client.sendRawTransaction({ serializedTransaction: serialized }),
+      broadcast: async (serialized) => {
+        await this.persistence?.guard();
+        return this.client.sendRawTransaction({
+          serializedTransaction: serialized,
+        });
+      },
       waitReceipt: (hash) =>
-        broadcastOnly
+        broadcastOnly || this.persistence
           ? Promise.resolve(null)
           : this.client.waitForTransactionReceipt({
               hash,
@@ -241,7 +264,7 @@ export class ExploreWorker {
             }),
     });
     if (broadcastOnly) return;
-    if (!outcome.receipt) throw new Error("Receipt missing");
+    if (!outcome.receipt) throw new Error("WAITING_FOR_CONFIRMATIONS");
     // Interactive progress uses two confirmations, not a claim of finalized evidence.
     if (
       (await this.client.getBlockNumber({ cacheTime: 0 })) <
@@ -255,7 +278,7 @@ export class ExploreWorker {
       throw new Error("WAITING_FOR_CANONICAL_RECEIPT");
     this.ledger[key]!.confirmed = true;
     if (outcome.receipt.status !== "success") this.ledger[key]!.failed = true;
-    await atomicJson(this.ledgerPath, this.ledger);
+    await this.saveEntry(key);
     let visible = run.transactions.find((item) => item.label === label);
     if (!visible) {
       visible = { label, hash: outcome.transaction.hash, confirmed: true };
@@ -369,6 +392,7 @@ export class ExploreWorker {
     return true;
   }
   async tick(run: ExploreRun) {
+    await this.persistence?.guard();
     this.snapshotBlock = undefined;
     // Recover signed work before deriving the next action from current balances.
     for (const [key, entry] of Object.entries(this.ledger)) {
@@ -405,10 +429,23 @@ export class ExploreWorker {
       throw new Error("Use a separate judge wallet, not an operator account");
     const command = run.command;
     if (command) {
-      delete run.command;
+      // Keep the command until its result is durable, so a terminated request
+      // resumes it. Extraction counters are charged only once across retries.
       if (command.action === "extract") {
-        run.extractionCalls++;
-        run.revision++;
+        if (!run.extractionInFlight) {
+          run.extractionCalls++;
+          run.revision++;
+          run.extractionInFlight = true;
+          run.extractionAttempts = 0;
+        }
+        if ((run.extractionAttempts ?? 0) >= 3) {
+          delete run.command;
+          delete run.extractionInFlight;
+          run.error = "EXTRACTION_FAILED";
+          await this.store.save(run);
+          return;
+        }
+        run.extractionAttempts = (run.extractionAttempts ?? 0) + 1;
         run.text = command.text;
         delete run.extraction;
         run.phase = "preferences";
@@ -418,6 +455,13 @@ export class ExploreWorker {
         const kiln = createKilnClient({
           apiKey: process.env.KILN_API_KEY,
           onAttempt: async (attempt) => {
+            if (this.persistence) {
+              await this.persistence.attempt(
+                `${run.id}:${run.revision}:${attempt.usage.requestId}:${attempt.usage.attempt}`,
+                attempt,
+              );
+              return;
+            }
             await atomicJson(
               join(
                 this.store.root,
@@ -433,6 +477,8 @@ export class ExploreWorker {
           text: command.text,
         });
         run.phase = "review";
+        delete run.extractionInFlight;
+        delete run.extractionAttempts;
       } else if (command.action === "confirm") {
         if (command.revision !== run.revision || run.phase !== "review")
           throw new Error("STALE_REVISION");
@@ -497,6 +543,7 @@ export class ExploreWorker {
           throw new Error("POLICY_NOT_READY");
         run.phase = "preparing";
       }
+      delete run.command;
       await this.store.save(run);
       return;
     }
@@ -662,6 +709,7 @@ export class ExploreWorker {
           [id],
           true,
         );
+      run.automationComplete = refundBots.length === 0;
       return;
     }
     if (run.contributions[0] !== "10000000") {

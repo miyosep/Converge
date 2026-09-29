@@ -4,6 +4,11 @@ import { createServer } from "node:net";
 import { mkdtemp, mkdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Pool } from "pg";
+import { verifiedPostgresUrl } from "../src/lib/db/connection.js";
+import { DatabaseExploreStore } from "../src/lib/explore/database-store.js";
+import { explorePersistence } from "../src/lib/jobs/journal.js";
+import { JobBusy, withJobLease } from "../src/lib/jobs/lease.js";
 import { setTimeout as sleep } from "node:timers/promises";
 import {
   createPublicClient,
@@ -23,6 +28,20 @@ import { createBaselinePreferences } from "../src/lib/fixtures/preferences.js";
 // This harness injects disposable local accounts into the worker. Production init
 // remains pinned to Sepolia genesis, deployment bytecode, and public manifests.
 async function main() {
+  const useDatabase = process.argv.includes("--database");
+  if (
+    useDatabase &&
+    (process.env.NEON_BRANCH !== "dev-vercel-inngest" ||
+      !process.env.DATABASE_URL)
+  )
+    throw new Error("Isolated test branch required");
+  const pool = useDatabase
+    ? new Pool({
+        connectionString: verifiedPostgresUrl(process.env.DATABASE_URL!),
+        max: 5,
+      })
+    : undefined;
+  const savedIds: string[] = [];
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const port = (server.address() as { port: number }).port;
@@ -121,7 +140,9 @@ async function main() {
         }),
       })
     ).contractAddress!;
-    const store = new ExploreStore(root);
+    const store = pool
+      ? new DatabaseExploreStore(pool)
+      : new ExploreStore(root);
     await mkdir(join(root, "private"));
     const worker = Object.assign(
       Object.create(ExploreWorker.prototype) as ExploreWorker,
@@ -153,11 +174,12 @@ async function main() {
         args,
       });
     const maxPending = new Map<string, number>();
-    async function advance(id: string) {
+    async function advanceState(id: string) {
       // Reload the signed journal on every pass, exercising restart recovery.
-      worker.ledger =
-        (await optionalJson<typeof worker.ledger>(worker.ledgerPath)) ?? {};
-      const state = (await store.read(id))!;
+      worker.ledger = worker.persistence
+        ? await worker.persistence.load()
+        : ((await optionalJson<typeof worker.ledger>(worker.ledgerPath)) ?? {});
+      const state = (await worker.store.read(id))!;
       try {
         await worker.tick(state);
       } catch (error) {
@@ -167,7 +189,7 @@ async function main() {
         )
           throw error;
       }
-      await store.save(state);
+      await worker.store.save(state);
       const pending = Object.entries(worker.ledger).filter(
         ([key, entry]) => key.startsWith(`${id}:`) && !entry.confirmed,
       ).length;
@@ -175,6 +197,22 @@ async function main() {
       await rpc("evm_mine");
       return state;
     }
+    async function withRuntime<T>(id: string, work: () => Promise<T>) {
+      if (!pool) return work();
+      for (let attempt = 0; ; attempt++) {
+        try {
+          return await withJobLease(pool, "chain-execution", async (lease) => {
+            const persistence = explorePersistence(pool, lease);
+            Object.assign(worker, { persistence, store: persistence.store });
+            return worker.store.withRunLock(id, work);
+          });
+        } catch (error) {
+          if (!(error instanceof JobBusy) || attempt >= 60) throw error;
+          await sleep(5000);
+        }
+      }
+    }
+    const advance = (id: string) => withRuntime(id, () => advanceState(id));
     for (const scenario of ["payment", "cancel", "expiry"] as const) {
       const judge = privateKeyToAccount(generatePrivateKey());
       const judgeWallet = createWalletClient({
@@ -183,13 +221,14 @@ async function main() {
         transport,
       });
       const state = await store.create(judge.address, 5);
+      savedIds.push(state.id);
       state.phase = "review";
       state.revision = 1;
       state.extraction = createBaselinePreferences([
         judge.address,
         ...bots.map((bot) => bot.address),
       ])[0]!.extraction;
-      await store.save(state);
+      await store.withRunLock(state.id, () => store.save(state));
       await store.queue(judge.address, {
         action: "confirm",
         revision: 1,
@@ -321,39 +360,42 @@ async function main() {
         count,
         "Refresh/restart must not duplicate payments or grants",
       );
-      const entry = Object.values(worker.ledger)[0]!;
-      entry.confirmed = false;
-      await assert.rejects(
-        worker.transact(
-          finished,
-          "Blocked concurrency test",
-          deployer,
-          judge.address,
-        ),
-        /WAITING_FOR_OTHER_TRANSACTION/,
-      );
-      entry.confirmed = true;
-      const previousCap = process.env.EXPLORE_DEMO_MAX_ETH;
-      process.env.EXPLORE_DEMO_MAX_ETH = "0";
-      try {
+      await withRuntime(state.id, async () => {
+        const entry = Object.values(worker.ledger)[0]!;
+        entry.confirmed = false;
         await assert.rejects(
           worker.transact(
             finished,
-            "Blocked budget test",
+            "Blocked concurrency test",
             deployer,
             judge.address,
           ),
-          /DEMO_ETH_BUDGET_EXCEEDED/,
+          /WAITING_FOR_OTHER_TRANSACTION/,
         );
-      } finally {
-        if (previousCap === undefined) delete process.env.EXPLORE_DEMO_MAX_ETH;
-        else process.env.EXPLORE_DEMO_MAX_ETH = previousCap;
-      }
-      assert.equal(
-        Object.keys(worker.ledger).length,
-        count,
-        "Blocked work must never be signed or broadcast",
-      );
+        entry.confirmed = true;
+        const previousCap = process.env.EXPLORE_DEMO_MAX_ETH;
+        process.env.EXPLORE_DEMO_MAX_ETH = "0";
+        try {
+          await assert.rejects(
+            worker.transact(
+              finished,
+              "Blocked budget test",
+              deployer,
+              judge.address,
+            ),
+            /DEMO_ETH_BUDGET_EXCEEDED/,
+          );
+        } finally {
+          if (previousCap === undefined)
+            delete process.env.EXPLORE_DEMO_MAX_ETH;
+          else process.env.EXPLORE_DEMO_MAX_ETH = previousCap;
+        }
+        assert.equal(
+          Object.keys(worker.ledger).length,
+          count,
+          "Blocked work must never be signed or broadcast",
+        );
+      });
       console.log(
         `Local Explore ${scenario}: passed, including judge refund and restart idempotency.`,
       );
@@ -362,6 +404,16 @@ async function main() {
       "Explore integration rehearsal passed on disposable Anvil. No Sepolia transactions or live Kiln calls.",
     );
   } finally {
+    if (pool) {
+      for (const id of savedIds) {
+        await pool.query(
+          "DELETE FROM converge_job_transactions WHERE id LIKE $1",
+          [`explore:${id}:%`],
+        );
+        await pool.query("DELETE FROM converge_explore_runs WHERE id=$1", [id]);
+      }
+      await pool.end();
+    }
     if (child.pid !== undefined && child.exitCode === null) {
       child.kill();
       await new Promise<void>((resolve) => child.once("exit", () => resolve()));

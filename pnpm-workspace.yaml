@@ -2,3 +2,4 @@ saveExact: true
 engineStrict: true
 allowBuilds:
   esbuild: true
+  protobufjs: false

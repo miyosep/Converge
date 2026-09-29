@@ -101,6 +101,15 @@ export function verifyAccessCode(expected: string | undefined, actual: string) {
 }
 export class ExploreStore {
   constructor(readonly root = demoDirectory()) {}
+  withRunLock<T>(id: string, work: () => Promise<T>) {
+    return withFileLock(`${this.path(id)}.lock`, work);
+  }
+  async online() {
+    const heartbeat = await optionalJson<{ at: string }>(
+      join(this.root, "heartbeat.json"),
+    );
+    return !!heartbeat && Date.now() - Date.parse(heartbeat.at) < 30_000;
+  }
   async init() {
     await mkdir(this.root, { recursive: true, mode: 0o700 });
   }

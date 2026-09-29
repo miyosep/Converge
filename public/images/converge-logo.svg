@@ -1,20 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="310 294 640 640" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="271 245 714 755" fill="none">
   <defs>
-    <linearGradient id="red" x1="475" y1="347" x2="914" y2="529" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#B24C3B"/>
-      <stop offset="1" stop-color="#AA4438"/>
+    <linearGradient id="upper" x1="541" y1="292" x2="784" y2="647" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C95442"/><stop offset=".45" stop-color="#BC493B"/><stop offset="1" stop-color="#8D2D26"/>
     </linearGradient>
-    <linearGradient id="peach" x1="354" y1="603" x2="695" y2="453" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#E6A185"/>
-      <stop offset="1" stop-color="#DFA085"/>
+    <linearGradient id="cream" x1="347" y1="499" x2="657" y2="659" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3E1CC"/><stop offset="1" stop-color="#DFB39B"/>
     </linearGradient>
-    <linearGradient id="charcoal" x1="367" y1="649" x2="867" y2="891" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#41423A"/>
-      <stop offset="1" stop-color="#393A33"/>
+    <linearGradient id="lower" x1="503" y1="629" x2="697" y2="950" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8C2D26"/><stop offset=".5" stop-color="#BC4D3E"/><stop offset="1" stop-color="#A63D32"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="602" y1="718" x2="933" y2="586" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DA6A50"/><stop offset="1" stop-color="#ED886E"/>
     </linearGradient>
   </defs>
-  <path d="M431 486C486 391 601 314 704 316C789 315 861 351 907 400C937 432 935 475 909 505C884 534 848 540 819 530C777 517 748 483 707 460C656 431 612 415 565 418C514 420 468 448 431 486Z" fill="url(#red)"/>
-  <path d="M723 490C672 450 616 436 565 443C518 447 484 472 447 498C421 516 401 525 380 529C349 535 334 552 333 575C332 601 352 621 382 624C426 630 473 610 512 582C550 555 591 520 626 500C658 481 687 479 723 490Z" fill="url(#peach)"/>
-  <path d="M565 567C550 609 542 657 580 720C547 687 514 655 477 633C509 617 538 594 565 567Z" fill="url(#charcoal)"/>
-  <path d="M380 640C432 630 488 661 530 701C565 735 600 767 648 777C689 786 731 775 772 750C810 726 845 729 869 742C899 758 910 792 891 820C881 834 861 848 843 860C793 893 741 910 681 909C601 909 543 880 499 834C468 801 446 754 410 735C395 727 377 724 361 715C341 704 333 683 341 665C348 650 361 643 380 640Z" fill="url(#charcoal)"/>
+  <path d="M523 269C660 301 752 348 789 438C821 516 780 629 677 682C698 656 706 621 700 589C694 536 654 497 597 466C550 441 523 425 523 371V269Z" fill="url(#upper)"/>
+  <path d="M295 708C307 600 352 522 420 478C447 461 472 455 498 455C589 455 674 501 699 579C676 556 650 548 621 550C548 550 484 592 444 651C420 688 391 708 356 708H295Z" fill="url(#cream)"/>
+  <path d="M599 563C513 587 452 650 452 729C450 849 549 930 735 976V898C735 852 717 830 674 804C612 767 573 718 561 664C552 629 570 590 599 563Z" fill="url(#lower)"/>
+  <path d="M560 657C572 690 604 705 635 700C703 690 751 650 791 600C819 566 846 554 879 554H961C956 672 899 760 815 788C710 827 599 745 571 699C565 685 561 671 560 657Z" fill="url(#coral)"/>
 </svg>

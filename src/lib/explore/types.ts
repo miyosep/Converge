@@ -28,6 +28,9 @@ export type ExploreRun = {
   extraction?: Extraction;
   revision: number;
   extractionCalls: number;
+  extractionInFlight?: boolean;
+  extractionAttempts?: number;
+  automationComplete?: boolean;
   evaluation?: ReturnType<typeof publicEvaluation>;
   restaurant?: string;
   policy?: Policy;

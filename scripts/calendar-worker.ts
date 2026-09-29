@@ -1,10 +1,12 @@
 import { Pool } from "pg";
+import { assertLocalWorker } from "../src/lib/jobs/config.js";
 import { setTimeout as sleep } from "node:timers/promises";
 import { verifiedPostgresUrl } from "../src/lib/db/connection.js";
 import { calendarConfig } from "../src/lib/calendar/google.js";
 import { syncCalendars } from "../src/lib/calendar/worker.js";
 
 async function main() {
+  assertLocalWorker();
   calendarConfig();
   const url = process.env.DATABASE_URL_UNPOOLED;
   if (!url || new URL(url).hostname.includes("-pooler"))

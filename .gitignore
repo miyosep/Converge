@@ -2,6 +2,7 @@ node_modules/
 .next/
 .next-acceptance/
 .next-ui-review/
+.next-serverless/
 dist/
 coverage/
 *.tsbuildinfo

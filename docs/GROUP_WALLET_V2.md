@@ -6,7 +6,7 @@ the contract freezes the participant list and requires every member's equal
 contribution and approval. Payment, cancellation, expiry and individual refunds
 use the actual participant count. The UI defaults to four members.
 
-The ordinary catalog has 20 fictional restaurants (A–T). Search covers name,
+The ordinary catalog has 40 fictional restaurants (A–Z and AA–AN). Search covers name,
 cuisine and area. The selected shortlist is saved with the group. Dietary,
 availability and price metadata are synthetic; no real reservation is made.
 Each person contributes 10 MockUSDC. Recommendation caps are the smaller of

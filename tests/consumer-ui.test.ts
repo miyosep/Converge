@@ -7,7 +7,6 @@ import {
   type PlanBuilderProps,
 } from "../app/components/plan-builder.js";
 import { SignInDialog } from "../app/components/sign-in-dialog.js";
-import { optionsForCategory } from "../src/lib/catalog-options.js";
 
 const noop = () => {};
 const props: PlanBuilderProps = {
@@ -21,7 +20,8 @@ const props: PlanBuilderProps = {
   setSizeInput: noop,
   category: "stay",
   setCategory: noop,
-  permittedRestaurantIds: optionsForCategory("stay").map((item) => item.id),
+  initialPreferences: "Quiet stay under $50",
+  setInitialPreferences: noop,
   setPermittedRestaurantIds: noop,
   busy: false,
   onCreate: noop,
@@ -39,13 +39,19 @@ test("plan creation requires complete basics and a future time before proceeding
     );
     assert.match(
       html,
-      /<button class="primary" disabled="">Next: choose places/,
+      /<button class="primary" disabled="">.*?Create plan &amp; invite friends<\/button>/,
     );
   }
   const html = renderToStaticMarkup(createElement(PlanBuilder, props));
-  assert.match(html, /<button class="primary">Next: choose places/);
-  assert.match(html, /<div hidden=""><div class="plan-recap">/);
-  assert.match(html, /aria-current="step"/);
+  assert.match(
+    html,
+    /<button class="primary">.*?Create plan &amp; invite friends<\/button>/,
+  );
+  assert.match(html, /Quiet stay under \$50/);
+  assert.doesNotMatch(
+    html,
+    /Next: choose places|Find matching places|Choose places to consider|builder-steps/,
+  );
 });
 
 test("sign-in onboarding distinguishes identity confirmation from spending", () => {

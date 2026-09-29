@@ -1126,6 +1126,101 @@ fieldset label {
   font-size: 19px;
   margin-bottom: 10px;
 }
+.evidence-intro {
+  max-width: 760px;
+  padding: 32px 0 48px;
+}
+.evidence-intro h1 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  margin: 14px 0 22px;
+}
+.evidence-intro > p:not(.eyebrow) {
+  max-width: 620px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.evidence-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  padding-bottom: 48px;
+}
+.evidence-features article {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.evidence-features svg {
+  color: var(--green);
+}
+.evidence-features h2 {
+  font-size: 20px;
+  margin: 16px 0 10px;
+}
+.evidence-features p,
+.evidence-outcome-grid p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.evidence-outcomes {
+  padding: 32px;
+  background: var(--accent-soft);
+  border-radius: 24px;
+}
+.evidence-outcomes > h2 {
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.2;
+  margin: 14px 0;
+}
+.evidence-outcome-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 28px 0;
+}
+.evidence-outcome-grid article {
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+.evidence-outcome-grid h3 {
+  font-size: 20px;
+  line-height: 1.4;
+}
+.evidence-outcome-grid a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 14px;
+}
+.evidence-scope {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 850px;
+}
+.evidence-records {
+  margin-top: 56px;
+  scroll-margin-top: 24px;
+}
+.evidence-disclosure summary {
+  font-size: 16px;
+  min-height: 44px;
+  align-content: center;
+}
+@media (max-width: 720px) {
+  .evidence-features,
+  .evidence-outcome-grid {
+    grid-template-columns: 1fr;
+  }
+  .evidence-outcomes {
+    padding: 22px 18px;
+  }
+  .evidence-intro {
+    padding-top: 16px;
+  }
+}
 .json-editor {
   font-family: Consolas, monospace;
   font-size: 13px;
@@ -2813,7 +2908,7 @@ select {
     grid-row: 2;
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 2px;
   }
   .floating-topbar .main-nav a {
@@ -2834,4 +2929,11 @@ select {
   .landing-shell .sky-hero {
     padding-top: 175px;
   }
+}
+
+.plan-basics {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
 }

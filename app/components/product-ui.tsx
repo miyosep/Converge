@@ -62,12 +62,6 @@ export function AppHeader({
           >
             Explore demo
           </Link>
-          <Link
-            href="/evidence"
-            aria-current={active === "evidence" ? "page" : undefined}
-          >
-            About the prototype
-          </Link>
         </nav>
         <div className="top-actions">
           <span className="network">
@@ -159,10 +153,9 @@ export function WelcomeWorkspace({
             <em>More together.</em>
           </h1>
           <p className="human-description">
-            Dinner with friends. A weekend away. Something new.
+            Good food. A weekend away. Something new.
             <br />
-            Share your preferences privately. Find a plan everyone can enjoy
-            without the endless group chat.
+            Share what matters privately. Find a plan everyone enjoys.
           </p>
           <div className="human-actions">
             <button
@@ -340,7 +333,7 @@ export function WelcomeWorkspace({
       <footer className="human-footer">
         <Brand />
         <Link href="/evidence">
-          How this prototype works <ArrowUpRight size={16} />
+          Behind the demo <ArrowUpRight size={16} />
         </Link>
       </footer>
     </div>

@@ -73,7 +73,7 @@ try {
     }
     const before = await repo.getOverview(group, members[0]!);
     assert.equal(before.group.category, category);
-    assert.equal(before.group.permittedRestaurantIds!.length, 20);
+    assert.equal(before.group.permittedRestaurantIds!.length, 40);
     assert.equal(
       (await repo.listGroups(members[0]!)).find((item) => item.id === group)!
         .category,
@@ -88,7 +88,7 @@ try {
     const saved = await repo.getOverview(group, members[1]!);
     assert.equal(saved.group.locked, true);
     assert.equal(saved.evaluation!.status, "PROPOSAL_READY");
-    assert.equal(saved.evaluation!.catalog.length, 20);
+    assert.equal(saved.evaluation!.catalog.length, 40);
     const winner = saved.evaluation!.catalog.find(
       (item) => item.id === saved.evaluation!.winnerId,
     )!;
@@ -104,7 +104,7 @@ try {
     );
     assert.ok(BigInt(winner.depositBaseUnits) <= 20_000_000n);
     console.log(
-      `${category}: 20 saved candidates, confirmed preferences, frozen recommendation and v2 policy verified`,
+      `${category}: 40 saved candidates, confirmed preferences, frozen recommendation and v2 policy verified`,
     );
   }
 } finally {

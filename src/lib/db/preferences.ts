@@ -316,6 +316,7 @@ export class PreferenceRepository {
   }
 
   async createGroup(input: {
+    initialPreferences?: string | undefined;
     targetMemberCount?: unknown;
     permittedRestaurantIds?: unknown;
     name: string;
@@ -339,6 +340,22 @@ export class PreferenceRepository {
       input.permittedRestaurantIds ?? [...RESTAURANT_IDS],
     );
     const id = randomUUID();
+    const initialText = z
+      .string()
+      .trim()
+      .max(4000)
+      .parse(input.initialPreferences ?? "");
+    const initial = initialText
+      ? submitPreference(
+          {
+            groupId: id,
+            participant: addressSchema.parse(creator),
+            preferencesLocked: false,
+          },
+          null,
+          { text: initialText, expectedRevisionId: null },
+        )
+      : null;
     await transaction(this.pool, async (client) => {
       await client.query(
         `INSERT INTO converge_groups
@@ -359,6 +376,7 @@ export class PreferenceRepository {
         VALUES ($1, $2, $3)`,
         [id, creator, displayName],
       );
+      if (initial) await saveState(client, initial, null);
     });
     return id;
   }
