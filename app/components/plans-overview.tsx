@@ -55,7 +55,9 @@ export function PlansOverview({
         <header className="plans-heading">
           <div>
             <h1>My plans</h1>
-            <p>Your people. Your next good memory.</p>
+            <p>
+              Your people. <em>Your next good memory.</em>
+            </p>
           </div>
           {!empty && (
             <Link href="/group/new" className="primary plans-create">
