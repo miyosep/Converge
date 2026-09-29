@@ -862,10 +862,7 @@
 }
 .demo-redesign,
 .demo-redesign.demo-in-session {
-  background:
-    linear-gradient(180deg, #faf8f570 0, #faf8f5b0 340px, #faf8f5 720px),
-    url("/images/converge-city-sky.webp") center top / auto 760px no-repeat,
-    #faf8f5;
+  background: #faf8f5;
 }
 .demo-redesign .explore-heading h1 em,
 .demo-redesign .explore-section h2 em,
