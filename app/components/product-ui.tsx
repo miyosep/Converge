@@ -46,12 +46,6 @@ export function AppHeader({
         <Brand />
         <nav className="main-nav" aria-label="Main navigation">
           <Link
-            href="/discover"
-            aria-current={active === "discover" ? "page" : undefined}
-          >
-            Find places
-          </Link>
-          <Link
             href={publicView ? "#how-it-works" : "/"}
             aria-current={
               !publicView && active === "workspace" ? "page" : undefined
