@@ -87,7 +87,7 @@ export default function KagamiRestaurant() {
           </h1>
           <p>
             KAGAMI is the fictional Restaurant A in this Converge demonstration.
-            Bookings and payments shown here use test data and MockUSDC.
+            Bookings and payments shown here use test data and USDC.
           </p>
           <a className="kagami-button" href="#reserve">
             View your request <span aria-hidden="true">↗</span>

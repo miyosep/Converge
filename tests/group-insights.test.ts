@@ -80,7 +80,7 @@ test("explanation model receives only public facts and cannot supply new prose",
   const result = await explainPublicEvaluation(client, evaluation);
   assert.deepEqual(result.reasonIds, ["ranking", "deposit"]);
   assert.match(result.text, /KAGAMI ranks first/);
-  assert.match(result.text, /45 MockUSDC/);
+  assert.match(result.text, /45 USDC/);
   assert.doesNotMatch(
     requestBody,
     /rawText|extraction|revisionId|participant|Alice|Bob/,

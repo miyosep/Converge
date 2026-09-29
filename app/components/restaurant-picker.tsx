@@ -18,6 +18,41 @@ const categoryIcons = {
   class: Palette,
 };
 
+export function CategoryPicker({
+  category,
+  onCategoryChange,
+}: {
+  category: Category;
+  onCategoryChange: (category: Category) => void;
+}) {
+  return (
+    <div
+      className="category-options"
+      role="group"
+      aria-label="Booking category"
+    >
+      {CATEGORY_IDS.map((id) => {
+        const Icon = categoryIcons[id];
+        return (
+          <button
+            key={id}
+            type="button"
+            className={`category-option ${category === id ? "selected" : ""}`}
+            aria-pressed={category === id}
+            onClick={() => {
+              onCategoryChange(id);
+            }}
+          >
+            <Icon size={20} aria-hidden="true" />
+            <strong>{categories[id].label}</strong>
+            <small>{optionsForCategory(id).length} examples</small>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // The exported name is retained for existing ordinary-group consumers.
 export function RestaurantPicker({
   selected,
@@ -42,33 +77,19 @@ export function RestaurantPicker({
   const count = options.filter((item) => selected.includes(item.id)).length;
   return (
     <fieldset className="restaurant-picker">
-      <legend>What are you planning?</legend>
+      <legend>
+        {onCategoryChange
+          ? "What are you planning?"
+          : "Choose places to consider"}
+      </legend>
       {onCategoryChange && (
-        <div
-          className="category-options"
-          role="group"
-          aria-label="Booking category"
-        >
-          {CATEGORY_IDS.map((id) => {
-            const Icon = categoryIcons[id];
-            return (
-              <button
-                key={id}
-                type="button"
-                className={`category-option ${category === id ? "selected" : ""}`}
-                aria-pressed={category === id}
-                onClick={() => {
-                  setSearch("");
-                  onCategoryChange(id);
-                }}
-              >
-                <Icon size={20} aria-hidden="true" />
-                <strong>{categories[id].label}</strong>
-                <small>{optionsForCategory(id).length} examples</small>
-              </button>
-            );
-          })}
-        </div>
+        <CategoryPicker
+          category={category}
+          onCategoryChange={(next) => {
+            setSearch("");
+            onCategoryChange(next);
+          }}
+        />
       )}
       <div className="catalog-heading">
         <div>
@@ -83,7 +104,7 @@ export function RestaurantPicker({
       </p>
       <p className="flow-note">
         Prices are USD per {info.priceUnit}. Deposits are group totals in
-        MockUSDC. Availability and facilities are synthetic; no real booking is
+        USDC. Availability and facilities are synthetic; no real booking is
         made.
       </p>
       <label htmlFor="restaurant-search">
@@ -142,7 +163,7 @@ export function RestaurantPicker({
                 {item.kind} · {item.area}
               </small>
               <small>
-                ${item.price} / {info.priceUnit} · {item.deposit} MockUSDC group
+                ${item.price} / {info.priceUnit} · {item.deposit} USDC group
                 deposit
               </small>
               {item.capacity !== undefined && (

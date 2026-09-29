@@ -48,7 +48,9 @@
     "demo:fund": "node --env-file=.env --import tsx scripts/fund-demo-wallets.ts",
     "format": "prettier --write app src tests scripts package.json tsconfig.json next.config.ts .github",
     "format:check": "prettier --check app src tests scripts package.json tsconfig.json next.config.ts .github",
-    "check": "tsc --noEmit && prettier --check app src tests scripts package.json tsconfig.json next.config.ts .github && tsx --test tests/*.test.ts"
+    "check": "tsc --noEmit && prettier --check app src tests scripts package.json tsconfig.json next.config.ts .github && tsx --test tests/*.test.ts",
+    "calendar:worker": "node --env-file=.env --env-file=.env.development --import tsx scripts/calendar-worker.ts",
+    "calendar:check": "node --env-file=.env --env-file=.env.development --import tsx scripts/calendar-worker.ts --check"
   },
   "dependencies": {
     "@neon/config": "1.8.2",

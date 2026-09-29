@@ -77,7 +77,7 @@ export function acceptanceEvidence(artifact: AcceptanceArtifact): EvidenceRun {
         : []),
       {
         label: "Payment",
-        value: `${formatUnits(BigInt(artifact.policy.paymentAmount), 6)} MockUSDC`,
+        value: `${formatUnits(BigInt(artifact.policy.paymentAmount), 6)} USDC`,
       },
       {
         label: "Rejected simulation",

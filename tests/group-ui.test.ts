@@ -119,13 +119,13 @@ test("four-member progress unlocks evaluation and policy preparation without a s
   assert.match(render("lobby"), /max="4"/);
   assert.match(
     render("results"),
-    /<button class="primary">Evaluate group<\/button>/,
+    /<button class="primary">Find a match<\/button>/,
   );
   const incomplete = { ...four, participants: four.participants.slice(0, 3) };
   assert.match(render("results", incomplete), /disabled=""/);
   assert.match(render("approve"), /Approval is not available yet/);
   const ready = { ...four, evaluation };
-  assert.match(render("approve", ready), /Prepare signing policy/);
+  assert.match(render("approve", ready), /Save these terms for everyone/);
   assert.doesNotMatch(
     render("approve", ready),
     /require exactly 6|unavailable for this group size/,
@@ -152,12 +152,12 @@ test("missing group records never become fabricated policy, balance, or payment 
     createElement(GroupStageContent, { overview: empty, stage: "approve" }),
   );
   assert.match(approval, /Approval is not available yet/);
-  assert.doesNotMatch(approval, /<button|10 MockUSDC|60 MockUSDC/);
+  assert.doesNotMatch(approval, /<button|10 USDC|60 USDC/);
   const execution = renderToStaticMarkup(
     createElement(GroupStageContent, { overview, stage: "execution" }),
   );
   assert.match(execution, /No reconciled record/);
-  assert.doesNotMatch(execution, /Payment complete|Claim .*refund|0 MockUSDC/);
+  assert.doesNotMatch(execution, /Payment complete|Claim .*refund|0 USDC/);
 });
 
 test("published evidence keeps independent records separate and missing usage unknown", () => {

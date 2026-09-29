@@ -3,8 +3,9 @@ import { formatUnits } from "viem";
 import { ShieldCheck } from "lucide-react";
 import type { GroupOverview } from "../../src/lib/group-view";
 import { GroupChainPanel } from "./group-chain-panel";
+import { CalendarPanel } from "./calendar-panel";
 
-const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
+const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 
 export function GroupPolicyPanel({
   overview,
@@ -86,6 +87,7 @@ export function GroupPolicyPanel({
     ["Reservation reference", policy?.reservationReference ?? "Not available"],
   ];
   const verificationLabels = new Set([
+    "Merchant address",
     "Token address",
     "Escrow contract",
     "Executor",
@@ -105,6 +107,17 @@ export function GroupPolicyPanel({
   return (
     <div className="flow-grid">
       <section className="flow-panel">
+        <div className="payment-summary">
+          <span>Your share of the group deposit</span>
+          <strong>
+            {policy
+              ? money(policy.contributionPerParticipant)
+              : evaluation
+                ? money(evaluation.terms.contributionPerParticipant)
+                : "Not calculated yet"}
+          </strong>
+          <span>Test tokens on Sepolia · No real booking</span>
+        </div>
         <div className="panel-heading">
           <h2>{policy ? "Your shared spending plan" : "Spending terms"}</h2>
           <span className="pill">
@@ -156,6 +169,7 @@ export function GroupPolicyPanel({
         <Link className="text-button" href={`${root}/results`}>
           ← Back to results
         </Link>
+        {selected && <CalendarPanel overview={overview} />}
       </section>
       <section className="flow-panel">
         <ShieldCheck size={26} />
@@ -163,9 +177,9 @@ export function GroupPolicyPanel({
           {expired
             ? "This policy has expired"
             : policy
-              ? "Review and fund this policy"
+              ? "Approve and pay your share"
               : selected
-                ? "Prepare your group's policy"
+                ? "Ready to agree on the costs?"
                 : "Approval is not available yet"}
         </h2>
         <p>
@@ -183,7 +197,7 @@ export function GroupPolicyPanel({
             disabled={busy || !onPrepare}
             onClick={onPrepare}
           >
-            {busy ? "Preparing policy…" : "Prepare signing policy"}
+            {busy ? "Saving terms…" : "Save these terms for everyone"}
           </button>
         )}
         {signingPolicy && (

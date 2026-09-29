@@ -3,10 +3,22 @@ import {
   type Constraint,
 } from "../../src/lib/schemas/constraints";
 
+const fieldLabels: Record<string, string> = {
+  budget_per_person_cents: "Budget per person",
+  subway_distance_meters: "Distance from the station",
+  reservation_slot: "Date and time",
+  minimum_beds: "Beds needed",
+  facility_requirement: "Facilities",
+  wheelchair_accessible: "Wheelchair access",
+  cuisine_preference: "Preferred cuisine",
+  dietary_requirement: "Dietary needs",
+};
+
 function valueLabel(condition: Constraint) {
   if (condition.field === "minimum_beds")
     return `At least ${condition.value} beds`;
-  if (condition.type === "soft") return `Weight ${condition.weight}`;
+  if (condition.type === "soft")
+    return `Preference strength: ${condition.weight}`;
   if (condition.field === "budget_per_person_cents")
     return `At most $${(condition.value / 100).toFixed(2)} per person`;
   if (condition.field === "subway_distance_meters")
@@ -48,7 +60,10 @@ export function ConstraintSummary({ value }: { value: unknown }) {
                       ? "Requirement"
                       : "Non-negotiable"}
                 </td>
-                <td>{condition.field.replaceAll("_", " ")}</td>
+                <td>
+                  {fieldLabels[condition.field] ??
+                    condition.field.replaceAll("_", " ")}
+                </td>
                 <td>{valueLabel(condition)}</td>
               </tr>
             ))}

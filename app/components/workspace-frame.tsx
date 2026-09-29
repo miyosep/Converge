@@ -5,11 +5,11 @@ import { AppHeader } from "./product-ui";
 export type GroupStage =
   "lobby" | "preferences" | "results" | "approve" | "execution";
 export const groupStages: { key: GroupStage; label: string; path: string }[] = [
-  { key: "lobby", label: "Group", path: "" },
-  { key: "preferences", label: "Preferences", path: "/preferences" },
-  { key: "results", label: "Results", path: "/results" },
-  { key: "approve", label: "Policy & approval", path: "/approve" },
-  { key: "execution", label: "Execution", path: "/execution" },
+  { key: "lobby", label: "People", path: "" },
+  { key: "preferences", label: "Your preferences", path: "/preferences" },
+  { key: "results", label: "Suggestions", path: "/results" },
+  { key: "approve", label: "Split & approve", path: "/approve" },
+  { key: "execution", label: "Payment status", path: "/execution" },
 ];
 
 export function GroupNavigation({

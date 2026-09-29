@@ -1,4 +1,5 @@
 "use client";
+import { SignInDialog } from "./sign-in-dialog";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -18,12 +19,8 @@ import { diagnosticMessage } from "../../src/lib/diagnostics/errors";
 import type { PublicDiagnostic } from "../../src/lib/diagnostics/types";
 import type { GroupOverview, GroupSummary } from "../../src/lib/group-view";
 import { RESTAURANT_IDS } from "../../src/lib/group-conditions";
-import { RestaurantPicker } from "./restaurant-picker";
-import {
-  categories,
-  optionsForCategory,
-  type Category,
-} from "../../src/lib/catalog-options";
+import { PlanBuilder } from "./plan-builder";
+import { categories, type Category } from "../../src/lib/catalog-options";
 import {
   groupSizeSchema,
   MIN_GROUP_MEMBERS,
@@ -82,6 +79,7 @@ export function GroupWorkspace({
   initialGroupId?: string;
   mode?: "home" | "create" | "preferences";
 }) {
+  const [signInOpen, setSignInOpen] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
 
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -218,6 +216,7 @@ export function GroupWorkspace({
         signature,
       });
       setWallet(session.walletAddress);
+      setSignInOpen(false);
       setNotice("");
       if (mode === "home" && !groupId) window.location.assign("/group/new");
     });
@@ -331,11 +330,11 @@ export function GroupWorkspace({
             <button
               className="wallet-button"
               type="button"
-              onClick={() => void connect()}
+              onClick={() => setSignInOpen(true)}
               disabled={busy || sessionLoading}
             >
               <Wallet size={16} aria-hidden="true" />{" "}
-              {busy ? "Connecting…" : "Connect wallet"}
+              {busy ? "Connecting…" : "Sign in"}
             </button>
           }
         />
@@ -345,9 +344,16 @@ export function GroupWorkspace({
             loading={sessionLoading}
             notice={notice}
             invited={!!inviteToken}
-            onConnect={() => void connect()}
+            onConnect={() => setSignInOpen(true)}
           />
         </main>
+        <SignInDialog
+          open={signInOpen}
+          busy={busy}
+          notice={notice}
+          onClose={() => setSignInOpen(false)}
+          onConnect={() => void connect()}
+        />
       </div>
     );
   return (
@@ -396,7 +402,7 @@ export function GroupWorkspace({
                 aria-current={mode !== "create" ? "page" : undefined}
               >
                 <Users size={18} />
-                Your groups
+                My plans
               </Link>
               <Link
                 className={`nav-row ${mode === "create" ? "active" : ""}`}
@@ -404,7 +410,7 @@ export function GroupWorkspace({
                 aria-current={mode === "create" ? "page" : undefined}
               >
                 <Plus size={18} />
-                New group
+                New plan
               </Link>
             </nav>
             <div className="sidebar-foot">
@@ -421,13 +427,13 @@ export function GroupWorkspace({
             <>
               <div className="heading">
                 <div>
-                  <div className="eyebrow">GROUP WORKSPACE</div>
+                  <div className="eyebrow">YOUR NEXT GET-TOGETHER</div>
                   <h1>
                     {groupId && participants.length
                       ? "Your preferences"
                       : mode === "create"
-                        ? "Create a group"
-                        : "Your groups"}
+                        ? "Make a little room for together."
+                        : "My plans"}
                   </h1>
                 </div>
                 {wallet && groupId && participants.length > 0 && (
@@ -557,84 +563,22 @@ export function GroupWorkspace({
             mode === "create" &&
             (!groupId || (participants.length === 0 && !inviteToken)) && (
               <div className="section-block">
-                <h2>Create a decision</h2>
-                <div className="form-grid">
-                  <label>
-                    Group name
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={categories[category].groupName}
-                      maxLength={100}
-                    />
-                  </label>
-                  <label>
-                    Your display name
-                    <input
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Alice"
-                      maxLength={80}
-                    />
-                  </label>
-                  <label>
-                    Reservation time
-                    <input
-                      type="datetime-local"
-                      value={when}
-                      onChange={(e) => setWhen(e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    Group size, including you
-                    <input
-                      type="number"
-                      min={MIN_GROUP_MEMBERS}
-                      max={MAX_GROUP_MEMBERS}
-                      step={1}
-                      value={sizeInput}
-                      onChange={(event) => setSizeInput(event.target.value)}
-                      aria-describedby="group-size-help"
-                      aria-invalid={!validSize}
-                    />
-                    <small id="group-size-help">
-                      {validSize
-                        ? `Invite ${Number(sizeInput) - 1} others. Everyone must confirm before recommendations are ready.`
-                        : `Enter a whole number from ${MIN_GROUP_MEMBERS} to ${MAX_GROUP_MEMBERS}.`}
-                    </small>
-                  </label>
-                </div>
-                <p className="flow-note">
-                  Groups of {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} can collect
-                  preferences, compare places and experiences and approve a
-                  shared test payment. The Explore demo uses six participants.
-                </p>
-                <RestaurantPicker
+                <PlanBuilder
+                  name={name}
+                  setName={setName}
+                  displayName={displayName}
+                  setDisplayName={setDisplayName}
+                  when={when}
+                  setWhen={setWhen}
+                  sizeInput={sizeInput}
+                  setSizeInput={setSizeInput}
                   category={category}
-                  onCategoryChange={(next) => {
-                    setCategory(next);
-                    setPermittedRestaurantIds(
-                      optionsForCategory(next).map((option) => option.id),
-                    );
-                  }}
-                  selected={permittedRestaurantIds}
-                  onChange={setPermittedRestaurantIds}
-                />
-                <button
-                  className="primary"
-                  onClick={() => void createGroup()}
-                  disabled={
-                    busy ||
-                    !wallet ||
-                    !name.trim() ||
-                    !displayName.trim() ||
-                    !when ||
-                    !validSize ||
-                    permittedRestaurantIds.length === 0
-                  }
-                >
-                  <Plus size={16} /> Create group
-                </button>
+                  setCategory={setCategory}
+                  permittedRestaurantIds={permittedRestaurantIds}
+                  setPermittedRestaurantIds={setPermittedRestaurantIds}
+                  busy={busy}
+                  onCreate={() => void createGroup()}
+                />{" "}
                 {groupId && (
                   <button
                     className="text-button"
@@ -661,12 +605,19 @@ export function GroupWorkspace({
                       </p>
                     </div>
                     <span className="state">
-                      {preference?.status?.replaceAll("_", " ") ??
-                        "NOT SUBMITTED"}
+                      {(
+                        {
+                          PARSING: "Reading your preferences…",
+                          AWAITING_CONFIRMATION: "Ready for your review",
+                          NEEDS_CLARIFICATION: "A little more detail needed",
+                          PARSE_FAILED: "Please try again",
+                          CONFIRMED: "Confirmed",
+                        } as Record<string, string>
+                      )[preference?.status ?? ""] ?? "Not shared yet"}
                     </span>
                   </div>
                   <label>
-                    Your requirements · {categories[category].label}
+                    What matters to you? · {categories[category].label}
                     <textarea
                       value={text}
                       onChange={(e) => setText(e.target.value)}
@@ -687,8 +638,8 @@ export function GroupWorkspace({
                         disabled={busy || !text.trim()}
                       >
                         {preference
-                          ? "Update & re-interpret"
-                          : "Interpret preferences"}{" "}
+                          ? "Review my changes"
+                          : "Help me find a fit"}{" "}
                         <ArrowRight size={16} />
                       </button>
                     )}

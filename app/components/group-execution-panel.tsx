@@ -5,7 +5,7 @@ import type { GroupHistory } from "../../src/lib/group-execution";
 import type { SigningPolicy } from "../../src/lib/group-policy";
 import { GroupChainPanel } from "./group-chain-panel";
 
-const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
+const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 export function GroupExecutionPanel({
   groupId,
   saved,

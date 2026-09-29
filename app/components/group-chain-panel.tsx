@@ -22,7 +22,7 @@ import { browserWallets } from "../../src/lib/browser-wallet";
 import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
 import { ensureSepolia } from "../../src/lib/wallet-connection";
 
-const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
+const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 const labels: Record<GroupChainAction, string> = {
   register: "Register policy on Sepolia",
   allowance: "Allow contribution amount",
@@ -35,7 +35,7 @@ const messages: Record<string, string> = {
     "Select the wallet used to sign in. Reconnect from the workspace if you want to use another account.",
   WRONG_CHAIN: "Select Ethereum Sepolia in your wallet.",
   INSUFFICIENT_MOCKUSDC:
-    "Your wallet needs enough MockUSDC for this contribution.",
+    "Your wallet needs enough USDC for this contribution.",
   TRANSACTION_REVERTED:
     "The transaction reverted. Refresh the chain status before retrying.",
 };
@@ -350,7 +350,7 @@ export function GroupChainPanel({
             BigInt(state.balance) <
               BigInt(saved.policy.contributionPerParticipant) && (
               <p>
-                Your MockUSDC balance is insufficient. Ordinary groups do not
+                Your USDC balance is insufficient. Ordinary groups do not
                 receive automatic demo funds.
               </p>
             )}

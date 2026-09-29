@@ -1,3 +1,5 @@
+import { PlanPreview } from "./plan-preview";
+import { BrandMark } from "./brand-mark";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -10,24 +12,18 @@ import {
   Wallet,
   UserRound,
   Flower2,
+  BedDouble,
+  Building2,
+  Trophy,
+  Palette,
+  Utensils,
+  CalendarDays,
 } from "lucide-react";
 
 export function Brand() {
   return (
     <Link className="brand" href="/" aria-label="Converge home">
-      <svg
-        className="brand-symbol"
-        viewBox="0 0 36 36"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M7 10h9v9H7zM20 17h9v9h-9z" fill="currentColor" />
-        <path
-          d="m16 10 13 16M7 19l13-2"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-      </svg>
+      <BrandMark className="brand-symbol" />
       <span>
         converge<span className="brand-period">.</span>
       </span>
@@ -49,7 +45,7 @@ export function AppHeader({
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <header className="topbar">
+      <header className={`topbar${publicView ? " floating-topbar" : ""}`}>
         <Brand />
         <nav className="main-nav" aria-label="Main navigation">
           <Link
@@ -58,7 +54,7 @@ export function AppHeader({
               !publicView && active === "workspace" ? "page" : undefined
             }
           >
-            {publicView ? "How it works" : "Workspace"}
+            {publicView ? "How it works" : "My plans"}
           </Link>
           <Link
             href="/demo"
@@ -70,7 +66,7 @@ export function AppHeader({
             href="/evidence"
             aria-current={active === "evidence" ? "page" : undefined}
           >
-            Evidence
+            About the prototype
           </Link>
         </nav>
         <div className="top-actions">
@@ -145,131 +141,208 @@ export function WelcomeWorkspace({
   onConnect: () => void;
 }) {
   return (
-    <div className="welcome">
-      <section className="landing-hero" aria-labelledby="welcome-title">
+    <div className="welcome consumer-welcome">
+      <section className="human-hero sky-hero" aria-labelledby="welcome-title">
         <img
-          className="landing-visual"
-          src="/images/converge-orbit.webp"
+          className="sky-hero-image"
+          src="/images/converge-city-sky.webp"
           alt=""
-          fetchPriority="high"
           width={1672}
           height={941}
+          fetchPriority="high"
         />
-        <div className="landing-shade" aria-hidden="true" />
-        <div className="landing-copy">
-          <p className="landing-eyebrow">
-            <span className="accent-dot" /> DIFFERENT PEOPLE. SHARED
-            POSSIBILITIES.
-          </p>
+        <div className="sky-hero-wash" aria-hidden="true" />
+        <div className="human-copy">
           <h1 id="welcome-title">
-            Every voice.
+            Less planning.
             <br />
-            <em>One shared plan.</em>
+            <em>More together.</em>
           </h1>
-          <p className="landing-description">
-            Bring your people together. Converge turns private preferences into
-            a plan everyone can approve — from dinner and weekend stays to
-            spaces, sports and new experiences.
+          <p className="human-description">
+            Dinner with friends. A weekend away. Something new.
+            <br />
+            Share your preferences privately. Find a plan everyone can enjoy
+            without the endless group chat.
           </p>
-          <div className="landing-actions">
+          <div className="human-actions">
             <button
               className="primary"
               disabled={busy || loading}
               onClick={onConnect}
             >
-              <Wallet size={18} aria-hidden="true" />
               {loading
                 ? "Checking your session…"
                 : busy
                   ? "Connecting…"
-                  : "Connect wallet"}
+                  : invited
+                    ? "Join your friends"
+                    : "Start a plan"}
               <ArrowRight size={18} aria-hidden="true" />
             </button>
-            <a className="landing-secondary" href="#how-it-works">
-              Discover Converge <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+            <Link className="human-demo" href="/demo">
+              Try the demo <ArrowUpRight size={17} aria-hidden="true" />
+            </Link>
           </div>
-          <p className="landing-login-hint">
-            Your wallet is your sign-in. A message signature, no payment.
+          <p className="human-signin">
+            Sign in with MetaMask. No payment to get started.
           </p>
           {invited && (
             <p className="landing-invitation">
               Your group is waiting. Sign in to continue with your invitation.
             </p>
           )}
-          <div className="landing-status" role="status" aria-live="polite">
+          <div role="status" aria-live="polite">
             {notice}
           </div>
+          <div className="human-assurance">
+            <span className="human-assurance-icon" aria-hidden="true">
+              <LockKeyhole size={18} />
+            </span>
+            <div className="human-assurance-copy">
+              <strong>Your preferences stay private.</strong>
+              <span>
+                Friends see the shared plan, not your individual answers.
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="landing-bottom">
-          <span>AI proposes. Humans approve.</span>
-          <a href="#how-it-works">
-            A better way to decide <span aria-hidden="true">↓</span>
-          </a>
+        <a className="sky-scroll-cue" href="#product-preview">
+          See how a plan comes together <span aria-hidden="true">↓</span>
+        </a>
+      </section>
+      <section
+        id="product-preview"
+        className="product-preview-section"
+        aria-labelledby="product-preview-heading"
+      >
+        <div className="product-preview-intro">
+          <p className="eyebrow">A LITTLE LESS “WHAT WORKS FOR EVERYONE?”</p>
+          <h2 id="product-preview-heading">
+            Different wishes.
+            <br />
+            One shared plan.
+          </h2>
+          <p>
+            Pick an example. See how your preferences become a plan you can all
+            approve.
+          </p>
+        </div>
+        <PlanPreview />
+      </section>
+      <section className="occasion-strip" aria-label="Ideas for your next plan">
+        <p>Whatever brings you together.</p>
+        <div>
+          {[
+            { Icon: Utensils, label: "Dinner & drinks" },
+            { Icon: BedDouble, label: "Weekend stays" },
+            { Icon: Building2, label: "Spaces to gather" },
+            { Icon: Trophy, label: "Play & move" },
+            { Icon: Palette, label: "Try something new" },
+          ].map(({ Icon, label }) => (
+            <span key={label}>
+              <Icon size={21} strokeWidth={1.6} />
+              {label}
+            </span>
+          ))}
         </div>
       </section>
       <section
         id="how-it-works"
-        className="how-it-works"
+        className="human-how"
         aria-labelledby="how-it-works-title"
       >
-        <div className="section-intro">
-          <p className="eyebrow">
-            A LITTLE STRUCTURE. A LOT LESS BACK-AND-FORTH.
-          </p>
-          <h2 id="how-it-works-title">
-            From “where should we go?”
-            <br />
-            to a plan you all approve.
-          </h2>
+        <div className="human-section-heading">
+          <div>
+            <p className="eyebrow">FROM “WE SHOULD” TO “LET'S GO”</p>
+            <h2 id="how-it-works-title">
+              Plan together. Let your agent handle payment.
+            </h2>
+          </div>
           <p>
-            AI helps with the options.
+            You set the terms.
             <br />
-            Your group makes the call.
+            Your agent follows them.
           </p>
         </div>
-        <div className="how-grid">
+        <div className="human-how-grid">
           {[
             {
-              number: "01",
-              Icon: MessageSquareText,
-              title: "Say what matters",
-              description:
-                "Choose your group size, invite your people, and share your budget, tastes, and requirements. Your original preferences stay private.",
-            },
-            {
-              number: "02",
               Icon: Users,
-              title: "Find your common ground",
+              title: "Bring your people",
               description:
-                "Review your interpreted preferences, then compare places and experiences that fit the group's confirmed requirements.",
+                "Pick the kind of outing, choose a few places to consider, and share an invite with your group.",
             },
             {
-              number: "03",
-              Icon: ShieldCheck,
-              title: "Approve. Then act.",
+              Icon: MessageSquareText,
+              title: "Tell us what matters",
               description:
-                "Everyone reviews the same spending terms. The group wallet can only pay within the approved policy.",
+                "Share your budget, needs and nice-to-haves in your own words. Review what AI understood. Your original preferences stay private.",
             },
-          ].map(({ number, Icon, title, description }) => (
-            <article className="how-card" key={number}>
-              <div className="how-card-top">
-                <Icon size={23} strokeWidth={1.5} />
-                <span>{number}</span>
+            {
+              Icon: ShieldCheck,
+              title: "You approve. Your agent pays.",
+              description:
+                "Choose a plan and review the place, amount and your share. Once everyone approves and contributes, your agent executes the payment within those agreed terms.",
+            },
+          ].map(({ Icon, title, description }, i) => (
+            <article key={title}>
+              <div className="human-step-icon">
+                <Icon size={24} strokeWidth={1.6} />
+                <span>0{i + 1}</span>
               </div>
               <h3>{title}</h3>
               <p>{description}</p>
             </article>
           ))}
         </div>
+        <p className="human-signin">
+          Prototype payments use test tokens. Reservations are simulated.
+        </p>
       </section>
-      <div className="workspace-footnote">
-        <span>
-          <span className="network-dot" />A working prototype on Ethereum
-          Sepolia
-        </span>
-        <span>Test tokens · Sample venues · No real reservations</span>
-      </div>
+      <aside
+        className="calendar-feature"
+        aria-labelledby="calendar-feature-title"
+      >
+        <CalendarDays size={26} aria-hidden="true" />
+        <div>
+          <h3 id="calendar-feature-title">A shared plan. On your calendar.</h3>
+          <p>
+            Google Calendar integration supports automatic event creation once
+            connected and your group's payment is confirmed. For now, copy your
+            plan details into your calendar — no connection needed.
+          </p>
+          <span>
+            Account connection coming later · Copy & paste available now
+          </span>
+        </div>
+      </aside>
+      <section className="human-final">
+        <img
+          className="human-final-photo"
+          src="/images/converge-together.webp"
+          width={1536}
+          height={1024}
+          alt="Friends planning a day together"
+          loading="lazy"
+        />
+        <div>
+          <p className="eyebrow">YOUR NEXT GOOD MEMORY</p>
+          <h2>It starts with a plan.</h2>
+        </div>
+        <button
+          className="primary"
+          onClick={onConnect}
+          disabled={busy || loading}
+        >
+          Start together <ArrowRight size={18} />
+        </button>
+      </section>
+      <footer className="human-footer">
+        <Brand />
+        <Link href="/evidence">
+          How this prototype works <ArrowUpRight size={16} />
+        </Link>
+      </footer>
     </div>
   );
 }

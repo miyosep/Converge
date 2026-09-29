@@ -66,11 +66,11 @@ export const publishedEvidence: EvidenceRun[] = [
       },
       {
         label: "Recorded payment",
-        value: `${formatUnits(BigInt(baseline.policy.paymentAmount), 6)} MockUSDC`,
+        value: `${formatUnits(BigInt(baseline.policy.paymentAmount), 6)} USDC`,
       },
       {
         label: "Rejected request",
-        value: `${formatUnits(BigInt(baseline.rejection.amount), 6)} MockUSDC · ${baseline.rejection.reason}`,
+        value: `${formatUnits(BigInt(baseline.rejection.amount), 6)} USDC · ${baseline.rejection.reason}`,
       },
       {
         label: "Rejection evidence",

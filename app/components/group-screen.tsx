@@ -24,9 +24,9 @@ const titles = {
   preferences: "Your preferences",
   results: "Find the right fit",
   approve: "Review before you sign",
-  execution: "Follow the decision",
+  execution: "Track your shared payment",
 };
-const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
+const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 
 export function GroupStageContent({
   overview,
@@ -140,7 +140,7 @@ export function GroupStageContent({
           <section className="flow-panel">
             <div className="panel-heading">
               <div>
-                <h2>Evaluate confirmed preferences</h2>
+                <h2>Ready to find your match?</h2>
                 <p className="flow-muted">
                   Uses every member's confirmed inputs and the synthetic booking
                   catalog. A matching proposal locks the inputs; a no-match
@@ -155,10 +155,10 @@ export function GroupStageContent({
                 onClick={onEvaluate}
               >
                 {busy
-                  ? "Evaluating…"
+                  ? "Finding your match…"
                   : evaluation
-                    ? "Evaluate again"
-                    : "Evaluate group"}
+                    ? "Refresh suggestions"
+                    : "Find a match"}
               </button>
             </div>
             {confirmed !== targetMemberCount && (
@@ -217,7 +217,7 @@ export function GroupStageContent({
                       className="primary flow-link"
                       href={`${root}/approve`}
                     >
-                      Review spending terms <ArrowRight size={16} />
+                      Review your share <ArrowRight size={16} />
                     </Link>
                   </>
                 )}

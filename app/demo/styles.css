@@ -371,6 +371,14 @@
 .explore-section summary {
   cursor: pointer;
 }
+.explore-policy-details p {
+  margin: 10px 0;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
 .explore-notice {
   padding: 17px;
   border: 1px solid #ecd7bc;

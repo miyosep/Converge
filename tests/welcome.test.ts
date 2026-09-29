@@ -13,9 +13,9 @@ test("signed-out home, creation and preference pages show the introduction witho
         ...(mode === "preferences" ? { initialGroupId: "invited-group" } : {}),
       }),
     );
-    assert.match(html, /Every voice/);
-    assert.match(html, /One shared plan/);
-    assert.match(html, /converge-orbit/);
+    assert.match(html, /Less planning/);
+    assert.match(html, /More together/);
+    assert.match(html, /converge-together/);
     assert.match(html, /Checking your session/);
     assert.doesNotMatch(
       html,
@@ -34,7 +34,7 @@ test("welcome explains sign-in, preserves invitation context and announces conne
       onConnect: () => {},
     }),
   );
-  assert.match(html, /Your wallet is your sign-in/);
+  assert.match(html, /Sign in with MetaMask/);
   assert.match(html, /Your group is waiting/);
   assert.match(html, /Connecting/);
   assert.match(html, /disabled/);

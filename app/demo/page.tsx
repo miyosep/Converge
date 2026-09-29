@@ -599,16 +599,16 @@ export default function ExploreDemo() {
                         <dt>Your contribution</dt>
                         <dd>
                           {money(state.policy.contributionPerParticipant)}{" "}
-                          MockUSDC
+                          USDC
                         </dd>
                       </div>
                       <div>
                         <dt>Reservation deposit</dt>
-                        <dd>{money(state.policy.paymentAmount)} MockUSDC</dd>
+                        <dd>{money(state.policy.paymentAmount)} USDC</dd>
                       </div>
                       <div>
                         <dt>Total spending cap</dt>
-                        <dd>{money(state.policy.maxTotalSpend)} MockUSDC</dd>
+                        <dd>{money(state.policy.maxTotalSpend)} USDC</dd>
                       </div>
                       <div>
                         <dt>Expires</dt>
@@ -662,21 +662,15 @@ export default function ExploreDemo() {
                         </p>
                       )}
                     </div>
-                    <details>
+                    <details className="explore-policy-details">
                       <summary>Policy details</summary>
-                      <p className="explore-address">
-                        Policy hash: {state.policyHash}
-                      </p>
-                      <p className="explore-address">
-                        Escrow: {state.policy.verifyingContract}
-                      </p>
-                      <p className="explore-address">
-                        Token: {state.policy.token}
-                      </p>
+                      <p>Policy hash: {state.policyHash}</p>
+                      <p>Escrow: {state.policy.verifyingContract}</p>
+                      <p>Token: {state.policy.token}</p>
                       <p>Network: Ethereum Sepolia (11155111)</p>
                       <p>
                         Maximum deposit: {money(state.policy.maxDeposit)}{" "}
-                        MockUSDC
+                        USDC
                       </p>
                     </details>
                     {state.phase === "proposal" && (
@@ -692,7 +686,7 @@ export default function ExploreDemo() {
                     )}
                     {state.phase === "preparing" && (
                       <p>
-                        Preparing your MockUSDC, gas allowance, and group
+                        Preparing your USDC, gas allowance, and group
                         policy...
                       </p>
                     )}
@@ -713,7 +707,7 @@ export default function ExploreDemo() {
                         >
                           Approve &amp; contribute{" "}
                           {money(state.policy.contributionPerParticipant)}{" "}
-                          MockUSDC
+                          USDC
                         </button>
                       </div>
                     )}
@@ -744,7 +738,7 @@ export default function ExploreDemo() {
                               void run(() => transaction("refund"))
                             }
                           >
-                            Claim {money(state.refund)} MockUSDC refund
+                            Claim {money(state.refund)} USDC refund
                           </button>
                         )}
                         {state.refunded && (
@@ -755,7 +749,7 @@ export default function ExploreDemo() {
                     {state.rejection && (
                       <p className="explore-check">
                         <ShieldCheck size={18} />
-                        80 MockUSDC request rejected by the contract's read-only
+                        80 USDC request rejected by the contract's read-only
                         check. No rejection transaction was submitted.
                       </p>
                     )}

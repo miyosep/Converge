@@ -12,6 +12,7 @@ import { PreferenceError } from "../preferences.js";
 import { GroupPolicyError } from "../group-policy.js";
 import { GroupInsightsRepository } from "../db/group-insights.js";
 import { GroupExecutionRepository } from "../db/group-execution.js";
+import { CalendarRepository } from "../db/calendar.js";
 import type { KilnAttempt } from "../kiln/client.js";
 
 const SESSION_COOKIE = "converge_session";
@@ -34,6 +35,7 @@ export function services() {
     preferences: new PreferenceRepository(pool),
     insights: new GroupInsightsRepository(pool),
     execution: new GroupExecutionRepository(pool),
+    calendar: new CalendarRepository(pool),
   };
 }
 

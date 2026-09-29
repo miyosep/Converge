@@ -36,7 +36,7 @@ export function publicExplanationFacts(evaluation: SavedEvaluation) {
   const facts: Record<ExplanationReason, string> = {
     ranking: `${winner.name} ranks first among eligible candidates with a public score of ${scorePercent(winnerScore)}/100. Ties use lower per-person price, then candidate ID.`,
     price: `The synthetic catalog estimates $${(winner.mealPricePerPersonCents / 100).toFixed(2)} per ${winner.priceUnit ?? "person"}.`,
-    deposit: `Its group reservation deposit is ${formatUnits(BigInt(winner.depositBaseUnits), 6)} MockUSDC.`,
+    deposit: `Its group reservation deposit is ${formatUnits(BigInt(winner.depositBaseUnits), 6)} USDC.`,
     comparison: `${eligible} of ${evaluation.candidates.length} sample candidates met the group's confirmed requirements.`,
   };
   return { winner: winner.name, facts };
