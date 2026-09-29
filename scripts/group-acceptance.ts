@@ -35,7 +35,11 @@ import {
   GroupExecutionRepository,
   type ExecutionPolicy,
 } from "../src/lib/db/group-execution.js";
-import { groupPolicyConfig } from "../src/lib/server/group-config.js";
+import {
+  groupPolicyConfig,
+  groupPolicyConfigFor,
+  currentGroupPolicyConfig,
+} from "../src/lib/server/group-config.js";
 import {
   groupChainTransaction,
   readGroupChain,
@@ -43,7 +47,7 @@ import {
 } from "../src/lib/group-chain.js";
 import type { GroupOverview } from "../src/lib/group-view.js";
 import type { PreferenceState } from "../src/lib/preferences.js";
-import { hashPolicy } from "../src/lib/policy.js";
+import { hashPolicy } from "../src/lib/signing-policy.js";
 import {
   atomicJson,
   optionalJson,
@@ -59,6 +63,7 @@ import { GroupExecutionWorker } from "./lib/group-execution-worker.js";
 
 const runId = process.argv[2] || "group-acceptance-001";
 const mode = process.argv[3] || "--run";
+const checkpointRecovery = process.argv.includes("--checkpoint-recovery");
 if (
   !/^[a-z0-9][a-z0-9-]{0,47}$/.test(runId) ||
   !["--prepare", "--run", "--verify"].includes(mode)
@@ -512,8 +517,13 @@ async function main() {
         const abi =
           log.address.toLowerCase() === groupPolicyConfig.token.toLowerCase()
             ? tokenAbi
-            : log.address.toLowerCase() ===
-                groupPolicyConfig.verifyingContract.toLowerCase()
+            : [
+                  groupPolicyConfig.verifyingContract,
+                  currentGroupPolicyConfig().verifyingContract,
+                ].some(
+                  (address) =>
+                    address.toLowerCase() === log.address.toLowerCase(),
+                )
               ? walletAbi
               : null;
         if (!abi) return [];
@@ -613,6 +623,9 @@ async function main() {
     return receipt;
   }
   async function fund() {
+    // Registration is only attempted after initial funding finishes. A resumed
+    // lifecycle must not replace tokens already spent on its contributions.
+    if (await optionalJson(join(root, "baseline-register-0.tx.json"))) return;
     for (const [i, person] of [...people, executor].entries()) {
       const target = parseEther(
         i === 0 ? "0.004" : i === 6 ? "0.001" : "0.002",
@@ -668,6 +681,7 @@ async function main() {
     index: number,
     kind: GroupChainAction,
   ) {
+    const groupPolicyConfig = groupPolicyConfigFor(saved.policy);
     const label = `${scenario.id}-${kind}-${index}`;
     const existing = await optionalJson<JournalTransaction>(
       join(root, `${label}.tx.json`),
@@ -758,6 +772,7 @@ async function main() {
   }
   async function chainRun(scenario: Scenario) {
     const saved = await policy(scenario);
+    const groupPolicyConfig = groupPolicyConfigFor(saved.policy);
     const registration = await action(scenario, saved, 0, "register");
     assert.ok(registration);
     const worker = () =>
@@ -776,6 +791,20 @@ async function main() {
       groupPolicyConfig,
       people[0]!.address,
     );
+    const previousExport = await optionalJson<{ policyHash: string }>(
+      `docs/evidence/${runId}-${scenario.id}.json`,
+    );
+    if (
+      previousExport?.policyHash === saved.policyHash &&
+      current.status === 2 &&
+      current.spent === scenario.amount &&
+      current.refunded === String(BigInt(scenario.refund) * 6n)
+    ) {
+      console.log(
+        `${scenario.id}: existing settled run verified; no new transactions`,
+      );
+      return;
+    }
     if (current.status !== 2) {
       await Promise.all(
         people.map((_, i) => action(scenario, saved, i, "allowance")),
@@ -827,68 +856,97 @@ async function main() {
           fault:
             "live broadcast succeeded; client response deliberately discarded",
           originalHash: journal.hash,
+          interruptedProcessId: process.pid,
         };
         await save();
+        if (checkpointRecovery)
+          throw new Error(
+            "RECOVERY_CHECKPOINT: broadcast response lost; resume the same run ID in a new process",
+          );
       }
-      if (scenario.id === "lower-budget" && !state.recovery[scenario.id]) {
-        let failed = false;
-        const store = new Proxy(repo, {
-          get(target, key) {
-            if (key === "status")
-              return async (...args: Parameters<typeof repo.status>) => {
-                if (args[1] === "confirmed" && !failed) {
-                  failed = true;
-                  throw new Error("INJECTED_DB_CONFIRMATION_FAILURE");
-                }
-                return target.status(...args);
-              };
-            const value: unknown = Reflect.get(target, key);
-            return typeof value === "function" ? value.bind(target) : value;
-          },
-        });
-        const interrupted = new GroupExecutionWorker(
-          client,
-          transport,
-          executor,
-          groupPolicyConfig,
-          store,
-          registration.blockNumber,
-          parseEther("0.03"),
-        );
-        const faultDeadline = Date.now() + 240000;
-        while (!failed) {
-          try {
-            await interrupted.tick(saved);
-          } catch (error) {
+    }
+    if (scenario.id === "lower-budget" && !state.recovery[scenario.id]) {
+      let failed = false;
+      const store = new Proxy(repo, {
+        get(target, key) {
+          if (key === "status")
+            return async (...args: Parameters<typeof repo.status>) => {
+              if (args[1] === "confirmed" && !failed) {
+                failed = true;
+                throw new Error("INJECTED_DB_CONFIRMATION_FAILURE");
+              }
+              return target.status(...args);
+            };
+          const value: unknown = Reflect.get(target, key);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
+      const interrupted = new GroupExecutionWorker(
+        client,
+        transport,
+        executor,
+        groupPolicyConfig,
+        store,
+        registration.blockNumber,
+        parseEther("0.03"),
+      );
+      const faultDeadline = Date.now() + 240000;
+      while (!failed) {
+        try {
+          await interrupted.tick(saved);
+        } catch (error) {
+          if (
+            !(error instanceof Error) ||
+            error.message !== "INJECTED_DB_CONFIRMATION_FAILURE"
+          ) {
             if (
-              !(error instanceof Error) ||
-              error.message !== "INJECTED_DB_CONFIRMATION_FAILURE"
+              !(error instanceof BaseError) ||
+              !(await repo.load(saved.policy.decisionId))
             )
               throw error;
+            console.log(
+              `${scenario.id}: RPC interrupted a journaled payment; reconciling the same hash`,
+            );
           }
-          if (Date.now() > faultDeadline)
-            throw new Error("Waiting for payment before DB recovery check");
-          if (!failed) await sleep(4000);
         }
-        const original = await repo.load(saved.policy.decisionId);
-        assert.ok(original);
-        state.recovery[scenario.id] = {
-          fault:
-            "successful on-chain payment followed by deliberately failed database confirmation write",
-          originalHash: original.hash,
-        };
-        await save();
+        if (Date.now() > faultDeadline)
+          throw new Error("Waiting for payment before DB recovery check");
+        if (!failed) await sleep(4000);
       }
-      const deadline = Date.now() + 240000;
-      do {
-        await worker().tick(saved);
-        const history = await repo.history(saved.groupId, people[0]!.address);
-        if (history.execution?.status === "confirmed") break;
-        if (Date.now() > deadline)
-          throw new Error("Payment pending; rerun the same run ID");
-        await sleep(4000);
-      } while (true);
+      const original = await repo.load(saved.policy.decisionId);
+      assert.ok(original);
+      state.recovery[scenario.id] = {
+        fault:
+          "successful on-chain payment followed by deliberately failed database confirmation write",
+        originalHash: original.hash,
+        interruptedProcessId: process.pid,
+      };
+      await save();
+      if (checkpointRecovery)
+        throw new Error(
+          "RECOVERY_CHECKPOINT: database confirmation write failed; resume the same run ID in a new process",
+        );
     }
+    const deadline = Date.now() + 240000;
+    do {
+      try {
+        await worker().tick(saved);
+      } catch (error) {
+        if (
+          !(error instanceof BaseError) ||
+          !(await repo.load(saved.policy.decisionId))
+        )
+          throw error;
+        console.log(
+          `${scenario.id}: RPC interrupted a journaled payment; reconciling the same hash`,
+        );
+      }
+      const history = await repo.history(saved.groupId, people[0]!.address);
+      if (history.execution?.status === "confirmed") break;
+      if (Date.now() > deadline)
+        throw new Error("Payment pending; rerun the same run ID");
+      await sleep(4000);
+    } while (true);
     const journal = await repo.load(saved.policy.decisionId);
     assert.ok(journal);
     await atomicJson(
@@ -942,7 +1000,10 @@ async function main() {
       /serialized|journal|privateKey/,
     );
     if (state.recovery[scenario.id]) {
-      const recovery = state.recovery[scenario.id] as { originalHash: string };
+      const recovery = state.recovery[scenario.id] as {
+        originalHash: string;
+        interruptedProcessId?: number;
+      };
       assert.equal(recovery.originalHash, journal.hash);
       state.recovery[scenario.id] = {
         ...recovery,
@@ -951,6 +1012,9 @@ async function main() {
         refundEventCount: 6,
         duplicateEventsAfterReplay: 0,
         recovered: true,
+        resumedProcessId: process.pid,
+        restartedInDifferentProcess:
+          recovery.interruptedProcessId !== process.pid,
       };
       await save();
     }
@@ -961,6 +1025,7 @@ async function main() {
   }
   async function exportScenario(scenario: Scenario, requireFinalized: boolean) {
     const saved = await policy(scenario);
+    const groupPolicyConfig = groupPolicyConfigFor(saved.policy);
     const history = await repo.history(saved.groupId, people[0]!.address);
     assert.equal(history.execution?.status, "confirmed");
     const files = (await readdir(root)).filter(
@@ -1050,6 +1115,12 @@ async function main() {
         "SELECT name,sha256,applied_at FROM converge_schema_migrations ORDER BY name",
       )
     ).rows;
+    const revisionHistory = (
+      await pool.query(
+        "SELECT wallet_address, revision_id, status, confirmed_at, error_code FROM converge_preference_revisions WHERE group_id=$1 ORDER BY wallet_address,revision_id",
+        [saved.groupId],
+      )
+    ).rows;
     await atomicJson(`docs/evidence/${runId}-${scenario.id}.json`, {
       schemaVersion: 1,
       scope: "ordinary-group-live-http-acceptance",
@@ -1062,8 +1133,10 @@ async function main() {
       checkedAt: new Date().toISOString(),
       chainId: 11155111,
       model: "qwen3-32b",
-      fixtureVersion: "restaurants-v2",
+      fixtureVersion: (await overview(saved.groupId)).evaluation
+        ?.fixtureVersion,
       syntheticInputs: true,
+      preferenceRevisionHistory: revisionHistory,
       participantControl:
         "six distinct private keys and isolated SIWE cookie sessions operated by one test runner; not six independent humans",
       groupId: saved.groupId,
@@ -1140,7 +1213,7 @@ main().catch((error: unknown) => {
   console.error(
     error instanceof Error && !(error instanceof BaseError)
       ? `${error.name}: ${error.message.slice(0, 350)}`
-      : "Acceptance stopped at an external request. Preserve the journal and resume the same run ID.",
+      : `${error instanceof Error ? error.name : "ExternalError"}: Acceptance stopped at an external request. Preserve the journal and resume the same run ID.`,
   );
   process.exitCode = 1;
 });

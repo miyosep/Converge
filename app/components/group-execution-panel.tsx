@@ -57,8 +57,8 @@ export function GroupExecutionPanel({
         <h2>Agent payment and settlement</h2>
         <p>
           The executor can pay only this policy's approved merchant and exact
-          amount after all six contributions. Each participant claims their own
-          unused funds.
+          amount after every participant contributes. Each participant claims
+          their own unused funds.
         </p>
         {snapshot ? (
           <>

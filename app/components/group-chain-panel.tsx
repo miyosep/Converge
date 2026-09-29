@@ -17,7 +17,10 @@ import {
   type GroupChainAction,
   type GroupChainState,
 } from "../../src/lib/group-chain";
-import { groupPolicyConfig } from "../../src/lib/server/group-config";
+import { groupPolicyConfigFor } from "../../src/lib/server/group-config";
+import { browserWallets } from "../../src/lib/browser-wallet";
+import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
+import { ensureSepolia } from "../../src/lib/wallet-connection";
 
 const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
 const labels: Record<GroupChainAction, string> = {
@@ -109,16 +112,17 @@ export function GroupChainPanel({
 
   // A saved hash survives reload; never resend a transaction merely because a receipt is slow.
   useEffect(() => {
-    if (!pending || !window.ethereum) return;
+    if (!pending) return;
     let stopped = false;
     let checking = false;
     const check = async () => {
-      if (checking || !window.ethereum) return;
+      const provider = browserWallets().current();
+      if (checking || !provider) return;
       checking = true;
       try {
         const reader = createPublicClient({
           chain: sepolia,
-          transport: custom(window.ethereum),
+          transport: custom(provider),
         });
         if ((await reader.getChainId()) !== sepolia.id) return;
         const receipt = await reader.waitForTransactionReceipt({
@@ -178,9 +182,8 @@ export function GroupChainPanel({
     setError("");
     setNotice("");
     try {
-      if (!window.ethereum)
-        throw new Error("Open this page in a browser with a wallet extension.");
-      const provider = window.ethereum;
+      const provider = await getMetaMaskProvider();
+      if (!provider) return;
       const session = await fetch("/api/auth/session", { cache: "no-store" });
       if (!session.ok)
         throw new Error(
@@ -196,10 +199,7 @@ export function GroupChainPanel({
           throw new Error("WRONG_WALLET");
       };
       await checkAccount();
-      await provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }],
-      });
+      await ensureSepolia(provider);
       const reader = createPublicClient({
         chain: sepolia,
         transport: custom(provider),
@@ -207,13 +207,13 @@ export function GroupChainPanel({
       const fresh = await readGroupChain(
         reader,
         saved,
-        groupPolicyConfig,
+        groupPolicyConfigFor(saved.policy),
         actor,
         1,
       );
       const tx = groupChainTransaction(
         saved,
-        groupPolicyConfig,
+        groupPolicyConfigFor(saved.policy),
         actor,
         fresh,
         action,
@@ -292,13 +292,13 @@ export function GroupChainPanel({
                   ? "Expired"
                   : [
                       "Collecting contributions",
-                      "Active · all six contributed",
+                      "Active · everyone contributed",
                       "Payment complete",
                       "Cancelled",
                       "Expired",
                     ][state.status!]}
             </strong>{" "}
-            · {state.approvals}/6 approvals
+            · {state.approvals}/{saved.policy.participants.length} approvals
           </p>
           <p>
             Total contributed: {money(state.contributed)} · Your contribution:{" "}
@@ -319,10 +319,10 @@ export function GroupChainPanel({
           </small>
           {state.status === 1 && (
             <p>
-              All six participants have funded this decision. The configured
-              group executor can now pay the exact approved amount. See the
-              execution page for its recorded progress. Participants can cancel
-              and recover funds before payment.
+              All participants have funded this decision. The configured group
+              executor can now pay the exact approved amount. See the execution
+              page for its recorded progress. Participants can cancel and
+              recover funds before payment.
             </p>
           )}
           {BigInt(state.refund) > 0n && (

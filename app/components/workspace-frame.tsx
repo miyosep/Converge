@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AppHeader } from "./product-ui";
 
 export type GroupStage =
   "lobby" | "preferences" | "results" | "approve" | "execution";
@@ -34,26 +35,19 @@ export function GroupNavigation({
   );
 }
 
-export function WorkspaceFrame({ children }: { children: ReactNode }) {
+export function WorkspaceFrame({
+  children,
+  active = "workspace",
+}: {
+  children: ReactNode;
+  active?: "workspace" | "evidence";
+}) {
   return (
-    <main className="shell">
-      <header className="topbar">
-        <Link className="brand" href="/">
-          <span className="brand-mark">C</span>Converge
-        </Link>
-        <nav className="top-actions" aria-label="Main navigation">
-          <Link className="text-button" href="/">
-            My groups
-          </Link>
-          <Link className="text-button" href="/evidence">
-            Evidence
-          </Link>
-          <Link className="text-button" href="/demo">
-            Explore Demo ↗
-          </Link>
-        </nav>
-      </header>
-      <div className="flow-content">{children}</div>
-    </main>
+    <div className="shell">
+      <AppHeader active={active} />
+      <main className="flow-content" id="main-content" tabIndex={-1}>
+        {children}
+      </main>
+    </div>
   );
 }

@@ -1,8 +1,21 @@
 import deployment from "../../../contracts/deployments/11155111.json";
+import deploymentV2 from "../../../contracts/deployments/11155111-v2.json";
 import publicRoles from "../../../contracts/deployments/demo-roles.11155111.json";
 import { demoRolesSchema } from "../demo-roles.js";
-import { createRestaurantCatalog } from "../fixtures/restaurants.js";
+import { createOrdinaryRestaurantCatalog } from "../fixtures/ordinary-restaurants.js";
 import type { GroupPolicyConfig } from "../group-policy.js";
+import { GroupPolicyError } from "../group-policy.js";
+import type { Policy } from "../signing-policy.js";
+
+export type GroupDeployment = {
+  address: `0x${string}`;
+  blockNumber: string;
+  deployedCodeHash: string;
+  transactionHash: string;
+  blockHash: string;
+};
+export const groupDeploymentV2 =
+  deploymentV2.convergeGroupWallet as GroupDeployment | null;
 
 // Shared public Sepolia infrastructure only. No demo users, keys, sessions or grants.
 const roles = demoRolesSchema.parse(publicRoles);
@@ -13,10 +26,30 @@ export const groupPolicyConfig: GroupPolicyConfig = {
   executor: roles.executor,
 };
 
-export function groupEvaluationOptions(startsAt: string) {
+export function currentGroupPolicyConfig(): GroupPolicyConfig {
+  if (!groupDeploymentV2) throw new GroupPolicyError("PAYMENT_NOT_CONFIGURED");
   return {
-    catalog: createRestaurantCatalog(roles, [startsAt]),
-    permittedMerchants: Object.values(roles.merchants),
+    ...groupPolicyConfig,
+    policyVersion: 2,
+    verifyingContract: groupDeploymentV2.address,
+  };
+}
+
+export function groupPolicyConfigFor(
+  policy: Pick<Policy, "policyVersion">,
+): GroupPolicyConfig {
+  return policy.policyVersion === 1
+    ? groupPolicyConfig
+    : currentGroupPolicyConfig();
+}
+
+export function groupEvaluationOptions(startsAt: string) {
+  const catalog = createOrdinaryRestaurantCatalog(roles, [startsAt]);
+  return {
+    catalog,
+    permittedMerchants: catalog.restaurants.map(
+      (restaurant) => restaurant.merchant,
+    ),
     contributionPerParticipant: "10000000",
     maxDeposit: "60000000",
     maxTotalSpend: "60000000",

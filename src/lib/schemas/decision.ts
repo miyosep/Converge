@@ -8,7 +8,11 @@ import {
   tokenAmountSchema,
   utcTimestampSchema,
 } from "./primitives.js";
-import { participantAddressesSchema } from "./shared.js";
+import {
+  groupMembersSchema,
+  MAX_GROUP_MEMBERS,
+  MIN_GROUP_MEMBERS,
+} from "../group-size.js";
 
 export const reservationSlotSchema = z.strictObject({
   startsAt: utcTimestampSchema,
@@ -18,6 +22,8 @@ const safety = z.enum(["supported", "unsupported", "unknown"]);
 export const restaurantSchema = z.strictObject({
   id: idSchema,
   name: z.string().min(1).max(80),
+  cuisine: z.string().min(1).max(80).optional(),
+  area: z.string().min(1).max(80).optional(),
   merchant: addressSchema,
   currency: z.literal("USD"),
   mealPricePerPersonCents: centsSchema,
@@ -43,7 +49,11 @@ export const restaurantSchema = z.strictObject({
 });
 export const restaurantCatalogSchema = z
   .strictObject({
-    fixtureVersion: z.enum(["restaurants-v1", "restaurants-v2"]),
+    fixtureVersion: z.enum([
+      "restaurants-v1",
+      "restaurants-v2",
+      "restaurants-v3",
+    ]),
     synthetic: z.literal(true),
     restaurants: z.array(restaurantSchema).min(1).max(100),
   })
@@ -67,8 +77,11 @@ export const preferenceRevisionSchema = z.strictObject({
 });
 export const evaluationInputSchema = z
   .strictObject({
-    members: participantAddressesSchema,
-    preferences: z.array(preferenceRevisionSchema).length(6),
+    members: groupMembersSchema,
+    preferences: z
+      .array(preferenceRevisionSchema)
+      .min(MIN_GROUP_MEMBERS)
+      .max(MAX_GROUP_MEMBERS),
     slot: reservationSlotSchema,
     permittedMerchants: z.array(addressSchema).max(100),
     contributionPerParticipant: tokenAmountSchema.refine(
@@ -86,7 +99,8 @@ export const evaluationInputSchema = z
       revision.participant.toLowerCase(),
     );
     if (
-      new Set(preferences).size !== 6 ||
+      preferences.length !== input.members.length ||
+      new Set(preferences).size !== input.members.length ||
       preferences.some((address) => !members.has(address))
     ) {
       context.addIssue({
@@ -95,7 +109,8 @@ export const evaluationInputSchema = z
         message: "One revision from every group member is required",
       });
     }
-    const funding = BigInt(input.contributionPerParticipant) * 6n;
+    const funding =
+      BigInt(input.contributionPerParticipant) * BigInt(input.members.length);
     if (
       funding >= 1n << 256n ||
       BigInt(input.maxDeposit) > BigInt(input.maxTotalSpend) ||

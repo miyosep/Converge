@@ -61,6 +61,7 @@ const overview: GroupOverview = {
     timeZone: "Asia/Seoul",
     locked: true,
     memberCount: 6,
+    targetMemberCount: 6,
     confirmedCount: 6,
   },
   participants: members.map((walletAddress, index) => ({
@@ -88,6 +89,47 @@ test("group results show the engine score on a 100-point scale and retain the cu
   );
   assert.match(nav, /actual-group\/preferences/);
   assert.match(nav, /aria-current="page"/);
+});
+
+test("four-member progress unlocks evaluation and policy preparation without a six-person gate", () => {
+  const four: GroupOverview = {
+    ...overview,
+    group: {
+      ...overview.group,
+      targetMemberCount: 4,
+      memberCount: 4,
+      confirmedCount: 4,
+      locked: false,
+    },
+    participants: overview.participants.slice(0, 4),
+    evaluation: null,
+  };
+  const render = (
+    stage: "lobby" | "results" | "approve" | "execution",
+    value = four,
+  ) =>
+    renderToStaticMarkup(
+      createElement(GroupStageContent, {
+        overview: value,
+        stage,
+        onEvaluate: () => {},
+      }),
+    );
+  assert.match(render("lobby"), /4 \/ 4 joined/);
+  assert.match(render("lobby"), /max="4"/);
+  assert.match(
+    render("results"),
+    /<button class="primary">Evaluate group<\/button>/,
+  );
+  const incomplete = { ...four, participants: four.participants.slice(0, 3) };
+  assert.match(render("results", incomplete), /disabled=""/);
+  assert.match(render("approve"), /Approval is not available yet/);
+  const ready = { ...four, evaluation };
+  assert.match(render("approve", ready), /Prepare signing policy/);
+  assert.doesNotMatch(
+    render("approve", ready),
+    /require exactly 6|unavailable for this group size/,
+  );
 });
 
 test("saved result projection excludes participant identities and private conditions", () => {

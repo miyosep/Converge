@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-acceptance/
+.next-ui-review/
 dist/
 coverage/
 *.tsbuildinfo
@@ -12,6 +13,8 @@ coverage/
 Thumbs.db
 contracts/out/
 contracts/cache/
+contracts/out-v2/
+contracts/cache-v2/
 contracts/broadcast/
 contracts/deployments/*.pending.json
 contracts/deployments/*.pending.json.tmp-*

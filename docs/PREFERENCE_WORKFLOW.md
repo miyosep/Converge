@@ -13,14 +13,14 @@ browser-supplied address as the actor.
 
 ## Transitions
 
-| Operation | Preconditions | Result |
-| --- | --- | --- |
-| Submit | Correct owner/group, unlocked preferences, expected current revision | New revision in `PARSING`; no extracted data or confirmation |
-| Complete extraction | Current revision matches the captured worker revision and is `PARSING` | Validated output in `AWAITING_CONFIRMATION` or `NEEDS_CLARIFICATION` |
-| Fail extraction | Current worker revision is still `PARSING` | `PARSE_FAILED` with the safe `EXTRACTION_FAILED` code |
-| Correct | Existing parsed output, correct expected revision, unlocked preferences | New revision; old confirmation cleared; ambiguity rechecked |
-| Confirm | Current revision is awaiting confirmation with no unresolved requirements | `CONFIRMED`, with a server timestamp |
-| Confirm again | The same revision is already confirmed | Idempotent response retaining the original timestamp |
+| Operation           | Preconditions                                                             | Result                                                               |
+| ------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Submit              | Correct owner/group, unlocked preferences, expected current revision      | New revision in `PARSING`; no extracted data or confirmation         |
+| Complete extraction | Current revision matches the captured worker revision and is `PARSING`    | Validated output in `AWAITING_CONFIRMATION` or `NEEDS_CLARIFICATION` |
+| Fail extraction     | Current worker revision is still `PARSING`                                | `PARSE_FAILED` with the safe `EXTRACTION_FAILED` code                |
+| Correct             | Existing parsed output, correct expected revision, unlocked preferences   | New revision; old confirmation cleared; ambiguity rechecked          |
+| Confirm             | Current revision is awaiting confirmation with no unresolved requirements | `CONFIRMED`, with a server timestamp                                 |
+| Confirm again       | The same revision is already confirmed                                    | Idempotent response retaining the original timestamp                 |
 
 A retry after provider failure is a fresh submission and revision, not an
 opportunity for the failed worker to overwrite current state. A late completion,
@@ -53,22 +53,25 @@ and feeds the existing evaluator; it does not create financial approval.
    prevents concurrent preference edits from changing the accepted snapshot.
 
 The database repository supplies concurrency protection for these transitions.
-Group membership is checked for reads and writes, but membership admission
-still needs a verified invitation and wallet session. The stored private
+Group membership is checked for reads and writes; membership admission uses
+a verified invitation and wallet session. The stored private
 evaluation is never a group response; return its allowlisted public projection.
 The fixture catalog, caps, and merchant list passed to `evaluateAndFreeze` must
 come from trusted server configuration and authorized group state, not client
 JSON. The web routes now provide expiring wallet sessions, same-origin POST
 checks, and immutable proposal policy construction. Execution reconciliation
-has an opt-in worker implementation; its full live ordinary-group run remains
-to be verified.
+has an opt-in worker implementation. Three live ordinary-group HTTP lifecycles
+now connect confirmed revisions to policies, payments, history and refunds;
+see [the acceptance records](GROUP_ACCEPTANCE.md) for the precise test scope.
 
 ## Verification
 
 `pnpm check` covers explicit confirmation, late worker responses, stale writes,
 correction reset, unresolved requirements, owner/group mismatch, proposal freeze,
 safe failure/retry, shared progress privacy, and invalid state/input rejection.
-The first two migrations were applied to the `dev-preferences` Neon branch.
+The initial preference rehearsal applied the first two migrations to the
+`dev-preferences` Neon branch. The branch now has migrations through `0008`,
+including execution history, explanations, usage, and saved merchant conditions.
 `pnpm db:rehearse:dev` exercised six synthetic participants, concurrent writes,
 late extraction rejection, correction, group progress, incomplete/no-match
 evaluation, snapshot persistence, and post-freeze refusal against the real

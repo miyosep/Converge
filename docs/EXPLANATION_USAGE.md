@@ -25,8 +25,9 @@ are `null` when any contributing attempt lacks that measurement; zero calls are
 shown as zero attempts with no measured token total. Provider-reported cost,
 cached-input tokens, and reasoning tokens are retained in the API response when
 complete. Energy use remains unknown. The existing `/evidence` page displays
-only allowlisted published artifacts; group usage is member-only and is not a
-public acceptance-run export.
+only allowlisted published artifacts. Real group usage remains member-only;
+three explicitly synthetic [acceptance exports](GROUP_ACCEPTANCE.md) now connect
+provider attempts and cached explanations to their group policies and receipts.
 
 Migration `0007_group_explanations.sql` creates the explanation and provider
 attempt records. Apply reviewed migrations to the isolated `dev-preferences`

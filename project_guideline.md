@@ -6,7 +6,7 @@ Document status: implementation specification, not a report of completed work.
 Reviewed on: 2026-09-29.
 Language: English for project documentation, code comments, issues, and demo evidence.
 Demo platform: MacBook. Native macOS support is required; the foundation targets Apple Silicon and Intel. See `docs/MACBOOK_DEMO.md` for setup and rehearsal requirements.
-Task ownership: self-assigned. Sage has claimed the blockchain contract and deployment work in Section 19; other tasks remain open for contributors to claim.
+Task ownership: self-assigned. See Section 19 for the current owners, reviewers and evidence-backed status.
 
 ## 1. Purpose and Source of Truth
 
@@ -16,7 +16,7 @@ The challenge brief in `hackathon_descrip.txt` records the original competition 
 
 At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, an ordinary-group Next.js/Neon/Kiln workflow with browser-wallet registration, contributions and refunds, and an opt-in payment worker with persisted chain history. A privacy-safe explanation flow and per-flow usage API are implemented in the current worktree. See `docs/FOUNDATION.md`, `docs/BLOCKCHAIN.md`, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md`. The browser-wallet Explore baseline has verified Sepolia payment and refunds; ordinary-group full live acceptance and both changed-condition runs remain pending.
+The current deliverables include the TypeScript/Next.js application, Neon persistence, live Kiln `qwen3-32b` extraction and private explanations, Sepolia contracts, wallet actions, the payment worker, reconciled history and public evidence. Three ordinary-group lifecycles completed with six distinct keys and isolated authenticated clients on Windows: baseline A / lower-budget B / merchant-excluded B, each through payment and six refunds. Lost-broadcast and confirmation-write failures recovered across separate processes. See [the acceptance record](docs/GROUP_ACCEPTANCE.md) for the exact controlled input variant, provider attempts, receipt finality and test scope. One operator controlled the six keys; the actual presentation MacBook and six-human browser rehearsal remain open.
 
 ### 1.1 Required README Declaration
 
@@ -26,35 +26,35 @@ Use this exact sentence prominently in the README:
 
 ### 1.2 Mandatory Challenge Outcomes
 
-| Requirement | Implementation outcome | Required evidence |
-| --- | --- | --- |
-| User need and workflow | At least six participants move from private preferences to an approved restaurant reservation deposit | Full workflow demonstration and clear AI/code boundaries |
-| Kiln integration | Real server-side Kiln calls using `qwen3-32b` influence the recommendation | Request metadata, validated outputs, and per-flow usage |
-| Efficiency | Limit unnecessary inference and disclose measurement limits | Calls and input/output tokens by flow; measured metrics or explicit assumptions |
-| Blockchain | Execute the selected workflow on a devnet or testnet | Successful transaction hash with matching contract event and application history |
-| Selected function | Declare the purchasing-agent and programmable-wallet function | Exact README declaration above |
-| Changed conditions | Repeat the end-to-end workflow twice with changed conditions | Baseline plus two separate recorded runs, including input changes and outcomes |
+| Requirement            | Implementation outcome                                                                                | Required evidence                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| User need and workflow | At least six participants move from private preferences to an approved restaurant reservation deposit | Full workflow demonstration and clear AI/code boundaries                         |
+| Kiln integration       | Real server-side Kiln calls using `qwen3-32b` influence the recommendation                            | Request metadata, validated outputs, and per-flow usage                          |
+| Efficiency             | Limit unnecessary inference and disclose measurement limits                                           | Calls and input/output tokens by flow; measured metrics or explicit assumptions  |
+| Blockchain             | Execute the selected workflow on a devnet or testnet                                                  | Successful transaction hash with matching contract event and application history |
+| Selected function      | Declare the purchasing-agent and programmable-wallet function                                         | Exact README declaration above                                                   |
+| Changed conditions     | Repeat the end-to-end workflow twice with changed conditions                                          | Baseline plus two separate recorded runs, including input changes and outcomes   |
 
 The brief permits a devnet or testnet. Converge has selected **Ethereum Sepolia (chain ID `11155111`)** for deployed contracts, final acceptance runs, and judge-facing transaction evidence. Local EVM chains remain useful for development and contract tests. Record the actual network used for each run; a local chain hash alone is not independently available after the chain is reset.
 
 ## 2. Architecture Review and Corrections
 
-| Original ambiguity or risk | Decision for the MVP | Why it matters |
-| --- | --- | --- |
-| Change the approved merchant on an active decision | Financial policies are immutable. Create a new decision and obtain fresh approvals | Old approvals must never authorize a changed recipient |
-| `maxDeposit` checked separately on every payment | One reservation payment per decision; mark payment consumed atomically | Multiple small transfers must not bypass the deposit ceiling |
+| Original ambiguity or risk                                           | Decision for the MVP                                                                                  | Why it matters                                                                |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Change the approved merchant on an active decision                   | Financial policies are immutable. Create a new decision and obtain fresh approvals                    | Old approvals must never authorize a changed recipient                        |
+| `maxDeposit` checked separately on every payment                     | One reservation payment per decision; mark payment consumed atomically                                | Multiple small transfers must not bypass the deposit ceiling                  |
 | A $120 spending limit with only $60 funded and a $35 personal budget | Separate estimated meal price from escrow spending. Baseline escrow cap is $60, actual payment is $45 | Meal cost, deposit, and authorized on-chain spending are different quantities |
-| Approvals without explicit participant membership | Freeze six unique participant addresses in the MVP policy | Outside accounts must not count toward activation |
-| Six approvals automatically mean ready | Require six unique approvals and exactly $60 of credited contributions | An approval alone does not prove funding |
-| JSON-derived decision hash unspecified | Use a versioned ABI-encoded policy hash computed identically in Solidity and TypeScript | Object ordering and number formatting must not change authorization |
-| Reject event emitted before a revert | Use custom errors and application rejection records; reverted logs do not survive | Evidence must describe what actually happened |
-| Private inputs hidden only in the interface | Enforce server authorization and private data projections | Browser visibility controls alone do not provide privacy |
-| Allergy interpreted as an ordinary Boolean fact | Distinguish verified fixture metadata from unknown information | Missing safety data must not become an affirmative safety claim |
-| AI explanation may disclose private restrictions | Give the explanation flow only a privacy-safe evaluation summary | Unattributed sensitive facts can still identify someone in a small group |
-| Refund after payment only | Support cancellation and expiry before payment, including partial funding | Funds must not be trapped when someone never approves |
-| Token usage always a number | Preserve missing usage as unknown; never synthesize measured counts | Evidence must remain truthful when the provider omits fields |
-| Changed-condition checks treated as isolated calls | Run baseline and two complete new decision lifecycles | The challenge asks for repeated end-to-end runs |
-| Agent implicitly has arbitrary execution privileges | A fixed executor may call only the bounded payment function | Compromising the agent must not expose arbitrary transfers |
+| Approvals without explicit participant membership                    | Freeze six unique participant addresses in the MVP policy                                             | Outside accounts must not count toward activation                             |
+| Six approvals automatically mean ready                               | Require six unique approvals and exactly $60 of credited contributions                                | An approval alone does not prove funding                                      |
+| JSON-derived decision hash unspecified                               | Use a versioned ABI-encoded policy hash computed identically in Solidity and TypeScript               | Object ordering and number formatting must not change authorization           |
+| Reject event emitted before a revert                                 | Use custom errors and application rejection records; reverted logs do not survive                     | Evidence must describe what actually happened                                 |
+| Private inputs hidden only in the interface                          | Enforce server authorization and private data projections                                             | Browser visibility controls alone do not provide privacy                      |
+| Allergy interpreted as an ordinary Boolean fact                      | Distinguish verified fixture metadata from unknown information                                        | Missing safety data must not become an affirmative safety claim               |
+| AI explanation may disclose private restrictions                     | Give the explanation flow only a privacy-safe evaluation summary                                      | Unattributed sensitive facts can still identify someone in a small group      |
+| Refund after payment only                                            | Support cancellation and expiry before payment, including partial funding                             | Funds must not be trapped when someone never approves                         |
+| Token usage always a number                                          | Preserve missing usage as unknown; never synthesize measured counts                                   | Evidence must remain truthful when the provider omits fields                  |
+| Changed-condition checks treated as isolated calls                   | Run baseline and two complete new decision lifecycles                                                 | The challenge asks for repeated end-to-end runs                               |
+| Agent implicitly has arbitrary execution privileges                  | A fixed executor may call only the bounded payment function                                           | Compromising the agent must not expose arbitrary transfers                    |
 
 ## 3. Product Scope
 
@@ -64,24 +64,24 @@ Six friends want to choose a restaurant together without sharing all of their pe
 
 Alice, Bob, Charlie, Dana, Erin, and Farah are demo participant personas, not engineering assignments.
 
-Use six as the fixed MVP group size and unanimous approval threshold. Future support for larger groups may generalize the participant array and threshold, but the acceptance runs must involve at least six distinct people/accounts.
+Explore Demo and the deployed v1 contract retain six participants. Ordinary groups choose 2–100 participants, select among 20 fictional restaurants, and use the separately deployed v2 contract for unanimous contributions, payment and refunds. Existing v1 policies and six-account acceptance evidence remain unchanged. The six-person specification below describes the original demo; see `docs/GROUP_WALLET_V2.md` for the current ordinary-group extension.
 
 ### 3.2 Baseline Financial Example
 
-| Item | Baseline value |
-| --- | --- |
-| Participants | Six unique wallet addresses |
-| Contribution | 10 mock USDC per participant |
-| Total credited funds | 60 mock USDC |
+| Item                              | Baseline value                           |
+| --------------------------------- | ---------------------------------------- |
+| Participants                      | Six unique wallet addresses              |
+| Contribution                      | 10 mock USDC per participant             |
+| Total credited funds              | 60 mock USDC                             |
 | Restaurant A estimated meal price | 32 USD per person, 192 USD for the group |
-| Actual reservation deposit | 45 mock USDC for the group |
-| Maximum authorized deposit | 60 mock USDC |
-| Maximum escrow spending | 60 mock USDC |
-| Number of permitted payments | One |
-| Invalid attempt | 80 mock USDC to Restaurant A |
-| Valid attempt | 45 mock USDC to Restaurant A |
-| Remaining refundable funds | 15 mock USDC |
-| Refund | 2.5 mock USDC per participant |
+| Actual reservation deposit        | 45 mock USDC for the group               |
+| Maximum authorized deposit        | 60 mock USDC                             |
+| Maximum escrow spending           | 60 mock USDC                             |
+| Number of permitted payments      | One                                      |
+| Invalid attempt                   | 80 mock USDC to Restaurant A             |
+| Valid attempt                     | 45 mock USDC to Restaurant A             |
+| Remaining refundable funds        | 15 mock USDC                             |
+| Refund                            | 2.5 mock USDC per participant            |
 
 For these synthetic fixtures, the reservation deposit is credited toward the quoted meal price. The remaining meal bill is outside this MVP and is never automatically charged. USD prices and mock USDC amounts use a documented 1:1 demo convention, not a real exchange-rate guarantee. Show mock-token labels clearly.
 
@@ -112,16 +112,16 @@ Basic participant authentication and authorization are required despite producti
 
 These are design selections for an empty repository, not claims that dependencies are already installed.
 
-| Layer | Default | Selection rule |
-| --- | --- | --- |
-| Web and server | Next.js with TypeScript | One application with server-side routes |
-| Shared validation | Zod | Validate all external inputs and model outputs |
-| Database | PostgreSQL on Neon Free, confirmed by the project owner on September 29, 2026 (KST) | Project `rough-cake-92709912` linked to `production`; no-change deploy and read-only connection verified; see `docs/DATABASE_SETUP.md` |
-| Local-only alternative | SQLite, not selected | Do not introduce a second persistence strategy into this implementation |
-| EVM interaction | viem; wagmi for browser wallet state | Share generated ABI and network configuration |
-| Smart contracts | Solidity and Foundry | Hardhat is acceptable if the team's environment makes it more reliable |
-| Token and transfer helpers | Established OpenZeppelin ERC-20 and safety utilities | Pin compatible versions during setup |
-| AI | Kiln, `qwen3-32b` | Verify the actual organizer-provided API contract before integration |
+| Layer                      | Default                                                                             | Selection rule                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Web and server             | Next.js with TypeScript                                                             | One application with server-side routes                                                                                                |
+| Shared validation          | Zod                                                                                 | Validate all external inputs and model outputs                                                                                         |
+| Database                   | PostgreSQL on Neon Free, confirmed by the project owner on September 29, 2026 (KST) | Project `rough-cake-92709912` linked to `production`; no-change deploy and read-only connection verified; see `docs/DATABASE_SETUP.md` |
+| Local-only alternative     | SQLite, not selected                                                                | Do not introduce a second persistence strategy into this implementation                                                                |
+| EVM interaction            | viem; wagmi for browser wallet state                                                | Share generated ABI and network configuration                                                                                          |
+| Smart contracts            | Solidity and Foundry                                                                | Hardhat is acceptable if the team's environment makes it more reliable                                                                 |
+| Token and transfer helpers | Established OpenZeppelin ERC-20 and safety utilities                                | Pin compatible versions during setup                                                                                                   |
+| AI                         | Kiln, `qwen3-32b`                                                                   | Verify the actual organizer-provided API contract before integration                                                                   |
 
 Avoid introducing a separate backend service, message broker, vector database, or agent framework unless a concrete requirement cannot be met within the application.
 
@@ -144,15 +144,15 @@ Participant browser
 
 ### 4.3 Authority Boundaries
 
-| Component | Responsible for | Must not do |
-| --- | --- | --- |
-| Kiln | Interpret natural language, identify ambiguity, explain an approved evaluation result | Authorize funds, invent merchant facts, override deterministic results |
-| Decision engine | Validate normalized constraints, filter, score, resolve ties | Relax mandatory conditions without participant confirmation |
-| Application server | Authenticate requests, persist records, call Kiln, orchestrate execution, reconcile events | Treat browser assertions as confirmed on-chain state |
-| Participant wallet | Sign token allowance and decision contribution transactions | Share private keys with the server |
-| Execution agent | Read active policy and submit one bounded deposit request | Approve on behalf of participants or submit arbitrary calldata |
-| Smart contract | Enforce membership, funding, approvals, recipient, limits, expiry, payment uniqueness, refunds | Depend on the LLM or database for final authorization |
-| Evidence view | Present inspectable public or explicitly shared records | Publish private inputs, credentials, or fabricated usage |
+| Component          | Responsible for                                                                                | Must not do                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Kiln               | Interpret natural language, identify ambiguity, explain an approved evaluation result          | Authorize funds, invent merchant facts, override deterministic results |
+| Decision engine    | Validate normalized constraints, filter, score, resolve ties                                   | Relax mandatory conditions without participant confirmation            |
+| Application server | Authenticate requests, persist records, call Kiln, orchestrate execution, reconcile events     | Treat browser assertions as confirmed on-chain state                   |
+| Participant wallet | Sign token allowance and decision contribution transactions                                    | Share private keys with the server                                     |
+| Execution agent    | Read active policy and submit one bounded deposit request                                      | Approve on behalf of participants or submit arbitrary calldata         |
+| Smart contract     | Enforce membership, funding, approvals, recipient, limits, expiry, payment uniqueness, refunds | Depend on the LLM or database for final authorization                  |
+| Evidence view      | Present inspectable public or explicitly shared records                                        | Publish private inputs, credentials, or fabricated usage               |
 
 The contract enforces financial authorization. It does not verify restaurant allergy safety, meal quality, opening hours, or real-world reservation fulfillment. Those are off-chain fixture and application claims, which must be described accurately.
 
@@ -203,17 +203,17 @@ The separate wallet-connected **Explore Demo** at `/demo` admits one SIWE-authen
 
 ### 5.2 Access Rules
 
-| Resource | Participant access | Public evidence access |
-| --- | --- | --- |
-| Own raw preference | Read and edit before proposal freeze | None by default |
-| Another participant's raw preference | Denied | None |
-| Own parsed constraints | Read, correct, confirm | None by default |
-| Another participant's parsed constraints | Denied | None |
-| Submission progress | Group members see submitted/confirmed flags | Aggregate counts only if useful |
-| Candidate result | Group members see sanitized reasons | Sanitized result |
-| Financial policy | Group members see complete proposal | Public on-chain policy fields |
-| Transaction and event evidence | Group members can inspect | Public chain data |
-| Kiln usage | Sanitized metadata | Sanitized per-flow usage |
+| Resource                                 | Participant access                          | Public evidence access          |
+| ---------------------------------------- | ------------------------------------------- | ------------------------------- |
+| Own raw preference                       | Read and edit before proposal freeze        | None by default                 |
+| Another participant's raw preference     | Denied                                      | None                            |
+| Own parsed constraints                   | Read, correct, confirm                      | None by default                 |
+| Another participant's parsed constraints | Denied                                      | None                            |
+| Submission progress                      | Group members see submitted/confirmed flags | Aggregate counts only if useful |
+| Candidate result                         | Group members see sanitized reasons         | Sanitized result                |
+| Financial policy                         | Group members see complete proposal         | Public on-chain policy fields   |
+| Transaction and event evidence           | Group members can inspect                   | Public chain data               |
+| Kiln usage                               | Sanitized metadata                          | Sanitized per-flow usage        |
 
 Enforce access in server queries and responses, including exports and debug endpoints. Do not send private fields to the browser and hide them with CSS. Scope every identifier lookup to the authenticated participant and group. Use secure session cookies and appropriate CSRF protection for cookie-authenticated mutations.
 
@@ -246,17 +246,17 @@ Enforce access in server queries and responses, including exports and debug endp
 
 Use a discriminated schema that restricts the allowed field, operator, and value combinations.
 
-| Category | Field | Value | Evaluation |
-| --- | --- | --- | --- |
-| Hard | `budget_per_person_cents` | Nonnegative integer | Candidate estimate must be at most the budget |
-| Hard | `subway_distance_meters` | Nonnegative integer | Candidate distance must be at most the maximum |
-| Hard | `reservation_slot` | Explicit timestamp and timezone context | Fixture must support the requested slot |
-| Non-negotiable | `shellfish_safe` | `true` | Candidate must have affirmative fixture evidence |
-| Non-negotiable | `wheelchair_accessible` | `true` | Candidate must have affirmative fixture evidence |
-| Non-negotiable | `dietary_requirement` | Supported enumerated value | Candidate must explicitly support it |
-| Soft | `quiet` | Weight from 0 to 1 | Use normalized quiet score |
-| Soft | `atmosphere` | Weight from 0 to 1 | Use normalized atmosphere score |
-| Soft | `subway_proximity` | Weight from 0 to 1 | Use normalized proximity score |
+| Category       | Field                     | Value                                   | Evaluation                                       |
+| -------------- | ------------------------- | --------------------------------------- | ------------------------------------------------ |
+| Hard           | `budget_per_person_cents` | Nonnegative integer                     | Candidate estimate must be at most the budget    |
+| Hard           | `subway_distance_meters`  | Nonnegative integer                     | Candidate distance must be at most the maximum   |
+| Hard           | `reservation_slot`        | Explicit timestamp and timezone context | Fixture must support the requested slot          |
+| Non-negotiable | `shellfish_safe`          | `true`                                  | Candidate must have affirmative fixture evidence |
+| Non-negotiable | `wheelchair_accessible`   | `true`                                  | Candidate must have affirmative fixture evidence |
+| Non-negotiable | `dietary_requirement`     | Supported enumerated value              | Candidate must explicitly support it             |
+| Soft           | `quiet`                   | Weight from 0 to 1                      | Use normalized quiet score                       |
+| Soft           | `atmosphere`              | Weight from 0 to 1                      | Use normalized atmosphere score                  |
+| Soft           | `subway_proximity`        | Weight from 0 to 1                      | Use normalized proximity score                   |
 
 Do not accept arbitrary model-generated fields or executable expressions. Unknown requirements produce a clarification or an unsupported-condition result, not an ignored constraint. Unknown safety metadata fails eligibility when the corresponding non-negotiable requirement is present.
 
@@ -302,13 +302,13 @@ Store source text spans privately when useful for correction. The model's confid
 
 Use synthetic data with five candidates. Resolve merchant addresses from a deployment-generated map; never use placeholder addresses in a live execution. Scores below are on a 0-100 scale, with larger values better except distance.
 
-| ID | Name | Meal price/person | Deposit/group | Shellfish fixture status | Subway distance | Quiet | Atmosphere | Availability |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| A | KAGAMI (Restaurant A) | $32 | 45 USDC | Unknown | 150 m | 90 | 95 | Available |
-| B | Restaurant B | $24 | 36 USDC | Confirmed safe in mock data | 300 m | 70 | 70 | Available |
-| C | Restaurant C | $22 | 30 USDC | Not safe in mock data | 100 m | 80 | 85 | Unavailable |
-| D | Restaurant D | $28 | 42 USDC | Confirmed safe in mock data | 900 m | 50 | 60 | Available |
-| E | Restaurant E | $30 | 45 USDC | Unknown | 200 m | 85 | 90 | Unavailable |
+| ID  | Name                  | Meal price/person | Deposit/group | Shellfish fixture status    | Subway distance | Quiet | Atmosphere | Availability |
+| --- | --------------------- | ----------------- | ------------- | --------------------------- | --------------- | ----- | ---------- | ------------ |
+| A   | KAGAMI (Restaurant A) | $32               | 45 USDC       | Unknown                     | 150 m           | 90    | 95         | Available    |
+| B   | Restaurant B          | $24               | 36 USDC       | Confirmed safe in mock data | 300 m           | 70    | 70         | Available    |
+| C   | Restaurant C          | $22               | 30 USDC       | Not safe in mock data       | 100 m           | 80    | 85         | Unavailable  |
+| D   | Restaurant D          | $28               | 42 USDC       | Confirmed safe in mock data | 900 m           | 50    | 60         | Available    |
+| E   | Restaurant E          | $30               | 45 USDC       | Unknown                     | 200 m           | 85    | 90         | Unavailable  |
 
 Current `restaurants-v2` presents Restaurant A as KAGAMI in the application. The $32 table meal estimate is a synthetic fixture assumption, not a price verified by the separate fictional KAGAMI concept page. Its $148 omakase is a different offering. KAGAMI's shellfish-safety field is unknown, so a confirmed shellfish-safety requirement excludes it. Existing `restaurants-v1` evidence retains the original Restaurant A label and conditions.
 
@@ -349,14 +349,14 @@ This normalizes each participant's influence so adding more soft-preference fiel
 
 Use these six synthetic baseline submissions in the scripted demo. Each person submits through a separate authenticated account and confirms the parsed result:
 
-| Participant | Private example input | Confirmed interpretation |
-| --- | --- | --- |
-| Alice | `I can spend at most $35 per person, and I would like somewhere quiet.` | Hard budget at most $35; soft quiet |
-| Bob | `I would prefer to be near a subway station.` | Soft subway proximity; the KAGAMI demo does not claim allergy safety |
-| Charlie | `Atmosphere matters most to me.` | Soft atmosphere |
-| Dana | `I want a calm place where we can talk.` | Soft quiet |
-| Erin | `I prefer a place with a strong atmosphere.` | Soft atmosphere |
-| Farah | `Easy subway access would make the evening simpler.` | Soft subway proximity |
+| Participant | Private example input                                                   | Confirmed interpretation                                             |
+| ----------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Alice       | `I can spend at most $35 per person, and I would like somewhere quiet.` | Hard budget at most $35; soft quiet                                  |
+| Bob         | `I would prefer to be near a subway station.`                           | Soft subway proximity; the KAGAMI demo does not claim allergy safety |
+| Charlie     | `Atmosphere matters most to me.`                                        | Soft atmosphere                                                      |
+| Dana        | `I want a calm place where we can talk.`                                | Soft quiet                                                           |
+| Erin        | `I prefer a place with a strong atmosphere.`                            | Soft atmosphere                                                      |
+| Farah       | `Easy subway access would make the evening simpler.`                    | Soft subway proximity                                                |
 
 - Baseline: Alice confirms a $35 maximum and quiet preference; Bob confirms subway proximity; Charlie confirms atmosphere preference; Dana prefers quiet conversation; Erin prefers atmosphere; Farah prefers subway proximity. KAGAMI (Restaurant A) wins.
 - Lower budget: Alice confirms a $25 maximum. KAGAMI and D fail the budget, C and E are unavailable, and B wins.
@@ -374,12 +374,12 @@ The adapter must provide timeouts, bounded output sizes, schema validation, sani
 
 ### 8.2 Flow Definitions
 
-| Flow | Input | Output | Default frequency |
-| --- | --- | --- | --- |
-| `constraint_extraction` | One participant's latest private input and supported schema | Validated extraction envelope | Once per new preference revision |
-| `candidate_analysis` | Compact public merchant metadata | Optional semantic summary, never authoritative safety facts | Disabled for already structured fixtures |
-| `decision_explanation` | Sanitized deterministic winner, ranking, and approved public facts | Short group-safe explanation | Once per proposal revision |
-| `clarification` | Minimal unresolved ambiguity | A focused question | Only when necessary; prefer extraction-provided questions |
+| Flow                    | Input                                                              | Output                                                      | Default frequency                                         |
+| ----------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------- |
+| `constraint_extraction` | One participant's latest private input and supported schema        | Validated extraction envelope                               | Once per new preference revision                          |
+| `candidate_analysis`    | Compact public merchant metadata                                   | Optional semantic summary, never authoritative safety facts | Disabled for already structured fixtures                  |
+| `decision_explanation`  | Sanitized deterministic winner, ranking, and approved public facts | Short group-safe explanation                                | Once per proposal revision                                |
+| `clarification`         | Minimal unresolved ambiguity                                       | A focused question                                          | Only when necessary; prefer extraction-provided questions |
 
 Record all flow categories in the dashboard, including zero calls and `not used` for candidate analysis. Candidate analysis is optional because the catalog is already structured. A clean baseline normally uses six extraction calls and one explanation call, excluding justified clarifications, retries, or corrections. This is a call budget, not measured evidence.
 
@@ -401,10 +401,13 @@ Record all flow categories in the dashboard, including zero calls and `not used`
 ```typescript
 type KilnUsageRecord = {
   runId: string;
-  requestId: string;          // Local correlation ID
+  requestId: string; // Local correlation ID
   providerRequestId: string | null;
-  flow: "constraint_extraction" | "candidate_analysis"
-      | "decision_explanation" | "clarification";
+  flow:
+    | "constraint_extraction"
+    | "candidate_analysis"
+    | "decision_explanation"
+    | "clarification";
   model: "qwen3-32b";
   attempt: number;
   status: "success" | "provider_error" | "validation_error";
@@ -620,22 +623,22 @@ Application workflow status and contract status are separate concepts. `AUTHORIZ
 
 ### 11.2 Minimum Database Entities
 
-| Entity | Essential fields and constraints |
-| --- | --- |
-| `groups` | ID, name, reservation slot, timezone, membership version, creator, timestamps |
-| `participants` | ID, group ID, verified wallet, display name; unique group/wallet |
-| `preference_submissions` | ID, participant ID, revision, private raw text, timestamps |
-| `parsed_constraints` | Submission ID, schema/prompt versions, validated JSON, confirmation timestamp |
-| `candidate_versions` | Fixture version, immutable candidate snapshot, deployment merchant mapping |
-| `evaluations` | Group/revision IDs, scoring version, private results, sanitized results, selected candidate |
-| `decisions` | Evaluation ID, complete policy, hash, chain/contract/decision IDs, chain status |
-| `approvals` | Decision ID, participant wallet, transaction/event identity; unique decision/participant |
-| `contributions` | Decision ID, participant, base-unit amount, confirmed event identity |
-| `executions` | Attempt ID, decision ID, requested destination/amount, outcome, error code, optional tx hash |
-| `refunds` | Decision ID, participant, entitlement, confirmed claim event |
-| `kiln_usage` | Run, flow, attempt, provider/local request IDs, nullable counts, versions, timestamps |
-| `chain_events` | Chain, contract, transaction hash, log index, block number/hash; unique event identity |
-| `scenario_runs` | Run ID, scenario, changed conditions, versions, status, evidence references |
+| Entity                   | Essential fields and constraints                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `groups`                 | ID, name, reservation slot, timezone, membership version, creator, timestamps                |
+| `participants`           | ID, group ID, verified wallet, display name; unique group/wallet                             |
+| `preference_submissions` | ID, participant ID, revision, private raw text, timestamps                                   |
+| `parsed_constraints`     | Submission ID, schema/prompt versions, validated JSON, confirmation timestamp                |
+| `candidate_versions`     | Fixture version, immutable candidate snapshot, deployment merchant mapping                   |
+| `evaluations`            | Group/revision IDs, scoring version, private results, sanitized results, selected candidate  |
+| `decisions`              | Evaluation ID, complete policy, hash, chain/contract/decision IDs, chain status              |
+| `approvals`              | Decision ID, participant wallet, transaction/event identity; unique decision/participant     |
+| `contributions`          | Decision ID, participant, base-unit amount, confirmed event identity                         |
+| `executions`             | Attempt ID, decision ID, requested destination/amount, outcome, error code, optional tx hash |
+| `refunds`                | Decision ID, participant, entitlement, confirmed claim event                                 |
+| `kiln_usage`             | Run, flow, attempt, provider/local request IDs, nullable counts, versions, timestamps        |
+| `chain_events`           | Chain, contract, transaction hash, log index, block number/hash; unique event identity       |
+| `scenario_runs`          | Run ID, scenario, changed conditions, versions, status, evidence references                  |
 
 Use database types capable of storing full EVM integer values, or validated decimal text. Do not use floating-point columns for token amounts.
 
@@ -656,21 +659,21 @@ Use database types capable of storing full EVM integer values, or validated deci
 
 The following routes are proposed contracts between the frontend and server. Freeze exact request/response schemas before independent implementation.
 
-| Method and route | Responsibility | Key rule |
-| --- | --- | --- |
-| `POST /api/groups` | Create group and reservation context | Authenticated creator |
-| `POST /api/groups/:id/join` | Join with valid invitation | Verify identity and capacity |
-| `GET /api/groups/:id` | Lobby and shared progress | Never return private inputs |
-| `POST /api/groups/:id/preferences` | Submit own new revision | Ignore any client attempt to select another owner |
-| `GET /api/groups/:id/preferences/me` | Read own raw/parsed input | Current participant only |
-| `POST /api/groups/:id/preferences/confirm` | Confirm or correct own parsed revision | Validate supported schema |
-| `POST /api/groups/:id/evaluations` | Evaluate frozen confirmed revisions | Idempotent per revision snapshot |
-| `GET /api/groups/:id/results` | Return sanitized results | No internal sensitive reason details |
-| `POST /api/groups/:id/decisions` | Build immutable policy proposal | Valid evaluation and membership snapshot |
-| `GET /api/decisions/:id` | Return policy and reconciled chain state | Group access or sanitized evidence view |
-| `POST /api/decisions/:id/executions` | Request bounded agent execution | Authorized group action; server signer remains constrained on-chain |
-| `GET /api/decisions/:id/history` | Execution, approval, refund history | Distinguish submitted and confirmed |
-| `GET /api/evidence/runs/:id` | Sanitized run evidence | Public only for explicitly published synthetic runs |
+| Method and route                           | Responsibility                           | Key rule                                                            |
+| ------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/groups`                         | Create group and reservation context     | Authenticated creator                                               |
+| `POST /api/groups/:id/join`                | Join with valid invitation               | Verify identity and capacity                                        |
+| `GET /api/groups/:id`                      | Lobby and shared progress                | Never return private inputs                                         |
+| `POST /api/groups/:id/preferences`         | Submit own new revision                  | Ignore any client attempt to select another owner                   |
+| `GET /api/groups/:id/preferences/me`       | Read own raw/parsed input                | Current participant only                                            |
+| `POST /api/groups/:id/preferences/confirm` | Confirm or correct own parsed revision   | Validate supported schema                                           |
+| `POST /api/groups/:id/evaluations`         | Evaluate frozen confirmed revisions      | Idempotent per revision snapshot                                    |
+| `GET /api/groups/:id/results`              | Return sanitized results                 | No internal sensitive reason details                                |
+| `POST /api/groups/:id/decisions`           | Build immutable policy proposal          | Valid evaluation and membership snapshot                            |
+| `GET /api/decisions/:id`                   | Return policy and reconciled chain state | Group access or sanitized evidence view                             |
+| `POST /api/decisions/:id/executions`       | Request bounded agent execution          | Authorized group action; server signer remains constrained on-chain |
+| `GET /api/decisions/:id/history`           | Execution, approval, refund history      | Distinguish submitted and confirmed                                 |
+| `GET /api/evidence/runs/:id`               | Sanitized run evidence                   | Public only for explicitly published synthetic runs                 |
 
 Participant approval/contribution and refund transactions are signed in the participant's wallet. No API endpoint may fake those actions by inserting an approval row. The server may accept a transaction hash as a reconciliation hint, then independently verify its chain, contract, sender, method, and receipt.
 
@@ -682,16 +685,16 @@ Keep the ordinary group workspace and the guided `/demo` experience separate. Us
 
 ### 13.1 Required Views
 
-| Route | Content and interactions | Essential states |
-| --- | --- | --- |
-| `/` | Existing groups and create-group action | Empty, loading, error |
-| `/group/new` | Group name, reservation date/time, invitation creation | Invalid slot, submitting, created |
-| `/group/[id]` | Six members, submission/confirmation progress | Waiting, complete, membership locked |
-| `/group/[id]/preferences` | Private text, extracted interpretation, correction and confirmation | Parsing, clarification, provider failure, confirmed |
-| `/group/[id]/results` | Eligible/rejected candidates, sanitized reasons, winner | No match, proposal stale, explanation fallback |
-| `/group/[id]/approve` | Complete financial policy and wallet contribution action | Wrong chain/account, allowance needed, pending, confirmed |
-| `/group/[id]/execution` | Contract policy, bounded attempts, transaction evidence, refund status | Inactive, active, rejected, pending, completed, expired |
-| `/evidence` | Run selector, per-flow usage, chain records, changed-condition comparison | Missing evidence, partial usage, complete run |
+| Route                     | Content and interactions                                                  | Essential states                                          |
+| ------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `/`                       | Existing groups and create-group action                                   | Empty, loading, error                                     |
+| `/group/new`              | Group name, reservation date/time, invitation creation                    | Invalid slot, submitting, created                         |
+| `/group/[id]`             | Six members, submission/confirmation progress                             | Waiting, complete, membership locked                      |
+| `/group/[id]/preferences` | Private text, extracted interpretation, correction and confirmation       | Parsing, clarification, provider failure, confirmed       |
+| `/group/[id]/results`     | Eligible/rejected candidates, sanitized reasons, winner                   | No match, proposal stale, explanation fallback            |
+| `/group/[id]/approve`     | Complete financial policy and wallet contribution action                  | Wrong chain/account, allowance needed, pending, confirmed |
+| `/group/[id]/execution`   | Contract policy, bounded attempts, transaction evidence, refund status    | Inactive, active, rejected, pending, completed, expired   |
+| `/evidence`               | Run selector, per-flow usage, chain records, changed-condition comparison | Missing evidence, partial usage, complete run             |
 
 ### 13.2 Approve and Contribute Experience
 
@@ -799,20 +802,20 @@ General logs may contain IDs, status, sanitized errors, durations, and public tr
 
 ### 16.1 Contract Tests
 
-| Area | Required checks |
-| --- | --- |
-| Creation | Valid policy; duplicate ID; invalid addresses; duplicate participants; wrong threshold; past expiry; inconsistent amount/caps/funding |
-| Approval | Member only; correct expected hash; exact contribution; duplicate approval blocked; allowance failure leaves state unchanged |
-| Activation | First through fifth contributions remain funding; sixth valid contribution activates exactly once |
-| Authorization | Non-executor blocked; payment before activation blocked; wrong decision blocked |
-| Spending | Valid payment succeeds; wrong merchant rejected; excessive deposit rejected; incorrect exact amount rejected; second payment rejected |
-| Expiry | Allowed before expiry; rejected exactly at and after expiry; expiry finalization enables refunds |
-| Cancellation | Participant veto before payment; outsider blocked; cancellation after completion blocked |
-| Refund | Baseline 2.5 each; B scenario 4 each; partial-funding full refund; deterministic remainder; duplicate claim blocked |
-| Isolation | Two funded decisions cannot spend or refund each other's balance; unsolicited transfer creates no credit |
-| Transfer failure | Failed payment/refund reverts accounting changes; reentrancy cannot duplicate payment or claim |
-| Hashes | Solidity and TypeScript agree; changing any policy field changes the hash |
-| Invariants | Spending never exceeds either applicable cap; spent plus refunded never exceeds contributions; total entitlements equal remainder |
+| Area             | Required checks                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Creation         | Valid policy; duplicate ID; invalid addresses; duplicate participants; wrong threshold; past expiry; inconsistent amount/caps/funding |
+| Approval         | Member only; correct expected hash; exact contribution; duplicate approval blocked; allowance failure leaves state unchanged          |
+| Activation       | First through fifth contributions remain funding; sixth valid contribution activates exactly once                                     |
+| Authorization    | Non-executor blocked; payment before activation blocked; wrong decision blocked                                                       |
+| Spending         | Valid payment succeeds; wrong merchant rejected; excessive deposit rejected; incorrect exact amount rejected; second payment rejected |
+| Expiry           | Allowed before expiry; rejected exactly at and after expiry; expiry finalization enables refunds                                      |
+| Cancellation     | Participant veto before payment; outsider blocked; cancellation after completion blocked                                              |
+| Refund           | Baseline 2.5 each; B scenario 4 each; partial-funding full refund; deterministic remainder; duplicate claim blocked                   |
+| Isolation        | Two funded decisions cannot spend or refund each other's balance; unsolicited transfer creates no credit                              |
+| Transfer failure | Failed payment/refund reverts accounting changes; reentrancy cannot duplicate payment or claim                                        |
+| Hashes           | Solidity and TypeScript agree; changing any policy field changes the hash                                                             |
+| Invariants       | Spending never exceeds either applicable cap; spent plus refunded never exceeds contributions; total entitlements equal remainder     |
 
 Use unit tests for explicit errors and fuzz/invariant tests for accounting and call sequences. Since the MVP permits only one payment, prove cumulative-spend safety through invariants rather than adding unsupported multi-payment behavior solely for testing.
 
@@ -886,7 +889,7 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 
 ### 17.3 Command Contract to Implement
 
-Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm build`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, `pnpm demo:fund`, the Explore Demo commands, and `pnpm groups:worker-check` / `pnpm groups:worker` in `package.json`. `pnpm check` combines type checking, formatting checks, and application tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. Ordinary-group wallet and worker code exists; a complete live acceptance run remains pending.
+Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm build`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, `pnpm demo:fund`, the Explore Demo commands, and `pnpm groups:worker-check` / `pnpm groups:worker` in `package.json`. `pnpm check` combines type checking, formatting checks, and application tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. Ordinary-group live acceptance completed for three controlled scenarios; `demo:groups-server`, `demo:groups-acceptance` and `demo:groups-verify` reproduce and verify their records. See `docs/GROUP_ACCEPTANCE.md`.
 
 The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
 
@@ -895,17 +898,17 @@ Additional implemented blockchain preparation and rehearsal commands are
 `pnpm demo:gas-topup`, and `pnpm demo:chain`. See `docs/CHAIN_REHEARSAL.md`
 for the completed baseline, read-only verification, and exact resume behavior.
 
-| Script | Intended behavior |
-| --- | --- |
-| `dev` | Start the web application |
-| `build` | Produce the deployable application build |
-| `lint` | Run configured lint rules |
-| `typecheck` | Validate TypeScript contracts |
-| `test` | Run decision and application tests |
-| `test:e2e` | Run browser integration tests |
-| `db:migrate` | Apply versioned migrations |
-| `demo:preflight` | Validate configuration and external prerequisites |
-| `demo:baseline` | Run the baseline with evidence |
+| Script            | Intended behavior                                  |
+| ----------------- | -------------------------------------------------- |
+| `dev`             | Start the web application                          |
+| `build`           | Produce the deployable application build           |
+| `lint`            | Run configured lint rules                          |
+| `typecheck`       | Validate TypeScript contracts                      |
+| `test`            | Run decision and application tests                 |
+| `test:e2e`        | Run browser integration tests                      |
+| `db:migrate`      | Apply versioned migrations                         |
+| `demo:preflight`  | Validate configuration and external prerequisites  |
+| `demo:baseline`   | Run the baseline with evidence                     |
 | `demo:conditions` | Run baseline plus both changed-condition scenarios |
 
 ## 18. Implementation Sequence and Integration Gates
@@ -950,42 +953,42 @@ Prioritize real Kiln integration, chain enforcement, funding/refunds, and reprod
 
 ## 19. Self-Assignment Task Register
 
-No person was preassigned a role or task in the initial plan. Sage has since claimed the blockchain contract and deployment tasks below. The Owner cell records a person's name; the Status cell records progress. Reviewer cells remain blank until someone accepts a review. A contributor claims another task by writing their own name, updating the status, and linking the implementation artifact when available. Claiming a task does not assign that person every task in the same area.
+No person was preassigned a role or task in the initial plan. Sage has claimed all tasks in the register below. The Owner cell records a person's name; the Status cell records progress. Reviewer cells remain blank until someone accepts a review. A contributor claims another task by writing their own name, updating the status, and linking the implementation artifact when available. Sage is the owner for each task; the status still records its actual progress.
 
 Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If multiple people collaborate on one task, list their names only after they agree. A reviewer adds their own name when accepting the review. Keep dependencies visible and document blockers with the exact missing input or prerequisite.
 
-| ID | Work item | Deliverable and completion criterion | Depends on | Owner | Reviewer | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| T01 | Project scaffold | Tooling, lockfile, CI, and env template ready; Next.js app scaffold and app lint/build remain | None | | | In progress |
-| T02 | Shared schemas | Primitives, extraction, statuses, public participant, errors, and usage ready; full group/candidate/policy/execution/evidence schemas remain | T01 | | | In progress |
-| T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In review |
-| T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In review |
-| T05 | Escrow core | Creation, membership, funding, activation, and immutable policy | T03, T04 | Sage | | In review |
-| T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
-| T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
-| T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Eight versioned migrations cover policies, execution/history, explanation/usage, and group merchant conditions; development migration and persistence rehearsals have passed, while full acceptance remains | T02 | | | In progress |
-| T10 | Identity and privacy | EOA SIWE nonce/session and capped invites implemented; signed HTTP login, replay, Origin, and outsider access tested; contract-wallet and deployment hardening remain | T09 | | | In progress |
-| T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; live synthetic extractions passed and authenticated private submission is connected | T02 | | | In review |
-| T12 | Usage and efficiency | Per-attempt extraction and explanation persistence, authorized per-flow usage/cache-hit API, and a live synthetic development rehearsal are implemented; three-run aggregation and efficiency comparison remain | T09, T11 | | | In progress |
-| T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
-| T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; ordinary-group evaluation API connected | T13 | | | In review |
-| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; full live application run pending | T10, T11 | | | In progress |
-| T16 | Explanation flow | Privacy-safe reason selection, labeled deterministic fallback, persistence, and authenticated API are implemented; migration and live synthetic development rehearsal passed, full acceptance remains | T12, T14 | | | In progress |
-| T17 | Proposal APIs | Frozen revision snapshot, public saved evaluation, and immutable off-chain policy rehearsed with synthetic inputs; browser-wallet on-chain registration is connected | T03, T14, T15 | | | In progress |
-| T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
-| T19 | Results and policy UI | Saved candidate outcomes, no-match state, policy review, browser-wallet actions, and privacy-safe explanation panel are implemented; full live acceptance remains | T16, T17 | | | In progress |
-| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks | T08 | Sage | | In review |
-| T21 | Wallet contribution UI | Ordinary-group registration, exact allowance, own-wallet contribution and canonical chain progress implemented; disposable Anvil rehearsal passed; six-user browser acceptance remains | T19, T20 | | | In progress |
-| T22 | Agent execution | Opt-in bounded payment worker and signed transaction journal implemented; full ordinary-group live execution and invalid-attempt evidence remain | T06, T12, T17, T20 | | | In progress |
-| T23 | Chain reconciliation | Worker receipt/event ingestion, canonical snapshots, and restart handling implemented; execution migration applied on dev, Anvil lost-broadcast recovery and Neon persistence/replay rehearsals passed; live ordinary-group acceptance remains | T09, T20 | | | In progress |
-| T24 | Execution and refund UI | Cancellation and contract-derived refunds on approval page; execution page displays stored snapshot, payment status, and events; full live flow remains | T07, T21-T23 | | | In progress |
-| T25 | Evidence view/export | Published evidence view separates blockchain baseline, live Kiln smoke, and deterministic fixtures; correlated full-run export remains | T12, T23, T24 | | | In progress |
-| T26 | Baseline demo script | Direct-contract payment/refund rehearsal verified in `docs/evidence/baseline-001.json`; real Kiln and full application workflow remain | T15, T17, T20, T22, T23 | | | Unclaimed |
-| T27 | Changed-condition scripts | Complete lower-budget and changed-merchant runs with comparison | T26 | | | Unclaimed |
-| T28 | Integration and privacy QA | Cross-session tests, failure recovery, access-control verification | T18-T27 | | | Unclaimed |
-| T29 | README and submission | Accurate setup, architecture, evidence, limitations, prior-work disclosure | T25-T28 | | | Unclaimed |
-| T30 | Final rehearsal | Reproducible deployed demo and recorded actual test outcomes | T29 | | | Unclaimed |
+| ID  | Work item                  | Deliverable and completion criterion                                                                                                                                                               | Depends on              | Owner | Reviewer | Status      |
+| --- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ----- | -------- | ----------- |
+| T01 | Project scaffold           | Tooling, lockfile, CI, and env template ready; Next.js app scaffold and app lint/build remain                                                                                                      | None                    | Sage  |          | In progress |
+| T02 | Shared schemas             | Primitives, extraction, statuses, public participant, errors, and usage ready; full group/candidate/policy/execution/evidence schemas remain                                                       | T01                     | Sage  |          | In progress |
+| T03 | Policy encoding            | Final ABI field order and cross-language hash test vectors                                                                                                                                         | T02                     | Sage  |          | In review   |
+| T04 | Mock token                 | Six-decimal mock token and restricted demo deployment configuration                                                                                                                                | T01                     | Sage  |          | In review   |
+| T05 | Escrow core                | Creation, membership, funding, activation, and immutable policy                                                                                                                                    | T03, T04                | Sage  |          | In review   |
+| T06 | Payment enforcement        | Shared validation, custom errors, one-payment execution, events                                                                                                                                    | T05                     | Sage  |          | In review   |
+| T07 | Cancellation and refunds   | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention                                                                                                                   | T05, T06                | Sage  |          | In review   |
+| T08 | Contract verification      | Unit and invariant tests for the Section 16 contract matrix                                                                                                                                        | T05-T07                 | Sage  |          | In review   |
+| T09 | Database and migrations    | Eight migrations applied to dev-preferences; live preference, policy, explanation, usage, execution journal and history persistence verified; production unmigrated                                | T02                     | Sage  |          | In review   |
+| T10 | Identity and privacy       | Six distinct EOA SIWE sessions, replay/Origin/invite controls, outsider rejection and cross-member privacy verified; production hardening and contract-wallet support remain separate              | T09                     | Sage  |          | In review   |
+| T11 | Kiln adapter               | Implemented server-side `qwen3-32b` adapter; live synthetic extractions passed and authenticated private submission is connected                                                                   | T02                     | Sage  |          | In review   |
+| T12 | Usage and efficiency       | Three live groups report 31 provider attempts by flow, failures/retries, three explanation cache hits, 41,819 measured tokens and unknown energy; correlated exports published                     | T09, T11                | Sage  |          | In review   |
+| T13 | Restaurant fixtures        | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata                                                                                     | T02                     | Sage  |          | In review   |
+| T14 | Decision engine            | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; ordinary-group evaluation API connected                                                             | T13                     | Sage  |          | In review   |
+| T15 | Preference workflow        | Six separate authenticated clients per group completed live extraction and explicit confirmation; failed revision recovery, stale writes, proposal locks and privacy verified                      | T10, T11                | Sage  |          | In review   |
+| T16 | Explanation flow           | Three live privacy-safe explanations persisted; repeated requests used the cache; public-fact-only selection and labeled fallback tested                                                           | T12, T14                | Sage  |          | In review   |
+| T17 | Proposal APIs              | Three distinct frozen evaluations and immutable policies registered on Sepolia; all six clients saw each identical policy hash                                                                     | T03, T14, T15           | Sage  |          | In review   |
+| T18 | Group and input UI         | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain                             | T10, T15                | Sage  |          | In progress |
+| T19 | Results and policy UI      | Saved results, policy review, wallet actions and private explanation panel implemented; full HTTP acceptance passed, manual presentation-browser review remains                                    | T16, T17                | Sage  |          | In progress |
+| T20 | Deployment                 | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks                            | T08                     | Sage  |          | In review   |
+| T21 | Wallet contribution UI     | Six distinct wallets contributed through the shared transaction builder in each live group; Anvil and canonical RPC checks passed; independent browser-user review remains                         | T19, T20                | Sage  |          | In progress |
+| T22 | Agent execution            | Three live bounded payments and historical invalid-request checks verified; signed journals preserve the original payment across failures                                                          | T06, T12, T17, T20      | Sage  |          | In review   |
+| T23 | Chain reconciliation       | Live receipts/events match member-only DB/API history; lost-broadcast and confirmation-write failures recovered in new processes; replay kept one payment and six refunds per group                | T09, T20                | Sage  |          | In review   |
+| T24 | Execution and refund UI    | All 18 live refund transactions match contract entitlements and persisted history; execution/refund UI implemented, presentation-browser walkthrough remains                                       | T07, T21-T23            | Sage  |          | In progress |
+| T25 | Evidence view/export       | Three correlated synthetic live exports and allowlisted /evidence projections added; independent RPC verifier checks calldata, receipts, finality and policy/usage links                           | T12, T23, T24           | Sage  |          | In review   |
+| T26 | Baseline demo script       | Budget-and-quiet live baseline selected A, rejected 80, paid 45 and refunded 2.5 per member; linked Kiln/DB/Sepolia evidence in group-acceptance-001-baseline.json                                 | T15, T17, T20, T22, T23 | Sage  |          | In review   |
+| T27 | Changed-condition scripts  | Fresh lower-budget and merchant-excluded live groups selected B, paid 36 and refunded 4 per member; excluded-A rejection and separate policies recorded                                            | T26                     | Sage  |          | In review   |
+| T28 | Integration and privacy QA | Twelve access/privacy checks per group, six isolated identities, live failed-revision recovery and two cross-process payment recovery cases passed; Anvil/Neon fault tests supplement live records | T18-T27                 | Sage  |          | In review   |
+| T29 | README and submission      | README records actual model, calls/tokens, three payments/refunds and tested scope; final team/prior-work disclosure and presentation-machine details remain                                       | T25-T28                 | Sage  |          | In progress |
+| T30 | Final rehearsal            | Reproducible deployed demo and recorded actual test outcomes                                                                                                                                       | T29                     | Sage  |          | Claimed     |
 
 ### 19.1 Task Handoff Template
 
@@ -1015,7 +1018,7 @@ Next integration step:
 
 ## 20. README and Submission Checklist
 
-The `README.md` remains a draft. It records verified deployment addresses, live Kiln smoke usage, direct-contract baseline transactions, and a browser-wallet Explore baseline. Correlated three-scenario acceptance usage and transactions, energy measurements, and final team contributions remain pending. Update it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
+The `README.md` records the deployed addresses, older independent rehearsals, and three correlated ordinary-group acceptance records with observed Kiln usage, payments and refunds. Energy remains unmeasured. Final team/prior-work disclosure and the actual presentation-MacBook rehearsal remain open. Keep its selected-function sentence unchanged unless the product function changes.
 
 The final README should contain:
 
@@ -1034,51 +1037,53 @@ The final README should contain:
 13. Pre-built versus hackathon-built work, supported by available records.
 14. Team contributions based on actual self-assigned completed work.
 
-No Git history was available during this review. Do not infer that every future file was written during the hackathon. Record starting assets, libraries, templates, and the actual development timeline when the repository is initialized.
+No Git history was available during the initial architecture review. Use the current repository history and actual event dates to document starting assets, libraries, templates and the development timeline; do not assume all implementation happened during the hackathon.
 
 ## 21. Definition of Done
 
-- [ ] A user can create a group and at least six participants can join through verified identities.
-- [ ] Private input and structured constraints are inaccessible to other participants.
-- [ ] Live Kiln `qwen3-32b` parses actual submitted preferences.
-- [ ] Parsed output is schema-validated and participant-confirmed.
-- [ ] Deterministic evaluation selects A/B/B for the defined fixture scenarios.
-- [ ] No-match and unresolved-constraint cases cannot create a fundable policy.
-- [ ] Shared explanations do not expose private restrictions by default.
-- [ ] Every participant reviews the same complete immutable financial policy.
-- [ ] Solidity and TypeScript produce matching policy hashes.
-- [ ] Six unique approved contributions activate the decision on-chain.
-- [ ] Invalid amounts, recipients, callers, states, and expired policies cannot move funds.
-- [ ] The invalid baseline attempt records `MAX_DEPOSIT_EXCEEDED` accurately.
-- [ ] A real valid payment succeeds with a receipt and matching event/history entry.
-- [ ] A second payment cannot bypass the single-payment rule.
-- [ ] Participants recover the correct unused balance without duplicate claims.
-- [ ] Cancellation and expiry return funds even if only one or two people contributed.
-- [ ] Concurrent decisions have isolated accounting.
-- [ ] Usage is reported by flow with retries, cache hits, and unknown metrics distinguished.
-- [ ] Baseline plus two changed-condition full runs produce correlated evidence.
-- [ ] The changed-merchant run records `MERCHANT_NOT_ALLOWED` before its valid payment.
-- [ ] `/evidence` contains sanitized real records and truthful completeness indicators.
-- [ ] Contract, application, privacy, and appropriate end-to-end checks pass.
-- [ ] Pending transactions and interrupted database writes can be reconciled safely.
-- [ ] README has actual run instructions, actual deployment values, and accurate disclosure.
+Checked implementation items are supported by Windows automated authenticated-client acceptance, Neon rehearsals, and/or contract tests. They do not claim six independent humans, manual browser-wallet acceptance, an independent security review, or a presentation-MacBook run. The live input variant and measurement limits are recorded in `docs/GROUP_ACCEPTANCE.md`.
+
+- [x] A user can create a group and at least six participants can join through verified identities.
+- [x] Private input and structured constraints are inaccessible to other participants.
+- [x] Live Kiln `qwen3-32b` parses actual submitted preferences.
+- [x] Parsed output is schema-validated and participant-confirmed.
+- [x] Deterministic evaluation selects A/B/B for the defined fixture scenarios.
+- [x] No-match and unresolved-constraint cases cannot create a fundable policy.
+- [x] Shared explanations do not expose private restrictions by default.
+- [x] Every participant reviews the same complete immutable financial policy.
+- [x] Solidity and TypeScript produce matching policy hashes.
+- [x] Six unique approved contributions activate the decision on-chain.
+- [x] Invalid amounts, recipients, callers, states, and expired policies cannot move funds.
+- [x] The invalid baseline attempt records `MAX_DEPOSIT_EXCEEDED` accurately.
+- [x] A real valid payment succeeds with a receipt and matching event/history entry.
+- [x] A second payment cannot bypass the single-payment rule.
+- [x] Participants recover the correct unused balance without duplicate claims.
+- [x] Cancellation and expiry return funds even if only one or two people contributed.
+- [x] Concurrent decisions have isolated accounting.
+- [x] Usage is reported by flow with retries, cache hits, and unknown metrics distinguished.
+- [x] Baseline plus two changed-condition full runs produce correlated evidence.
+- [x] The changed-merchant run records `MERCHANT_NOT_ALLOWED` before its valid payment.
+- [x] `/evidence` contains sanitized real records and truthful completeness indicators.
+- [x] Contract, application, privacy, and appropriate end-to-end checks pass.
+- [x] Pending transactions and interrupted database writes can be reconciled safely.
+- [x] README has actual run instructions, actual deployment values, and accurate disclosure.
 - [ ] All three complete acceptance runs have been rehearsed on the presentation MacBook, with OS/architecture, tool versions, browser/wallet, commit, network, and evidence recorded.
-- [ ] No API keys, wallet secrets, fabricated transactions, or fabricated measurements are committed.
+- [x] No API keys, wallet secrets, fabricated transactions, or fabricated measurements are committed.
 
 ## 22. Open Prerequisites
 
 These prerequisites are tracked separately from completed integration work. Resolve remaining items during setup and record the outcome; a configured RPC or contract deployment does not imply the application is complete.
 
-| Prerequisite | Current status | Required resolution |
-| --- | --- | --- |
-| Kiln endpoint and authentication details | Official endpoint verified by two successful live extraction calls | Recheck credentials on the demo MacBook; see `docs/KILN.md` |
-| Kiln API key and model availability | `qwen3-32b` verified and confirmed by the project owner as the updated requirement on September 29, 2026 (KST) | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
-| Provider usage and NPU metrics | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable | Keep unknown energy null; do not claim measured NPU efficiency without evidence |
-| Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
-| Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
-| Runtime and persistent database | Neon Free project linked; no-change config deploy and read-only SQL connection verified; server-only connection strings in ignored `.env` | Implement and verify migrations, authenticated access controls, and preference persistence |
-| Solidity toolchain | Foundry v1.8.3 verified on Windows; presentation MacBook pending | Run the contract suite on the actual MacBook |
-| Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |
-| Submission timing and prior-work records | Not supplied | Confirm organizer rules and document actual work history |
+| Prerequisite                                  | Current status                                                                                                                             | Required resolution                                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Kiln endpoint and authentication details      | Live qwen3-32b verified in three ordinary groups: 31 provider attempts including recorded failures and retries                             | Recheck credentials on the demo MacBook; see docs/KILN.md                                                     |
+| Kiln API key and model availability           | `qwen3-32b` verified and confirmed by the project owner as the updated requirement on September 29, 2026 (KST)                             | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
+| Provider usage and NPU metrics                | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable                                                  | Keep unknown energy null; do not claim measured NPU efficiency without evidence                               |
+| Selected chain and RPC                        | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment                             | Recheck RPC availability and chain identity on the demo MacBook                                               |
+| Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map   | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal                                     |
+| Runtime and persistent database               | Neon dev-preferences has migrations 0001–0008; authenticated persistence, explanations, execution and history passed three live lifecycles | Rehearse from the MacBook; apply reviewed migrations separately before any production deployment              |
+| Solidity toolchain                            | Foundry v1.8.3 verified on Windows; presentation MacBook pending                                                                           | Run the contract suite on the actual MacBook                                                                  |
+| Event date and demo expiry                    | Run-dependent                                                                                                                              | Use explicit future values and test expiry boundaries                                                         |
+| Submission timing and prior-work records      | Not supplied                                                                                                                               | Confirm organizer rules and document actual work history                                                      |
 
-The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. A completed blockchain-only baseline, including decision/payment/refund transactions, is recorded in `docs/evidence/baseline-001.json`; it does not complete the full application acceptance runs. Keep missing acceptance evidence, inference token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.
+The deployment manifest records verified contract addresses and deployment transactions. Earlier blockchain-only evidence stays separate from the three ordinary-group live records in `docs/GROUP_ACCEPTANCE.md`. Those records correlate actual synthetic submissions, Kiln attempts, policy hashes, receipts, stored history and finality. Keep presentation-MacBook evidence, independent user testing and energy measurements explicitly pending until captured.

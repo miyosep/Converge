@@ -51,12 +51,13 @@ export function groupPaymentIntent(
     state.policyHash !== saved.policyHash ||
     !state.registered ||
     state.status !== 1 ||
-    state.approvals !== 6 ||
+    state.approvals !== policy.participants.length ||
     state.timestamp >= policy.expiry ||
     BigInt(state.contributed) !==
-      BigInt(policy.contributionPerParticipant) * 6n ||
+      BigInt(policy.contributionPerParticipant) *
+        BigInt(policy.participants.length) ||
     state.spent !== "0" ||
-    state.members.length !== 6 ||
+    state.members.length !== policy.participants.length ||
     !policy.participants.every((address) =>
       state.members.some(
         (member) =>

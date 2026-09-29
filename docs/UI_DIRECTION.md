@@ -17,16 +17,16 @@ PR #3 informed the structured condition review, submitted/confirmed progress, ca
 
 ## Implemented ordinary-group routes
 
-| Route                     | UI and data                                                                                                                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                       | Authenticated group list, empty/loading/retry states, and create-group navigation                                                              |
-| `/group/new`              | Existing wallet-authenticated group creation                                                                                                   |
-| `/group/[id]`             | Member lobby, confirmation progress, and workflow navigation                                                                                   |
-| `/group/[id]/preferences` | Existing private input, extraction review, correction, confirmation, and invitations                                                           |
-| `/group/[id]/results`     | Run evaluation after six confirmations; saved candidate comparison and no-match correction                                                      |
-| `/group/[id]/approve`     | Prepare/retrieve an immutable policy; inspect addresses, amounts, wallets, expiry and hash                                             |
-| `/group/[id]/execution`   | Member-only saved chain snapshot, receipt-backed event history, payment status, and refund actions when the worker has synchronized the policy |
-| `/evidence`               | Allowlisted published synthetic artifacts: Sepolia receipts, separate live Kiln smoke usage, and separate deterministic condition-change tests |
+| Route                     | UI and data                                                                                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                       | Authenticated group list, empty/loading/retry states, and create-group navigation                                                                                                                  |
+| `/group/new`              | Existing wallet-authenticated group creation                                                                                                                                                       |
+| `/group/[id]`             | Member lobby, confirmation progress, and workflow navigation                                                                                                                                       |
+| `/group/[id]/preferences` | Existing private input, extraction review, correction, confirmation, and invitations                                                                                                               |
+| `/group/[id]/results`     | Run evaluation after six confirmations; saved candidate comparison and no-match correction                                                                                                         |
+| `/group/[id]/approve`     | Prepare/retrieve an immutable policy; inspect addresses, amounts, wallets, expiry and hash                                                                                                         |
+| `/group/[id]/execution`   | Member-only saved chain snapshot, receipt-backed event history, payment status, and refund actions when the worker has synchronized the policy                                                     |
+| `/evidence`               | Three correlated synthetic live group records with finality labels, Kiln usage, access/recovery facts and Sepolia receipts; older smoke, blockchain-only and deterministic records remain separate |
 
 `GET /api/groups` lists only groups belonging to the authenticated wallet. `GET /api/groups/:id/overview` requires membership and returns group metadata, participant progress, and an allowlisted saved evaluation. It never returns raw preferences, participant-specific failure reasons, or the private evaluation snapshot.
 

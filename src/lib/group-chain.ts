@@ -6,12 +6,15 @@ import {
   type Address,
   type PublicClient,
 } from "viem";
-import walletJson from "./abi/convergeGroupWallet.json";
 import tokenJson from "./abi/mockUSDC.json";
-import { hashPolicy, policySchema, toContractPolicy } from "./policy.js";
+import {
+  hashPolicy,
+  policySchema,
+  toContractPolicy,
+  policyWalletAbi,
+} from "./signing-policy.js";
 import type { GroupPolicyConfig, SigningPolicy } from "./group-policy.js";
 
-const walletAbi = walletJson as Abi;
 const tokenAbi = tokenJson as Abi;
 export type GroupChainState = {
   policyHash: string;
@@ -42,6 +45,7 @@ export function verifyGroupSigningPolicy(
     throw new Error("POLICY_HASH_MISMATCH");
   if (
     policy.chainId !== config.chainId ||
+    policy.policyVersion !== (config.policyVersion ?? 1) ||
     (["verifyingContract", "token", "executor"] as const).some(
       (key) => policy[key].toLowerCase() !== config[key].toLowerCase(),
     )
@@ -65,6 +69,7 @@ export async function readGroupChain(
   confirmations = 2,
 ): Promise<GroupChainState> {
   const policy = verifyGroupSigningPolicy(saved, config, actor);
+  const walletAbi = policyWalletAbi(policy);
   if ((await client.getChainId()) !== policy.chainId)
     throw new Error("WRONG_CHAIN");
   const height = await client.getBlockNumber({ cacheTime: 0 });
@@ -158,6 +163,7 @@ export function groupChainTransaction(
   action: GroupChainAction,
 ) {
   const policy = verifyGroupSigningPolicy(saved, config, actor);
+  const walletAbi = policyWalletAbi(policy);
   if (
     state.policyHash !== saved.policyHash ||
     state.actor.toLowerCase() !== actor.toLowerCase()

@@ -75,7 +75,7 @@ Production storage must preserve this boundary and authorize access to per-user
 data. Provider billing semantics are documented under
 [usage and billing](https://kiln.bricksum.com/docs/en/usage-billing).
 
-## Remaining Integration
+## Current Integration
 
 Authenticated private submissions, persistent revisions, human corrections,
 explicit confirmations, and blocking of unresolved clarifications are connected
@@ -83,7 +83,10 @@ to the web app. The ordinary-group decision engine also saves public candidate
 results and prepares an immutable off-chain policy. The Results page now has a
 privacy-safe explanation flow and member-only usage aggregation; see
 [explanation and usage](EXPLANATION_USAGE.md). The worktree also contains an
-opt-in ordinary-group execution worker and receipt-backed history. Its full
-live acceptance run and the two changed-condition runs remain pending. The
-existing blockchain-only baseline predates these live calls and must not be
-labeled AI-driven retroactively.
+opt-in ordinary-group execution worker and receipt-backed history. Three live
+ordinary groups completed extraction, confirmation, explanation, payment and
+refunds; see [the correlated acceptance records](GROUP_ACCEPTANCE.md). They
+record 28 extraction attempts (18 successful, 10 failed), three successful
+explanations, three explanation-cache hits and 41,819 measured tokens. One failed
+revision required resubmission after bounded repair; it never entered a policy.
+The existing blockchain-only baseline predates these calls and remains separate.

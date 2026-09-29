@@ -24,7 +24,7 @@ type CandidateResult = {
 };
 export type Evaluation = {
   engineVersion: "decision-v1";
-  fixtureVersion: "restaurants-v1" | "restaurants-v2";
+  fixtureVersion: "restaurants-v1" | "restaurants-v2" | "restaurants-v3";
   status: EvaluationStatus;
   winnerId: string | null;
   ranking: string[];
@@ -145,7 +145,8 @@ export function evaluateDecision(value: unknown): Evaluation {
     if (
       deposit > BigInt(input.maxDeposit) ||
       deposit > BigInt(input.maxTotalSpend) ||
-      deposit > BigInt(input.contributionPerParticipant) * 6n
+      deposit >
+        BigInt(input.contributionPerParticipant) * BigInt(input.members.length)
     )
       general("DEPOSIT_UNAFFORDABLE");
     for (const revision of input.preferences)

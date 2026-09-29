@@ -85,11 +85,28 @@ export function GroupPolicyPanel({
     ["Decision ID", policy?.decisionId ?? "Not available"],
     ["Reservation reference", policy?.reservationReference ?? "Not available"],
   ];
+  const verificationLabels = new Set([
+    "Token address",
+    "Escrow contract",
+    "Executor",
+    "Policy hash",
+    "Decision ID",
+    "Reservation reference",
+  ]);
+  const termRows = (rows: typeof details) =>
+    rows.map(([label, value]) => (
+      <div key={label}>
+        <dt>{label}</dt>
+        <dd className={value?.startsWith("0x") ? "address-value" : undefined}>
+          {value}
+        </dd>
+      </div>
+    ));
   return (
     <div className="flow-grid">
       <section className="flow-panel">
         <div className="panel-heading">
-          <h2>{policy ? "Immutable signing policy" : "Spending terms"}</h2>
+          <h2>{policy ? "Your shared spending plan" : "Spending terms"}</h2>
           <span className="pill">
             {expired
               ? "Expired"
@@ -106,19 +123,22 @@ export function GroupPolicyPanel({
             : "Prepare a complete policy from the group's frozen evaluation. Terms cannot be edited after preparation."}
         </p>
         <dl className="terms-list">
-          {details.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd
-                className={
-                  value?.startsWith("0x") ? "address-value" : undefined
-                }
-              >
-                {value}
-              </dd>
-            </div>
-          ))}
+          {termRows(
+            details.filter(([label]) => !verificationLabels.has(label!)),
+          )}
         </dl>
+        <details className="policy-details">
+          <summary>Contract addresses & verification details</summary>
+          <p className="flow-muted">
+            Inspect the token, escrow, executor, and exact policy identifiers
+            before signing.
+          </p>
+          <dl className="terms-list">
+            {termRows(
+              details.filter(([label]) => verificationLabels.has(label!)),
+            )}
+          </dl>
+        </details>
         {policy && (
           <details>
             <summary>
@@ -154,8 +174,8 @@ export function GroupPolicyPanel({
             : policy
               ? "Register this saved policy, then each participant allows and contributes their exact share from their own wallet."
               : selected
-                ? "Preparation locks the merchant, amounts and six participant wallets into one policy. It expires in up to one hour, before the reservation begins. No transaction is sent."
-                : "First confirm all six participants' preferences and run the group evaluation."}
+                ? "Preparation locks the merchant, amounts and all participant wallets into one policy. It expires in up to one hour, before the reservation begins. No transaction is sent."
+                : "First confirm every participant's preferences and run the group evaluation."}
         </p>
         {!policy && selected && (
           <button

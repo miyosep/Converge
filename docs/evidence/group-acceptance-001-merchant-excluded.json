@@ -1,0 +1,1435 @@
+{
+  "schemaVersion": 1,
+  "scope": "ordinary-group-live-http-acceptance",
+  "runId": "group-acceptance-001",
+  "scenario": "merchant-excluded",
+  "status": "finalized",
+  "checkedAt": "2026-09-29T07:55:42.804Z",
+  "chainId": 11155111,
+  "model": "qwen3-32b",
+  "fixtureVersion": "restaurants-v2",
+  "syntheticInputs": true,
+  "preferenceRevisionHistory": [
+    {
+      "wallet_address": "0x2163ea96654282508c6a1c2a2946b2521d882f6a",
+      "revision_id": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:08:20.000Z",
+      "error_code": null
+    },
+    {
+      "wallet_address": "0x5989458b5d6e12943e7f7c28019b3c6eadd3dc72",
+      "revision_id": "8fb2850e-a7c1-40be-acd0-5adbea5bdd70",
+      "status": "PARSE_FAILED",
+      "confirmed_at": null,
+      "error_code": "EXTRACTION_FAILED"
+    },
+    {
+      "wallet_address": "0x5989458b5d6e12943e7f7c28019b3c6eadd3dc72",
+      "revision_id": "c63bc893-44a7-4195-ba70-dca3085bc888",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:12:00.000Z",
+      "error_code": null
+    },
+    {
+      "wallet_address": "0x6d5c0433f16d44fb7552f365bf93ebf2c531d5aa",
+      "revision_id": "91c0d6c3-a895-4796-b6ad-87bf60b3e332",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:12:30.000Z",
+      "error_code": null
+    },
+    {
+      "wallet_address": "0x6f677023c08341985a557149a8c79b8d794f7458",
+      "revision_id": "eb3039c5-15dc-4135-848c-a200047775af",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:12:51.000Z",
+      "error_code": null
+    },
+    {
+      "wallet_address": "0xb6ba8fad31615ea6b10b0188c627f6905a862a32",
+      "revision_id": "4173e53a-ce5a-4b90-9ec5-4614258933b2",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:12:14.000Z",
+      "error_code": null
+    },
+    {
+      "wallet_address": "0xfa17db56195b9f40025ad09f4372eb72a29d1db6",
+      "revision_id": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+      "status": "CONFIRMED",
+      "confirmed_at": "2026-09-29T07:08:42.000Z",
+      "error_code": null
+    }
+  ],
+  "participantControl": "six distinct private keys and isolated SIWE cookie sessions operated by one test runner; not six independent humans",
+  "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+  "changedConditions": {
+    "aliceBudgetCents": 3500,
+    "permittedRestaurantIds": [
+      "B",
+      "C",
+      "D",
+      "E"
+    ]
+  },
+  "inputs": [
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+      "revisionId": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:08:20Z",
+      "errorCode": null
+    },
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "revisionId": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:08:42Z",
+      "errorCode": null
+    },
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "revisionId": "c63bc893-44a7-4195-ba70-dca3085bc888",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:12:00Z",
+      "errorCode": null
+    },
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "revisionId": "4173e53a-ce5a-4b90-9ec5-4614258933b2",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:12:14Z",
+      "errorCode": null
+    },
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "revisionId": "91c0d6c3-a895-4796-b6ad-87bf60b3e332",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:12:30Z",
+      "errorCode": null
+    },
+    {
+      "groupId": "b66eb830-387f-4b9c-814d-45eb2e4f30f9",
+      "participant": "0x6f677023c08341985a557149a8c79b8D794F7458",
+      "revisionId": "eb3039c5-15dc-4135-848c-a200047775af",
+      "rawText": "My maximum meal budget is 35 USD per person, inclusive. I prefer a quiet restaurant. I have no other requirements.",
+      "status": "CONFIRMED",
+      "extraction": {
+        "schemaVersion": 1,
+        "constraints": [
+          {
+            "type": "hard",
+            "field": "budget_per_person_cents",
+            "operator": "lte",
+            "value": 3500
+          },
+          {
+            "type": "soft",
+            "field": "quiet",
+            "weight": 1
+          }
+        ],
+        "clarifications": [],
+        "unsupportedRequirements": []
+      },
+      "confirmedAt": "2026-09-29T07:12:51Z",
+      "errorCode": null
+    }
+  ],
+  "evaluation": {
+    "id": "cd14c20f-8c05-4cf2-967d-5efd7ca472cd",
+    "createdAt": "2026-09-29T07:13:04Z",
+    "engineVersion": "decision-v1",
+    "fixtureVersion": "restaurants-v2",
+    "status": "PROPOSAL_READY",
+    "winnerId": "B",
+    "ranking": [
+      "B",
+      "D"
+    ],
+    "candidates": [
+      {
+        "id": "A",
+        "eligible": false,
+        "scoreMicros": null
+      },
+      {
+        "id": "B",
+        "eligible": true,
+        "scoreMicros": 700000
+      },
+      {
+        "id": "C",
+        "eligible": false,
+        "scoreMicros": null
+      },
+      {
+        "id": "D",
+        "eligible": true,
+        "scoreMicros": 500000
+      },
+      {
+        "id": "E",
+        "eligible": false,
+        "scoreMicros": null
+      }
+    ],
+    "syntheticCatalog": true,
+    "catalog": [
+      {
+        "id": "A",
+        "name": "KAGAMI",
+        "merchant": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
+        "mealPricePerPersonCents": 3200,
+        "depositBaseUnits": "45000000"
+      },
+      {
+        "id": "B",
+        "name": "Restaurant B",
+        "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+        "mealPricePerPersonCents": 2400,
+        "depositBaseUnits": "36000000"
+      },
+      {
+        "id": "C",
+        "name": "Restaurant C",
+        "merchant": "0xb0d95622166845D2aFC4E4d7637482f52015a58a",
+        "mealPricePerPersonCents": 2200,
+        "depositBaseUnits": "30000000"
+      },
+      {
+        "id": "D",
+        "name": "Restaurant D",
+        "merchant": "0x69cef213BD361B2bF6b2986D32aeD02290e01e71",
+        "mealPricePerPersonCents": 2800,
+        "depositBaseUnits": "42000000"
+      },
+      {
+        "id": "E",
+        "name": "Restaurant E",
+        "merchant": "0x7d25Bc4deD7d7A155D324C33Fb588AA03b3a1d45",
+        "mealPricePerPersonCents": 3000,
+        "depositBaseUnits": "45000000"
+      }
+    ],
+    "terms": {
+      "contributionPerParticipant": "10000000",
+      "maxDeposit": "60000000",
+      "maxTotalSpend": "60000000"
+    }
+  },
+  "policy": {
+    "policyVersion": 1,
+    "chainId": 11155111,
+    "verifyingContract": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+    "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+    "token": "0x4707Bde238399A27f88855A34BFb31f20B386B17",
+    "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+    "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+    "participants": [
+      "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+      "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "0x6f677023c08341985a557149a8c79b8D794F7458"
+    ],
+    "approvalThreshold": 6,
+    "contributionPerParticipant": "10000000",
+    "paymentAmount": "36000000",
+    "maxDeposit": "60000000",
+    "maxTotalSpend": "60000000",
+    "expiry": 1790669600,
+    "reservationReference": "0x9f329b65292d1ce1caea0e78c6410689d54a652d078314d8924db736c884fb4f"
+  },
+  "policyHash": "0x9807e7184cdd332d296c43d7b974ad1ae2469ed7e7d2b005a17107cf1e89feb3",
+  "rejection": {
+    "kind": "eth_call_simulation",
+    "transactionSubmitted": false,
+    "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+    "policyHash": "0x9807e7184cdd332d296c43d7b974ad1ae2469ed7e7d2b005a17107cf1e89feb3",
+    "merchant": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
+    "amount": "36000000",
+    "reason": "MERCHANT_NOT_ALLOWED",
+    "reasonCode": 6,
+    "blockNumber": "11806235",
+    "blockHash": "0x42cfeda7218219ea02b4e2d6b75694bb1048bec8f30c55a6600d3aba4026ea0f",
+    "validationAndEnforcingFunctionAgree": true
+  },
+  "receipts": [
+    {
+      "label": "merchant-excluded-allowance-0",
+      "hash": "0x185b0ce50f04b5d1308e90562399da8a9975e09c5201dee0c898bbcd1b05f2d5",
+      "status": "success",
+      "blockNumber": "11806226",
+      "blockHash": "0xc558726f83e6e6ad4494f7a71a9a33cd5ac6e575d81a5409d84c5224672302f4",
+      "from": "0x2163ea96654282508c6a1c2a2946b2521d882f6a",
+      "to": "0x4707bde238399a27f88855a34bfb31f20b386b17",
+      "gasUsed": "46904",
+      "events": [
+        {
+          "name": "Approval",
+          "args": {
+            "owner": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+            "spender": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 389
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-0",
+      "hash": "0x7beb366bd96d0890d1aaa7b6d8274a34449ba409db99392af6de6664e2f9b4bf",
+      "status": "success",
+      "blockNumber": "11806230",
+      "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+      "from": "0x2163ea96654282508c6a1c2a2946b2521d882f6a",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "95021",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 125
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+            "contribution": "10000000",
+            "approvalCount": "3"
+          },
+          "logIndex": 126
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-1",
+      "hash": "0xf85dfa6bb884d4932722e22ac229dff550fafd2d0ef26720ad985f64d6496deb",
+      "status": "success",
+      "blockNumber": "11806229",
+      "blockHash": "0x8ad5b3f71ae75a27842eecbaa574966dcf0797f28bcdf3ce5c27c8b74228f156",
+      "from": "0xfa17db56195b9f40025ad09f4372eb72a29d1db6",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "148577",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 127
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+            "contribution": "10000000",
+            "approvalCount": "1"
+          },
+          "logIndex": 128
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-2",
+      "hash": "0x81bba2ac9d6341b4e18b351edabb2bdc52b98e436b4e4b5fe3ce07b70e5f5e87",
+      "status": "success",
+      "blockNumber": "11806230",
+      "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+      "from": "0x5989458b5d6e12943e7f7c28019b3c6eadd3dc72",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "99533",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 129
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+            "contribution": "10000000",
+            "approvalCount": "5"
+          },
+          "logIndex": 130
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-3",
+      "hash": "0xe7a40d349177acae8bfe79a98b2a469eeba45140477a42c28d01a8d53f9ee2e5",
+      "status": "success",
+      "blockNumber": "11806230",
+      "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+      "from": "0xb6ba8fad31615ea6b10b0188c627f6905a862a32",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "101789",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 123
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+            "contribution": "10000000",
+            "approvalCount": "2"
+          },
+          "logIndex": 124
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-4",
+      "hash": "0x54e1ae7e4cf4ddd3115d6cd5431590500f9415e0c953aaae77d48e430ba09c90",
+      "status": "success",
+      "blockNumber": "11806230",
+      "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+      "from": "0x6d5c0433f16d44fb7552f365bf93ebf2c531d5aa",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "104045",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 127
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+            "contribution": "10000000",
+            "approvalCount": "4"
+          },
+          "logIndex": 128
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-contribute-5",
+      "hash": "0xad40807ab125fe8d746ba6e400f2de90f49ccdb7655e6213eb236d0bd45bcf9e",
+      "status": "success",
+      "blockNumber": "11806234",
+      "blockHash": "0x290331955a0bd1eac61de9694c21058d72170b9717de70d0b6adb31b45e1e4f0",
+      "from": "0x6f677023c08341985a557149a8c79b8d794f7458",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "128159",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0x6f677023c08341985a557149a8c79b8D794F7458",
+            "to": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "value": "10000000"
+          },
+          "logIndex": 100
+        },
+        {
+          "name": "ParticipantApproved",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x6f677023c08341985a557149a8c79b8D794F7458",
+            "contribution": "10000000",
+            "approvalCount": "6"
+          },
+          "logIndex": 101
+        },
+        {
+          "name": "WalletActivated",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "totalContributed": "60000000"
+          },
+          "logIndex": 102
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-payment",
+      "hash": "0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb",
+      "status": "success",
+      "blockNumber": "11806238",
+      "blockHash": "0x27b4a40a1b2a35683ab247ecbb2c22ffc52c5463657b56e793863f5bd9aad988",
+      "from": "0x53e56ceed40a662e144fd488afbf11ed2ed72456",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "96371",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+            "value": "36000000"
+          },
+          "logIndex": 140
+        },
+        {
+          "name": "PaymentExecuted",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+            "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+            "amount": "36000000"
+          },
+          "logIndex": 141
+        },
+        {
+          "name": "DecisionCompleted",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "remaining": "24000000"
+          },
+          "logIndex": 142
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-0",
+      "hash": "0x5972dec8ef427f1e0d711c82b516a4f805da07738ec88ee73a2463434c08b9c9",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0x2163ea96654282508c6a1c2a2946b2521d882f6a",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "102957",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+            "value": "4000000"
+          },
+          "logIndex": 186
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
+            "amount": "4000000"
+          },
+          "logIndex": 187
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-1",
+      "hash": "0xe196bf6e854ea3ac07a07f28aa101440f9d7a705501d737505ea6d9b2b20c4a7",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0xfa17db56195b9f40025ad09f4372eb72a29d1db6",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "83318",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+            "value": "4000000"
+          },
+          "logIndex": 196
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+            "amount": "4000000"
+          },
+          "logIndex": 197
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-2",
+      "hash": "0xe6a1c462cd026817c3cfe20eabc608c331c66aab637cbe79fc0717cad642a802",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0x5989458b5d6e12943e7f7c28019b3c6eadd3dc72",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "90379",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+            "value": "4000000"
+          },
+          "logIndex": 194
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+            "amount": "4000000"
+          },
+          "logIndex": 195
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-3",
+      "hash": "0x7074ac4cbc898011195e96a3f3b7da1e63cad1e393d4e31c799da86b382e89f7",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0xb6ba8fad31615ea6b10b0188c627f6905a862a32",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "92640",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+            "value": "4000000"
+          },
+          "logIndex": 188
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+            "amount": "4000000"
+          },
+          "logIndex": 189
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-4",
+      "hash": "0x5fc4adee160074b04ec7b651b217842279ae3b4d39dbfaea82f8f91d16ddcfc8",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0x6d5c0433f16d44fb7552f365bf93ebf2c531d5aa",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "94901",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+            "value": "4000000"
+          },
+          "logIndex": 192
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+            "amount": "4000000"
+          },
+          "logIndex": 193
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-refund-5",
+      "hash": "0x9fa194c54c4e9550eab5c7d56546dc480126dd635466eae19579c438400191e7",
+      "status": "success",
+      "blockNumber": "11806250",
+      "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+      "from": "0x6f677023c08341985a557149a8c79b8d794f7458",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "97162",
+      "events": [
+        {
+          "name": "Transfer",
+          "args": {
+            "from": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+            "to": "0x6f677023c08341985a557149a8c79b8D794F7458",
+            "value": "4000000"
+          },
+          "logIndex": 190
+        },
+        {
+          "name": "RefundClaimed",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "participant": "0x6f677023c08341985a557149a8c79b8D794F7458",
+            "amount": "4000000"
+          },
+          "logIndex": 191
+        }
+      ]
+    },
+    {
+      "label": "merchant-excluded-register-0",
+      "hash": "0x281a38b8459f91e3649685e9a9910b31c74f21a39fe8fb71a83fec39ddd6f17a",
+      "status": "success",
+      "blockNumber": "11806224",
+      "blockHash": "0xe748030a7506825c648316abc8f25c73a5acf864abdeb184aaae89011a16b11a",
+      "from": "0x2163ea96654282508c6a1c2a2946b2521d882f6a",
+      "to": "0xd43172d5bd904b68004d69545fd01dbcfdb82a89",
+      "gasUsed": "551232",
+      "events": [
+        {
+          "name": "DecisionCreated",
+          "args": {
+            "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+            "policyHash": "0x9807e7184cdd332d296c43d7b974ad1ae2469ed7e7d2b005a17107cf1e89feb3",
+            "creator": "0x2163ea96654282508c6A1C2A2946B2521D882f6A"
+          },
+          "logIndex": 330
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "explanation": {
+      "source": "kiln",
+      "reasonIds": [
+        "ranking",
+        "price"
+      ],
+      "text": "Restaurant B ranks first among eligible candidates with a public score of 70.0/100. Ties use lower meal price, then candidate ID. The synthetic catalog estimates $24.00 per person.",
+      "createdAt": "2026-09-29T07:13:15.094Z"
+    },
+    "usage": [
+      {
+        "flow": "constraint_extraction",
+        "attempts": 11,
+        "successfulAttempts": 6,
+        "failedAttempts": 5,
+        "retryAttempts": 4,
+        "unavailableUsageAttempts": 0,
+        "inputTokens": 11208,
+        "outputTokens": 4907,
+        "totalTokens": 16115,
+        "reportedCostUsd": 0.00182272,
+        "cachedInputTokens": 11197,
+        "reasoningTokens": 3988,
+        "applicationCacheHits": 0,
+        "energyJoules": null
+      },
+      {
+        "flow": "candidate_analysis",
+        "attempts": 0,
+        "successfulAttempts": 0,
+        "failedAttempts": 0,
+        "retryAttempts": 0,
+        "unavailableUsageAttempts": 0,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "reportedCostUsd": null,
+        "cachedInputTokens": null,
+        "reasoningTokens": null,
+        "applicationCacheHits": 0,
+        "energyJoules": null
+      },
+      {
+        "flow": "decision_explanation",
+        "attempts": 1,
+        "successfulAttempts": 1,
+        "failedAttempts": 0,
+        "retryAttempts": 0,
+        "unavailableUsageAttempts": 0,
+        "inputTokens": 206,
+        "outputTokens": 312,
+        "totalTokens": 518,
+        "reportedCostUsd": 0.00010316,
+        "cachedInputTokens": 17,
+        "reasoningTokens": 300,
+        "applicationCacheHits": 1,
+        "energyJoules": null
+      },
+      {
+        "flow": "clarification",
+        "attempts": 0,
+        "successfulAttempts": 0,
+        "failedAttempts": 0,
+        "retryAttempts": 0,
+        "unavailableUsageAttempts": 0,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "reportedCostUsd": null,
+        "cachedInputTokens": null,
+        "reasoningTokens": null,
+        "applicationCacheHits": 0,
+        "energyJoules": null
+      }
+    ]
+  },
+  "extractionAttempts": [
+    {
+      "revision_id": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+        "status": "validation_error",
+        "attempt": 1,
+        "latencyMs": 8294,
+        "requestId": "7530a16c-7beb-4b5a-92ce-4b6163a0aad6",
+        "startedAt": "2026-09-29T07:07:57Z",
+        "completedAt": "2026-09-29T07:08:05Z",
+        "inputTokens": 1008,
+        "totalTokens": 1529,
+        "usageSource": "provider",
+        "outputTokens": 521,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "20c0f150-6a7b-4db3-9227-b4e3eece2b33"
+      },
+      "http_status": 200,
+      "error_code": "INVALID_JSON",
+      "cost_usd": "0.00018624",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 420
+    },
+    {
+      "revision_id": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "d3c66fc2-5e01-4b1f-9d06-64e4f7a80e80",
+        "status": "success",
+        "attempt": 2,
+        "latencyMs": 9888,
+        "requestId": "7530a16c-7beb-4b5a-92ce-4b6163a0aad6",
+        "startedAt": "2026-09-29T07:08:06Z",
+        "completedAt": "2026-09-29T07:08:15Z",
+        "inputTokens": 1038,
+        "totalTokens": 1704,
+        "usageSource": "provider",
+        "outputTokens": 666,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "1f2b49b1-8ff2-44c0-a6e1-d2658f2c68b4"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00022804",
+      "cached_input_tokens": 1037,
+      "reasoning_tokens": 567
+    },
+    {
+      "revision_id": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+        "status": "validation_error",
+        "attempt": 1,
+        "latencyMs": 5879,
+        "requestId": "9b10321a-5871-4c68-8df1-dd2971cc6698",
+        "startedAt": "2026-09-29T07:08:25Z",
+        "completedAt": "2026-09-29T07:08:30Z",
+        "inputTokens": 1008,
+        "totalTokens": 1376,
+        "usageSource": "provider",
+        "outputTokens": 368,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "a8323958-0069-40cd-8867-15bc7d5e0ca2"
+      },
+      "http_status": 200,
+      "error_code": "INVALID_JSON",
+      "cost_usd": "0.0001434",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 267
+    },
+    {
+      "revision_id": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "7a0c167b-cef0-4bc0-aa1c-6f16d2a05676",
+        "status": "success",
+        "attempt": 2,
+        "latencyMs": 7421,
+        "requestId": "9b10321a-5871-4c68-8df1-dd2971cc6698",
+        "startedAt": "2026-09-29T07:08:31Z",
+        "completedAt": "2026-09-29T07:08:38Z",
+        "inputTokens": 1038,
+        "totalTokens": 1360,
+        "usageSource": "provider",
+        "outputTokens": 322,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "348d891e-f06e-4588-950b-6f16dcef0afc"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00013172",
+      "cached_input_tokens": 1037,
+      "reasoning_tokens": 266
+    },
+    {
+      "revision_id": "8fb2850e-a7c1-40be-acd0-5adbea5bdd70",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "8fb2850e-a7c1-40be-acd0-5adbea5bdd70",
+        "status": "validation_error",
+        "attempt": 1,
+        "latencyMs": 10383,
+        "requestId": "7fe04437-35d9-455d-8c6f-ac0dd6ccb126",
+        "startedAt": "2026-09-29T07:08:45Z",
+        "completedAt": "2026-09-29T07:08:56Z",
+        "inputTokens": 1008,
+        "totalTokens": 1625,
+        "usageSource": "provider",
+        "outputTokens": 617,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "1f933029-2686-4216-96fd-601c8f10100a"
+      },
+      "http_status": 200,
+      "error_code": "INVALID_JSON",
+      "cost_usd": "0.00021312",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 516
+    },
+    {
+      "revision_id": "8fb2850e-a7c1-40be-acd0-5adbea5bdd70",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "8fb2850e-a7c1-40be-acd0-5adbea5bdd70",
+        "status": "validation_error",
+        "attempt": 2,
+        "latencyMs": 5663,
+        "requestId": "7fe04437-35d9-455d-8c6f-ac0dd6ccb126",
+        "startedAt": "2026-09-29T07:08:57Z",
+        "completedAt": "2026-09-29T07:09:03Z",
+        "inputTokens": 1038,
+        "totalTokens": 1421,
+        "usageSource": "provider",
+        "outputTokens": 383,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "78c733be-0269-448b-96d0-5e5eb2254c96"
+      },
+      "http_status": 200,
+      "error_code": "INVALID_JSON",
+      "cost_usd": "0.00014879999999999998",
+      "cached_input_tokens": 1037,
+      "reasoning_tokens": 326
+    },
+    {
+      "revision_id": "c63bc893-44a7-4195-ba70-dca3085bc888",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "c63bc893-44a7-4195-ba70-dca3085bc888",
+        "status": "validation_error",
+        "attempt": 1,
+        "latencyMs": 7445,
+        "requestId": "bf90488f-2129-46d2-a77e-d9a340ffc63d",
+        "startedAt": "2026-09-29T07:11:43Z",
+        "completedAt": "2026-09-29T07:11:51Z",
+        "inputTokens": 1008,
+        "totalTokens": 1376,
+        "usageSource": "provider",
+        "outputTokens": 368,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "b2c50c2f-6ca2-4e77-8117-fdd51632ffc0"
+      },
+      "http_status": 200,
+      "error_code": "INVALID_JSON",
+      "cost_usd": "0.0001434",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 311
+    },
+    {
+      "revision_id": "c63bc893-44a7-4195-ba70-dca3085bc888",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "c63bc893-44a7-4195-ba70-dca3085bc888",
+        "status": "success",
+        "attempt": 2,
+        "latencyMs": 5053,
+        "requestId": "bf90488f-2129-46d2-a77e-d9a340ffc63d",
+        "startedAt": "2026-09-29T07:11:51Z",
+        "completedAt": "2026-09-29T07:11:56Z",
+        "inputTokens": 1038,
+        "totalTokens": 1363,
+        "usageSource": "provider",
+        "outputTokens": 325,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "e126c527-ecb3-4644-82dc-cda06a83387b"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00013256",
+      "cached_input_tokens": 1037,
+      "reasoning_tokens": 269
+    },
+    {
+      "revision_id": "4173e53a-ce5a-4b90-9ec5-4614258933b2",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "4173e53a-ce5a-4b90-9ec5-4614258933b2",
+        "status": "success",
+        "attempt": 1,
+        "latencyMs": 4464,
+        "requestId": "c7008982-4e7c-4bca-a0ba-1c304d3c42ad",
+        "startedAt": "2026-09-29T07:12:06Z",
+        "completedAt": "2026-09-29T07:12:10Z",
+        "inputTokens": 1008,
+        "totalTokens": 1284,
+        "usageSource": "provider",
+        "outputTokens": 276,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "a4358fd4-ce72-44dd-95ca-6f4d9b830ef0"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00011764",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 179
+    },
+    {
+      "revision_id": "91c0d6c3-a895-4796-b6ad-87bf60b3e332",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "91c0d6c3-a895-4796-b6ad-87bf60b3e332",
+        "status": "success",
+        "attempt": 1,
+        "latencyMs": 6881,
+        "requestId": "1cc641b7-eed4-4018-82d0-c4937e4bfda6",
+        "startedAt": "2026-09-29T07:12:19Z",
+        "completedAt": "2026-09-29T07:12:26Z",
+        "inputTokens": 1008,
+        "totalTokens": 1407,
+        "usageSource": "provider",
+        "outputTokens": 399,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "2b700d59-62bb-467c-b4b5-70887dd562bd"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00015208",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 302
+    },
+    {
+      "revision_id": "eb3039c5-15dc-4135-848c-a200047775af",
+      "usage": {
+        "flow": "constraint_extraction",
+        "model": "qwen3-32b",
+        "runId": "eb3039c5-15dc-4135-848c-a200047775af",
+        "status": "success",
+        "attempt": 1,
+        "latencyMs": 10000,
+        "requestId": "e853156d-14bd-4746-a09d-ec2bfe930075",
+        "startedAt": "2026-09-29T07:12:35Z",
+        "completedAt": "2026-09-29T07:12:45Z",
+        "inputTokens": 1008,
+        "totalTokens": 1670,
+        "usageSource": "provider",
+        "outputTokens": 662,
+        "promptVersion": "extraction-v1",
+        "schemaVersion": 1,
+        "providerRequestId": "d26497e7-ea95-4084-8922-fdcf8af0555d"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00022572",
+      "cached_input_tokens": 1007,
+      "reasoning_tokens": 565
+    }
+  ],
+  "explanationAttempts": [
+    {
+      "evaluation_id": "cd14c20f-8c05-4cf2-967d-5efd7ca472cd",
+      "usage": {
+        "flow": "decision_explanation",
+        "model": "qwen3-32b",
+        "runId": "cd14c20f-8c05-4cf2-967d-5efd7ca472cd",
+        "status": "success",
+        "attempt": 1,
+        "latencyMs": 6161,
+        "requestId": "b5dc4f57-6aab-4cf4-887c-d7c87ebe0019",
+        "startedAt": "2026-09-29T07:13:08Z",
+        "completedAt": "2026-09-29T07:13:15Z",
+        "inputTokens": 206,
+        "totalTokens": 518,
+        "usageSource": "provider",
+        "outputTokens": 312,
+        "promptVersion": "public-explanation-v4",
+        "schemaVersion": 1,
+        "providerRequestId": "f384d294-19c1-43b5-92e7-9102e56ca65d"
+      },
+      "http_status": 200,
+      "error_code": null,
+      "cost_usd": "0.00010316",
+      "cached_input_tokens": 17,
+      "reasoning_tokens": 300
+    }
+  ],
+  "history": {
+    "snapshot": {
+      "blockNumber": "11806252",
+      "checkedAt": "2026-09-29T07:40:54.738Z",
+      "state": {
+        "spent": "36000000",
+        "status": 2,
+        "refunded": "24000000",
+        "approvals": 6,
+        "contributed": "60000000"
+      }
+    },
+    "events": [
+      {
+        "hash": "0x281a38b8459f91e3649685e9a9910b31c74f21a39fe8fb71a83fec39ddd6f17a",
+        "kind": "DecisionCreated",
+        "logIndex": 330,
+        "blockHash": "0xe748030a7506825c648316abc8f25c73a5acf864abdeb184aaae89011a16b11a",
+        "blockNumber": "11806224"
+      },
+      {
+        "hash": "0xf85dfa6bb884d4932722e22ac229dff550fafd2d0ef26720ad985f64d6496deb",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 128,
+        "blockHash": "0x8ad5b3f71ae75a27842eecbaa574966dcf0797f28bcdf3ce5c27c8b74228f156",
+        "blockNumber": "11806229",
+        "participant": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6"
+      },
+      {
+        "hash": "0xe7a40d349177acae8bfe79a98b2a469eeba45140477a42c28d01a8d53f9ee2e5",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 124,
+        "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+        "blockNumber": "11806230",
+        "participant": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32"
+      },
+      {
+        "hash": "0x7beb366bd96d0890d1aaa7b6d8274a34449ba409db99392af6de6664e2f9b4bf",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 126,
+        "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+        "blockNumber": "11806230",
+        "participant": "0x2163ea96654282508c6A1C2A2946B2521D882f6A"
+      },
+      {
+        "hash": "0x54e1ae7e4cf4ddd3115d6cd5431590500f9415e0c953aaae77d48e430ba09c90",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 128,
+        "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+        "blockNumber": "11806230",
+        "participant": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA"
+      },
+      {
+        "hash": "0x81bba2ac9d6341b4e18b351edabb2bdc52b98e436b4e4b5fe3ce07b70e5f5e87",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 130,
+        "blockHash": "0x9ef209a73bea9b75316a8f99c9a061a46cd6cf02953c09e4d831292e68cb350b",
+        "blockNumber": "11806230",
+        "participant": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72"
+      },
+      {
+        "hash": "0xad40807ab125fe8d746ba6e400f2de90f49ccdb7655e6213eb236d0bd45bcf9e",
+        "kind": "ParticipantApproved",
+        "amount": "10000000",
+        "logIndex": 101,
+        "blockHash": "0x290331955a0bd1eac61de9694c21058d72170b9717de70d0b6adb31b45e1e4f0",
+        "blockNumber": "11806234",
+        "participant": "0x6f677023c08341985a557149a8c79b8D794F7458"
+      },
+      {
+        "hash": "0xad40807ab125fe8d746ba6e400f2de90f49ccdb7655e6213eb236d0bd45bcf9e",
+        "kind": "WalletActivated",
+        "logIndex": 102,
+        "blockHash": "0x290331955a0bd1eac61de9694c21058d72170b9717de70d0b6adb31b45e1e4f0",
+        "blockNumber": "11806234"
+      },
+      {
+        "hash": "0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb",
+        "kind": "PaymentExecuted",
+        "amount": "36000000",
+        "logIndex": 141,
+        "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+        "blockHash": "0x27b4a40a1b2a35683ab247ecbb2c22ffc52c5463657b56e793863f5bd9aad988",
+        "blockNumber": "11806238"
+      },
+      {
+        "hash": "0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb",
+        "kind": "DecisionCompleted",
+        "logIndex": 142,
+        "blockHash": "0x27b4a40a1b2a35683ab247ecbb2c22ffc52c5463657b56e793863f5bd9aad988",
+        "blockNumber": "11806238"
+      },
+      {
+        "hash": "0x5972dec8ef427f1e0d711c82b516a4f805da07738ec88ee73a2463434c08b9c9",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 187,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0x2163ea96654282508c6A1C2A2946B2521D882f6A"
+      },
+      {
+        "hash": "0x7074ac4cbc898011195e96a3f3b7da1e63cad1e393d4e31c799da86b382e89f7",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 189,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32"
+      },
+      {
+        "hash": "0x9fa194c54c4e9550eab5c7d56546dc480126dd635466eae19579c438400191e7",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 191,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0x6f677023c08341985a557149a8c79b8D794F7458"
+      },
+      {
+        "hash": "0x5fc4adee160074b04ec7b651b217842279ae3b4d39dbfaea82f8f91d16ddcfc8",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 193,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA"
+      },
+      {
+        "hash": "0xe6a1c462cd026817c3cfe20eabc608c331c66aab637cbe79fc0717cad642a802",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 195,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72"
+      },
+      {
+        "hash": "0xe196bf6e854ea3ac07a07f28aa101440f9d7a705501d737505ea6d9b2b20c4a7",
+        "kind": "RefundClaimed",
+        "amount": "4000000",
+        "logIndex": 197,
+        "blockHash": "0x23a304581a9ad8d1978f6a184854e46ec53407b5ccdcd2966e6f9e2da59d6a5c",
+        "blockNumber": "11806250",
+        "participant": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6"
+      }
+    ],
+    "execution": {
+      "hash": "0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb",
+      "status": "confirmed",
+      "errorCode": null,
+      "updatedAt": "2026-09-29T07:40:55.742Z"
+    }
+  },
+  "accessChecks": [
+    "six separate wallet signatures and cookie sessions",
+    "SIWE challenge replay rejected",
+    "unauthenticated and outsider reads rejected",
+    "actor spoofing query returns only own preference",
+    "cross-participant confirmation rejected",
+    "non-creator invite rejected",
+    "foreign Origin rejected",
+    "client merchant override rejected",
+    "shared view omits private constraints",
+    "all six clients see the same policy hash",
+    "frozen input mutation rejected",
+    "explanation cache avoids another provider call"
+  ],
+  "recovery": null,
+  "migrations": [
+    {
+      "name": "0001_groups_preferences.sql",
+      "sha256": "89dc711e77b24439fc37c1061ba166a7d394f00907f87c8bb0ba57c8fc6faa40",
+      "applied_at": "2026-09-28T17:41:25.761Z"
+    },
+    {
+      "name": "0002_evaluations.sql",
+      "sha256": "8d8e9819f9d0f09a8f0d66662c1d3bd9d992113328bf4c94b359d1fea1012b49",
+      "applied_at": "2026-09-28T17:45:57.201Z"
+    },
+    {
+      "name": "0003_wallet_auth_invites.sql",
+      "sha256": "8f91414299b6eb3562188bbd92b1383cda39c6011417bac465e1f1e2472495c6",
+      "applied_at": "2026-09-28T17:53:40.570Z"
+    },
+    {
+      "name": "0004_kiln_attempts.sql",
+      "sha256": "998899b52530b7d21d91cc9ddb50fd403f55cf8b9ed41bd2c6043262b4caf024",
+      "applied_at": "2026-09-28T18:03:45.967Z"
+    },
+    {
+      "name": "0005_group_policies.sql",
+      "sha256": "0edfd549872502475de3980bcf606c73b0be06b938850c8cc78583125e706b8d",
+      "applied_at": "2026-09-29T05:17:56.302Z"
+    },
+    {
+      "name": "0006_group_execution.sql",
+      "sha256": "c67b2a838062aa40b9bee8f91c2a5bc89d2d38bd70efa109c0f6314e4ef8b5f1",
+      "applied_at": "2026-09-29T06:35:51.147Z"
+    },
+    {
+      "name": "0007_group_explanations.sql",
+      "sha256": "2751322d3646e3d6269473c526b1f2497d02486e9289f6b90c0baffbc0e39353",
+      "applied_at": "2026-09-29T06:35:51.147Z"
+    },
+    {
+      "name": "0008_group_conditions.sql",
+      "sha256": "71c1aba7cb25a5af4707262f60548a24f6cc9988b937e29c58df38a35f5cadb3",
+      "applied_at": "2026-09-29T06:50:47.864Z"
+    }
+  ],
+  "finality": {
+    "requiredThroughBlock": "11806250",
+    "finalizedBlock": "11806261",
+    "finalizedBlockHash": "0xa2ed0ae305d16aa90c8f4f80791fccafeefc2ec12dd1d1021de2803bf152d72a",
+    "allReceiptsFinalized": true
+  },
+  "platform": {
+    "os": "win32",
+    "architecture": "x64",
+    "node": "v24.19.0"
+  }
+}

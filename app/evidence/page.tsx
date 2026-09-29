@@ -11,11 +11,11 @@ export default async function EvidencePage({
 }) {
   const { run: runId } = await searchParams;
   const run = publishedEvidence.find(
-    (entry) => entry.id === (runId ?? "baseline-001"),
+    (entry) => entry.id === (runId ?? "group-acceptance-001-baseline"),
   );
   if (!run) notFound();
   return (
-    <WorkspaceFrame>
+    <WorkspaceFrame active="evidence">
       <div className="heading">
         <div>
           <div className="eyebrow">PUBLISHED EVIDENCE</div>
@@ -46,7 +46,7 @@ export default async function EvidencePage({
       <section className="flow-panel">
         <div className="panel-heading">
           <h2>{run.title}</h2>
-          <span className="pill">Partial evidence</span>
+          <span className="pill">{run.completeness ?? "Partial evidence"}</span>
         </div>
         <p>{run.summary}</p>
         <p className="flow-note">{run.limitation}</p>
@@ -68,7 +68,9 @@ export default async function EvidencePage({
             aria-label="Condition-change comparison"
           >
             <table className="review-table">
-              <caption>Fixture outcomes only</caption>
+              <caption>
+                {run.scenarioCaption ?? "Fixture outcomes only"}
+              </caption>
               <thead>
                 <tr>
                   <th scope="col">Scenario</th>

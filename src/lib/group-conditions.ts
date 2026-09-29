@@ -1,11 +1,12 @@
 import { z } from "zod";
 import type { RestaurantCatalog } from "./schemas/decision.js";
 
-export const RESTAURANT_IDS = ["A", "B", "C", "D", "E"] as const;
+import { RESTAURANT_IDS } from "./restaurant-options.js";
+export { RESTAURANT_IDS };
 export const permittedRestaurantIdsSchema = z
   .array(z.enum(RESTAURANT_IDS))
   .min(1)
-  .max(5)
+  .max(RESTAURANT_IDS.length)
   .refine((ids) => new Set(ids).size === ids.length, "Duplicate restaurant");
 
 export function permittedGroupMerchants(

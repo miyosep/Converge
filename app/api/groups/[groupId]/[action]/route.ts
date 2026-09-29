@@ -7,7 +7,8 @@ import { createKilnClient } from "../../../../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
 import {
   groupEvaluationOptions,
-  groupPolicyConfig,
+  currentGroupPolicyConfig,
+  groupPolicyConfigFor,
 } from "../../../../../src/lib/server/group-config.js";
 import {
   api,
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest, context: Context) {
           await readGroupChain(
             client,
             overview.signingPolicy,
-            groupPolicyConfig,
+            groupPolicyConfigFor(overview.signingPolicy.policy),
             getAddress(actor),
           ),
         );
@@ -85,6 +86,12 @@ export async function POST(request: NextRequest, context: Context) {
     verifyOrigin(request);
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "leave") {
+      z.strictObject({}).parse(await request.json());
+      return NextResponse.json(
+        await services().preferences.leaveGroup(groupId, actor),
+      );
+    }
     if (action === "evaluate") {
       z.strictObject({}).parse(await request.json());
       const repository = services().preferences;
@@ -106,7 +113,7 @@ export async function POST(request: NextRequest, context: Context) {
       await services().preferences.preparePolicy(
         groupId,
         actor,
-        groupPolicyConfig,
+        currentGroupPolicyConfig(),
       );
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),

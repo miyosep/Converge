@@ -14,7 +14,12 @@ import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { verifiedPostgresUrl } from "../src/lib/db/connection.js";
 import { GroupExecutionRepository } from "../src/lib/db/group-execution.js";
-import { groupPolicyConfig } from "../src/lib/server/group-config.js";
+import {
+  groupPolicyConfig,
+  groupPolicyConfigFor,
+  groupDeploymentV2,
+  currentGroupPolicyConfig,
+} from "../src/lib/server/group-config.js";
 import { demoDirectory, withFileLock } from "../src/lib/explore/store.js";
 import deployment from "../contracts/deployments/11155111.json";
 import { GroupExecutionWorker } from "./lib/group-execution-worker.js";
@@ -58,6 +63,7 @@ async function main() {
     for (const contract of [
       deployment.mockUSDC,
       deployment.convergeGroupWallet,
+      ...(groupDeploymentV2 ? [groupDeploymentV2] : []),
     ]) {
       const code = await client.getBytecode({
         address: contract.address as Address,
@@ -100,7 +106,7 @@ async function main() {
         process.on("SIGTERM", () => {
           stopping = true;
         });
-        const worker = new GroupExecutionWorker(
+        const legacyWorker = new GroupExecutionWorker(
           client,
           transport,
           account,
@@ -109,6 +115,17 @@ async function main() {
           BigInt(deployment.convergeGroupWallet.blockNumber),
           cap,
         );
+        const currentWorker = groupDeploymentV2
+          ? new GroupExecutionWorker(
+              client,
+              transport,
+              account,
+              currentGroupPolicyConfig(),
+              repo,
+              BigInt(groupDeploymentV2.blockNumber),
+              cap,
+            )
+          : null;
         console.log(
           "Group executor ready. Watching saved ordinary-group policies.",
         );
@@ -118,6 +135,12 @@ async function main() {
             // Probe the dedicated lock connection before every execution cycle.
             await lock.query("SELECT 1");
             try {
+              groupPolicyConfigFor(policy.policy);
+              const worker =
+                policy.policy.policyVersion === 1
+                  ? legacyWorker
+                  : currentWorker;
+              if (!worker) throw new Error("PAYMENT_NOT_CONFIGURED");
               await worker.tick(policy);
             } catch {
               console.error(

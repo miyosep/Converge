@@ -9,6 +9,7 @@
     "pnpm": "11.19.0"
   },
   "scripts": {
+    "demo:groups-verify": "node --env-file=.env --import tsx scripts/verify-group-acceptance.ts",
     "demo:groups-server": "node --import tsx scripts/group-acceptance-server.ts",
     "demo:groups-acceptance": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-acceptance.ts",
     "groups:worker": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-execution-worker.ts",

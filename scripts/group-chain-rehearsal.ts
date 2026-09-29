@@ -20,8 +20,11 @@ import {
   verifyGroupSigningPolicy,
   type GroupChainAction,
 } from "../src/lib/group-chain.js";
-import { hashPolicy, policySchema } from "../src/lib/policy.js";
-import type { SigningPolicy } from "../src/lib/group-policy.js";
+import { hashPolicy, policySchema } from "../src/lib/signing-policy.js";
+import type {
+  SigningPolicy,
+  GroupPolicyConfig,
+} from "../src/lib/group-policy.js";
 import {
   GroupExecutionWorker,
   type ExecutionStore,
@@ -74,6 +77,19 @@ class MemoryExecutionStore implements ExecutionStore {
 
 // Disposable local EVM only. No environment credentials or Sepolia writes.
 async function main() {
+  const version = process.argv.includes("--v2") ? 2 : 1;
+  const memberCount =
+    version === 2
+      ? Number(
+          process.argv.includes("--members")
+            ? process.argv[process.argv.indexOf("--members") + 1]
+            : 4,
+        )
+      : 6;
+  if (!Number.isInteger(memberCount) || memberCount < 2 || memberCount > 100)
+    throw new Error("Invalid member count");
+  const funding = String(memberCount * 10000000);
+  const payment = String(memberCount * 7500000);
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const port = (server.address() as { port: number }).port;
@@ -126,10 +142,10 @@ async function main() {
         await sleep(100);
       }
     }
-    const accounts = Array.from({ length: 7 }, () =>
+    const accounts = Array.from({ length: memberCount + 1 }, () =>
       privateKeyToAccount(generatePrivateKey()),
     );
-    const members = accounts.slice(0, 6);
+    const members = accounts.slice(0, memberCount);
     for (const account of accounts)
       await rpc("anvil_setBalance", [account.address, "0x8ac7230489e80000"]);
     const wallet = (index: number) =>
@@ -149,7 +165,9 @@ async function main() {
     ) as { abi: Abi; bytecode: { object: Hex } };
     const escrowArtifact = JSON.parse(
       await readFile(
-        "contracts/out/ConvergeGroupWallet.sol/ConvergeGroupWallet.json",
+        version === 2
+          ? "contracts/out-v2/ConvergeGroupWalletV2.sol/ConvergeGroupWalletV2.json"
+          : "contracts/out/ConvergeGroupWallet.sol/ConvergeGroupWallet.json",
         "utf8",
       ),
     ) as { abi: Abi; bytecode: { object: Hex } };
@@ -170,24 +188,25 @@ async function main() {
         }),
       )
     ).contractAddress!;
-    const config = {
+    const config: GroupPolicyConfig = {
+      policyVersion: version,
       chainId: 11155111,
       verifyingContract: escrow,
       token,
-      executor: accounts[6]!.address,
+      executor: accounts[memberCount]!.address,
     };
     const now = Number((await reader.getBlock()).timestamp);
     const policy = policySchema.parse({
       ...config,
-      policyVersion: 1,
+      policyVersion: version,
       decisionId: keccak256(stringToHex("ordinary-group")),
       merchant: privateKeyToAccount(generatePrivateKey()).address,
       participants: members.map((a) => a.address),
-      approvalThreshold: 6,
+      approvalThreshold: memberCount,
       contributionPerParticipant: "10000000",
-      paymentAmount: "45000000",
-      maxDeposit: "60000000",
-      maxTotalSpend: "60000000",
+      paymentAmount: payment,
+      maxDeposit: funding,
+      maxTotalSpend: funding,
       expiry: now + 3600,
       reservationReference: keccak256(stringToHex("reservation")),
     });
@@ -216,13 +235,17 @@ async function main() {
     };
     assert.equal((await state()).registered, false);
     assert.throws(
-      () => verifyGroupSigningPolicy(saved, config, accounts[6]!.address),
+      () =>
+        verifyGroupSigningPolicy(saved, config, accounts[memberCount]!.address),
       /NOT_POLICY_PARTICIPANT/,
     );
     assert.throws(
       () =>
         verifyGroupSigningPolicy(
-          { ...saved, policy: { ...policy, paymentAmount: "44000000" } },
+          {
+            ...saved,
+            policy: { ...policy, paymentAmount: String(BigInt(payment) - 1n) },
+          },
           config,
           members[0]!.address,
         ),
@@ -231,13 +254,13 @@ async function main() {
     await send(0, "register");
     assert.equal((await state()).registered, true);
     await assert.rejects(send(1, "register"), /REGISTRATION_UNAVAILABLE/);
-    const changed = { ...policy, paymentAmount: "44000000" };
+    const changed = { ...policy, paymentAmount: String(BigInt(payment) - 1n) };
     await assert.rejects(
       state(0, { ...saved, policy: changed, policyHash: hashPolicy(changed) }),
       /CHAIN_POLICY_MISMATCH/,
     );
     await assert.rejects(send(0, "allowance"), /INSUFFICIENT_MOCKUSDC/);
-    for (let index = 0; index < 6; index++) {
+    for (let index = 0; index < memberCount; index++) {
       await confirmed(
         await wallet(0).writeContract({
           address: token,
@@ -256,18 +279,18 @@ async function main() {
     }
     const active = await state();
     assert.equal(active.status, 1);
-    assert.equal(active.approvals, 6);
-    assert.equal(active.contributed, "60000000");
+    assert.equal(active.approvals, memberCount);
+    assert.equal(active.contributed, funding);
     assert.ok(
       active.members.every((member) => member.contribution === "10000000"),
     );
-    await send(2, "cancel");
-    for (let index = 0; index < 6; index++) {
+    await send(Math.min(2, memberCount - 1), "cancel");
+    for (let index = 0; index < memberCount; index++) {
       assert.equal((await state(index)).refund, "10000000");
       await send(index, "refund");
       await assert.rejects(send(index, "refund"), /REFUND_UNAVAILABLE/);
     }
-    assert.equal((await state()).refunded, "60000000");
+    assert.equal((await state()).refunded, funding);
     const nextPolicy = {
       ...policy,
       decisionId: keccak256(stringToHex("expired-group")),
@@ -304,17 +327,17 @@ async function main() {
     const worker = new GroupExecutionWorker(
       reader,
       transport,
-      accounts[6]!,
+      accounts[memberCount]!,
       config,
       store,
       0n,
       10000000000000000n,
     );
     await send(0, "register", pay);
-    for (let index = 0; index < 6; index++) {
+    for (let index = 0; index < memberCount; index++) {
       await send(index, "allowance", pay);
       await send(index, "contribute", pay);
-      if (index === 4) {
+      if (index === memberCount - 2) {
         await worker.tick(pay);
         assert.equal(store.journal, undefined);
       }
@@ -331,7 +354,7 @@ async function main() {
     const interrupted = new GroupExecutionWorker(
       interruptedClient,
       transport,
-      accounts[6]!,
+      accounts[memberCount]!,
       config,
       store,
       0n,
@@ -347,7 +370,7 @@ async function main() {
     const resumed = new GroupExecutionWorker(
       reader,
       transport,
-      accounts[6]!,
+      accounts[memberCount]!,
       config,
       store,
       0n,
@@ -358,17 +381,18 @@ async function main() {
     assert.equal(store.saves, 1);
     assert.equal(store.journal!.hash, originalHash);
     assert.equal(store.executionStatus, "confirmed");
-    assert.equal((await state(0, pay)).spent, "45000000");
+    assert.equal((await state(0, pay)).spent, payment);
     assert.equal(
       store.events.filter((e) => e.kind === "PaymentExecuted").length,
       1,
     );
-    for (let index = 0; index < 6; index++) await send(index, "refund", pay);
+    for (let index = 0; index < memberCount; index++)
+      await send(index, "refund", pay);
     await resumed.tick(pay);
-    assert.equal((await state(0, pay)).refunded, "15000000");
+    assert.equal((await state(0, pay)).refunded, String(memberCount * 2500000));
     assert.equal(
       store.events.filter((e) => e.kind === "RefundClaimed").length,
-      6,
+      memberCount,
     );
     store.cursor!.blockHash = `0x${"0".repeat(64)}`;
     await resumed.tick(pay);
@@ -378,19 +402,19 @@ async function main() {
     );
     assert.equal(
       store.events.filter((e) => e.kind === "RefundClaimed").length,
-      6,
+      memberCount,
     );
     console.log(
-      "PASS: agent executes only after six contributions; lost broadcast response resumes the same signed hash; history replay is idempotent; all six refunds recorded.",
+      "PASS: agent executes only after all contributions; lost broadcast response resumes the same signed hash; history replay is idempotent; all participant refunds recorded.",
     );
     console.log(
-      "PASS: ordinary-group registration, exact allowances, six contributions, hash/member checks, duplicate prevention, cancellation, expiry and refunds on disposable Anvil.",
+      "PASS: ordinary-group registration, exact allowances, all contributions, hash/member checks, duplicate prevention, cancellation, expiry and refunds on disposable Anvil.",
     );
   } finally {
     child.kill();
   }
 }
-main().catch(() => {
-  console.error("Group chain rehearsal failed.");
+main().catch((error: unknown) => {
+  console.error("Group chain rehearsal failed.", error);
   process.exitCode = 1;
 });

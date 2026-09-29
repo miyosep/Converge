@@ -4,6 +4,7 @@ import { join } from "node:path";
 const contracts = [
   ["MockUSDC", "mockUSDC.json"],
   ["ConvergeGroupWallet", "convergeGroupWallet.json"],
+  ["ConvergeGroupWalletV2", "convergeGroupWalletV2.json"],
 ] as const;
 
 const outputDir = join("src", "lib", "abi");

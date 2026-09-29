@@ -11,6 +11,7 @@ export type GroupSummary = {
   timeZone: string;
   locked: boolean;
   memberCount: number;
+  targetMemberCount: number;
   confirmedCount: number;
 };
 
@@ -32,6 +33,8 @@ export function savedEvaluationView(input: {
     catalog: input.catalog.restaurants.map((restaurant) => ({
       id: restaurant.id,
       name: restaurant.name,
+      cuisine: restaurant.cuisine,
+      area: restaurant.area,
       merchant: restaurant.merchant,
       mealPricePerPersonCents: restaurant.mealPricePerPersonCents,
       depositBaseUnits: restaurant.depositBaseUnits,

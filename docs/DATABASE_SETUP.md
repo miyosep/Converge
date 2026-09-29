@@ -70,8 +70,8 @@ login for participants.
 5. Set `DATABASE_URL` in the repository's ignored root `.env`, then save the
    file. Do not put the value in chat, a screenshot, a commit, or a public issue.
 6. Tell the implementer that the file is ready, without including its contents.
-   Connectivity checks and reviewed migrations are the next steps; neither has
-   been run against a managed database yet.
+   Check connectivity and apply reviewed migrations on an isolated development
+   branch before enabling application writes.
 
 The expected variable is `DATABASE_URL`, not a public frontend environment
 variable. The setup does not require sharing a Neon account password or API key.
@@ -82,8 +82,9 @@ explicit decision from the owner.
 
 ## Implementation and Demo Boundaries
 
-Project linking and database connectivity are complete. Four versioned SQL
-migrations and transaction-backed preference, auth, invitation, and usage storage have been verified on
+Project linking and database connectivity are complete. Ten versioned SQL
+migrations and transaction-backed preference, auth, invitation, usage, explanation,
+execution journal, chain history, permitted-restaurant storage, and flexible group capacity have been applied on
 `dev-preferences`; production remains untouched. The development connection
 strings live in ignored `.env.development`, while `.env` remains pinned to
 production. `pnpm db:migrate:dev` requires the direct connection and matching
@@ -93,8 +94,10 @@ sanitized synthetic evidence. Neither command needs the Neon CLI at runtime.
 EOA wallet sessions, invitation validation, and the first HTTP APIs now run on
 the development branch. The production branch has not received these migrations.
 Saved ordinary-group evaluations and off-chain immutable policies have been
-rehearsed on `dev-preferences` with synthetic inputs. On-chain financial entities,
-settlement reconciliation, and full end-to-end application runs remain pending.
+rehearsed on `dev-preferences` with synthetic inputs. The ordinary-group payment
+worker and settlement reconciliation are implemented; Anvil recovery and Neon
+journal/history rehearsals have passed. See [ordinary-group acceptance](GROUP_ACCEPTANCE.md)
+for the live Kiln and Sepolia lifecycle commands and their correlated evidence.
 No empty or unavailable database should cause the application to fall back to
 in-memory production state or to fabricate confirmed preferences.
 
