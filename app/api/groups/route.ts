@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { reservationSlotSchema } from "../../../src/lib/schemas/decision.js";
+import { permittedRestaurantIdsSchema } from "../../../src/lib/group-conditions.js";
+import { groupSizeSchema } from "../../../src/lib/group-size.js";
 import {
   api,
   services,
@@ -27,7 +29,9 @@ export async function POST(request: NextRequest) {
       .strictObject({
         name: z.string(),
         displayName: z.string(),
+        targetMemberCount: groupSizeSchema.optional(),
         slot: reservationSlotSchema,
+        permittedRestaurantIds: permittedRestaurantIdsSchema.optional(),
       })
       .parse(await request.json());
     const groupId = await services().preferences.createGroup({

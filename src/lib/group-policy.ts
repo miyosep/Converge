@@ -1,12 +1,16 @@
 import { keccak256, stringToHex } from "viem";
 import { evaluateDecision } from "./decision-engine.js";
 import { evaluationInputSchema } from "./schemas/decision.js";
-import { hashPolicy, policySchema, type Policy } from "./policy.js";
+import { hashPolicy, policySchema, type Policy } from "./signing-policy.js";
 
 export class GroupPolicyError extends Error {
   constructor(
     public readonly code:
-      "NO_PROPOSAL" | "STALE_EVALUATION" | "RESERVATION_PASSED",
+      | "NO_PROPOSAL"
+      | "STALE_EVALUATION"
+      | "RESERVATION_PASSED"
+      | "PAYMENT_NOT_CONFIGURED"
+      | "UNSUPPORTED_PAYMENT_GROUP_SIZE",
   ) {
     super(code);
   }
@@ -15,7 +19,7 @@ export class GroupPolicyError extends Error {
 export type GroupPolicyConfig = Pick<
   Policy,
   "chainId" | "verifyingContract" | "token" | "executor"
->;
+> & { policyVersion?: 1 | 2 };
 export type SigningPolicy = {
   policy: Policy;
   policyHash: string;
@@ -32,6 +36,8 @@ export function buildGroupPolicy(input: {
   nowSeconds: number;
 }): SigningPolicy {
   const snapshot = evaluationInputSchema.parse(input.snapshot);
+  if ((input.config.policyVersion ?? 1) === 1 && snapshot.members.length !== 6)
+    throw new GroupPolicyError("UNSUPPORTED_PAYMENT_GROUP_SIZE");
   const result = evaluateDecision(snapshot);
   if (result.status !== "PROPOSAL_READY" || !result.winnerId)
     throw new GroupPolicyError("NO_PROPOSAL");
@@ -46,7 +52,7 @@ export function buildGroupPolicy(input: {
     throw new GroupPolicyError("RESERVATION_PASSED");
   const policy = policySchema.parse({
     ...input.config,
-    policyVersion: 1,
+    policyVersion: input.config.policyVersion ?? 1,
     decisionId: keccak256(
       stringToHex(
         `group:${input.groupId}:${input.evaluationId}:${input.decisionNonce}`,
@@ -54,7 +60,7 @@ export function buildGroupPolicy(input: {
     ),
     merchant: restaurant.merchant,
     participants: snapshot.members,
-    approvalThreshold: 6,
+    approvalThreshold: snapshot.members.length,
     contributionPerParticipant: snapshot.contributionPerParticipant,
     paymentAmount: restaurant.depositBaseUnits,
     maxDeposit: snapshot.maxDeposit,

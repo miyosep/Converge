@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "branch": "dev-preferences",
+  "checkedAt": "2026-09-29T06:55:23.395Z",
+  "groupId": "dd69995f-53ab-4fb7-a5e1-55a70dc803a2",
+  "explanationSource": "kiln",
+  "explanationPromptVersion": "public-explanation-v2",
+  "explanationAttempts": 1,
+  "inputTokens": 179,
+  "outputTokens": 877,
+  "cacheHitOnRepeat": true,
+  "outsiderRejected": true,
+  "csrfRejected": true,
+  "onChainTransactions": false
+}

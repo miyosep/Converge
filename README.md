@@ -6,7 +6,7 @@ Converge helps a group choose a restaurant from private preferences, approve one
 
 In the current Explore Demo catalog, Restaurant A is presented as **KAGAMI**, a fictional storefront at `/restaurant`. Its table meal estimate is synthetic and separate from the $148 omakase shown on the concept page. Its shellfish-safety metadata is unknown. The storefront displays a simulator-only booking state after a matching Sepolia test payment; it does not accept a real reservation.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented on Ethereum Sepolia. Ordinary groups can save candidate results and prepare an immutable off-chain signing policy; their on-chain approval, contribution, execution, and refund flow remains pending. The direct-contract baseline and a wallet-connected Explore rehearsal each completed six contributions, one bounded payment, and six refunds. The Explore rehearsal used live Kiln extraction and a dedicated script-controlled judge test wallet; its [Sepolia evidence](docs/evidence/explore-live-c1564c0c4a4c.json) includes verified receipts and events. A real judge's browser-wallet walkthrough and the MacBook rehearsal remain pending. This README remains a draft.
+> **Project status:** The ordinary-group baseline, lower-budget, and merchant-excluded lifecycles completed on the Neon development branch and Ethereum Sepolia, using live Kiln `qwen3-32b`, six distinct wallet keys and isolated authenticated HTTP clients. Each run has six contributions, one bounded payment, six refunds, and matching application history. Lost-broadcast and database-confirmation failures recovered across separate processes without duplicate payment. See [the acceptance record](docs/GROUP_ACCEPTANCE.md) for exact inputs, receipts, usage and finality. One test operator controlled all six keys; a six-human browser walkthrough and the presentation MacBook rehearsal remain open. Production deployment, independent review, and submission disclosures are separate remaining work.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -24,7 +24,21 @@ Choosing and paying for a group reservation requires people to coordinate budget
 
 ## Solution
 
-The proposed MVP supports **six participants** and one restaurant reservation deposit:
+Ordinary groups can choose **2–100 participants** when created. Invitations,
+private preferences, progress and recommendations use that group's chosen size.
+All members must join and confirm before evaluation. The per-person test
+contribution remains 10 MockUSDC; recommendation spending limits cannot exceed
+the actual group's total contribution (and retain the configured 60 MockUSDC cap).
+Migration `0009_group_size.sql` preserves existing groups at six members.
+
+Ordinary groups can search and select from **20 fictional restaurants** by name,
+cuisine or area. All members approve one immutable policy and contribute before
+payment. The deployed **v2 contract supports 2–100 participants**, including four.
+Existing v1 policies remain supported. Explore Demo retains six participants and
+its original five-candidate catalog. Apply migrations through `0010`.
+See [variable-size payments](docs/GROUP_WALLET_V2.md) for deployment and verification.
+
+The payment flow supports one test restaurant reservation deposit:
 
 1. Each person submits a private natural-language preference and confirms the structured interpretation.
 2. Kiln `qwen3-32b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
@@ -43,18 +57,18 @@ The first [live Explore rehearsal](docs/evidence/explore-live-c1564c0c4a4c.json)
 
 The baseline uses six separate participant accounts: Alice, Bob, Charlie, Dana, Erin, and Farah. These are demo personas, not team assignments. Dedicated accounts have been generated for a single-operator rehearsal; this does not demonstrate six independently controlled participants. Their public addresses are in [the participant manifest](contracts/deployments/demo-participants.11155111.json).
 
-| Item | Planned baseline |
-| --- | --- |
-| Recommended restaurant | Restaurant A |
-| Estimated meal price | $32 per person; $192 for six people |
-| Contribution | 10 Mock USDC per person |
-| Total contributed | 60 Mock USDC |
-| Approved merchant | Restaurant A's deployed mock merchant address |
-| Exact reservation deposit | 45 Mock USDC |
-| Maximum deposit and total escrow spend | 60 Mock USDC each |
-| Deliberately invalid request | 80 Mock USDC to Restaurant A; expected `MAX_DEPOSIT_EXCEEDED` |
-| Valid request | 45 Mock USDC to Restaurant A |
-| Remaining funds after payment | 15 Mock USDC; 2.5 per person |
+| Item                                   | Verified baseline terms                                       |
+| -------------------------------------- | ------------------------------------------------------------- |
+| Recommended restaurant                 | Restaurant A                                                  |
+| Estimated meal price                   | $32 per person; $192 for six people                           |
+| Contribution                           | 10 Mock USDC per person                                       |
+| Total contributed                      | 60 Mock USDC                                                  |
+| Approved merchant                      | Restaurant A's deployed mock merchant address                 |
+| Exact reservation deposit              | 45 Mock USDC                                                  |
+| Maximum deposit and total escrow spend | 60 Mock USDC each                                             |
+| Deliberately invalid request           | 80 Mock USDC to Restaurant A; expected `MAX_DEPOSIT_EXCEEDED` |
+| Valid request                          | 45 Mock USDC to Restaurant A                                  |
+| Remaining funds after payment          | 15 Mock USDC; 2.5 per person                                  |
 
 The $45 deposit is credited toward the synthetic $192 meal estimate. The balance of the meal is outside the on-chain MVP. A successful live demo must show a real transaction receipt, matching contract event, and application history entry. The invalid attempt must be described according to its actual evidence type: read-only validation, simulation revert, or mined revert.
 
@@ -70,47 +84,49 @@ Private input -> Kiln extraction -> participant confirmation
               -> receipt, event, history, and refunds
 ```
 
-The policy will have a canonical, versioned ABI encoding and a `decisionHash` calculated consistently in Solidity and TypeScript. Changing the merchant or any other approved financial term will require a new decision and fresh approvals.
+The policy has a canonical, versioned ABI encoding and a `policyHash` calculated consistently in Solidity and TypeScript. Changing the merchant or any other approved financial term requires a new decision and fresh approvals.
 
 ## AI vs Code vs Smart Contract
 
-| Layer | Planned responsibility |
-| --- | --- |
+| Layer            | Implemented responsibility                                                                                                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Kiln `qwen3-32b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
-| Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence. |
-| Smart contract | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable. |
+| Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence.                              |
+| Smart contract   | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable.                                 |
 
 The contract is the final authority for token movement. It cannot verify restaurant allergy safety, availability, or real-world service delivery; those are off-chain fixture claims in this MVP.
 
 ## Kiln Integration
 
-**Selected model:** `qwen3-32b` through Kiln, following the organizer update reported by the project owner on September 29, 2026 (KST). The server-side adapter has passed two live synthetic extraction checks with schema validation and provider usage records. Participant confirmation and the web workflow remain pending. NPU execution and energy are not independently attested by these responses.
+**Selected model:** `qwen3-32b` through Kiln. The project owner confirmed that the updated competition requirement supersedes the older `gpt-oss-120b` wording in `hackathon_descrip.txt`. The server-side adapter passed two live synthetic extraction checks with schema validation and provider usage records. Authenticated web submission, correction, and participant confirmation are implemented. NPU execution and energy are not independently attested by these responses.
 
-The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
+The deterministic decision engine selects A/B/B for the three offline fixture scenarios. The three live ordinary-group runs also select A/B/B using the explicitly documented budget-and-quiet input variant. Each live group has six fresh extractions, confirmations and a Kiln explanation; these records are separate from the earlier smoke and blockchain-only rehearsals. See [acceptance inputs and evidence](docs/GROUP_ACCEPTANCE.md), [decision engine details](docs/DECISION_ENGINE.md), and [Kiln integration](docs/KILN.md).
 
-Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. The first [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, and per-attempt usage storage. Proposal and payment routes are not connected yet.
+Preference revision transitions enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) runs on an isolated Neon development branch with migrations through `0008`; production remains unmigrated. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. The [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, per-attempt usage, immutable policies, wallet actions, the payment worker and receipt-backed history. All three live acceptance groups completed this HTTP-to-chain-to-refund flow.
 
-| Flow | Purpose | Planned usage |
-| --- | --- | --- |
-| `constraint_extraction` | Parse each participant's latest preference revision | Six calls for an unchanged baseline, before retries or corrections |
-| `decision_explanation` | Explain the deterministic result from privacy-safe data | One call per proposal revision |
-| `clarification` | Ask about a consequential ambiguity | Only when needed |
-| `candidate_analysis` | Interpret unstructured candidate facts | Normally zero calls for structured fixtures |
+| Flow                    | Purpose                                                 | Expected usage before retries                                      |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| `constraint_extraction` | Parse each participant's latest preference revision     | Six calls for an unchanged baseline, before retries or corrections |
+| `decision_explanation`  | Explain the deterministic result from privacy-safe data | One call per proposal revision                                     |
+| `clarification`         | Ask about a consequential ambiguity                     | Only when needed                                                   |
+| `candidate_analysis`    | Interpret unstructured candidate facts                  | Normally zero calls for structured fixtures                        |
 
-These are proposed call counts, not observed measurements. Final acceptance runs must use real Kiln responses; a development mock must be visibly labeled and excluded from live evidence.
+These are expected call counts before retries or corrections. Observed provider attempts are reported separately below. Acceptance evidence uses real Kiln responses; development mocks are labeled and excluded from live evidence.
 
 ## Kiln Token Usage by Flow
 
-Earlier synthetic Kiln smoke checks and one live web extraction have succeeded. The table below is reserved for the final acceptance runs and will be filled from their provider usage records. Unknown values will remain unknown rather than be reported as zero.
+These totals come only from the three live ordinary-group records, including failed attempts and retries. Earlier smoke and Explore runs are excluded.
 
-| Flow | Calls | Input tokens | Output tokens | Total tokens | Evidence |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `constraint_extraction` | Pending | Pending | Pending | Pending | Pending |
-| `decision_explanation` | Pending | Pending | Pending | Pending | Pending |
-| `clarification` | Pending | Pending | Pending | Pending | Pending |
-| `candidate_analysis` | Pending | Pending | Pending | Pending | Pending |
+| Flow                    | Provider attempts | Input tokens | Output tokens | Total tokens | Evidence                                                                     |
+| ----------------------- | ----------------: | -----------: | ------------: | -----------: | ---------------------------------------------------------------------------- |
+| `constraint_extraction` |                28 |       28,494 |        11,743 |       40,237 | [Three-run records](docs/GROUP_ACCEPTANCE.md#recorded-run-september-29-2026) |
+| `decision_explanation`  |                 3 |          597 |           985 |        1,582 | Same records                                                                 |
+| `clarification`         |                 0 |            — |             — |            — | No calls                                                                     |
+| `candidate_analysis`    |                 0 |            — |             — |            — | No calls                                                                     |
 
-The `/evidence` page is planned to show per-flow usage and each run's completeness. Request IDs, timestamps, model, flow, retries, and cache hits will be recorded without publishing private prompts or secrets.
+Extraction had 18 successful and 10 failed attempts, including nine automatic retry attempts. One failed revision required a fresh submission; it was never confirmed or used in a policy. All three explanation calls succeeded, with three subsequent application-cache hits. Total measured tokens were 41,819; provider-reported cost was USD 0.00479144. Unused flows have no measured token total. Energy remains unknown.
+
+The `/evidence` page publishes allowlisted projections of the three correlated records and keeps earlier evidence separate. The member-only insights API reports usage, failures, retries and cache hits. Public JSON includes explicitly synthetic test inputs for auditability; the public page omits input text and private fields. Real participant prompts and all secrets stay private.
 
 ## Inference / Energy Efficiency
 
@@ -134,11 +150,11 @@ The wallet rejects the wrong caller or merchant, insufficient approval/funding, 
 
 ## Contract Addresses
 
-| Contract | Address | Deployment transaction |
-| --- | --- | --- |
-| MockUSDC | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) | [`0xf329f3...f21991`](https://sepolia.etherscan.io/tx/0xf329f33842f286b2007693d604c66779ad879bd4061c6c4852bd62a4a9f21991) |
-| ConvergeGroupWallet | [`0xd43172d5bd904b68004d69545fd01dbcfdb82a89`](https://sepolia.etherscan.io/address/0xd43172d5bd904b68004d69545fd01dbcfdb82a89) | [`0x2ba1af...33b57`](https://sepolia.etherscan.io/tx/0x2ba1af22b6ba1ea410d482c195671caec2184fa49462feea449a9cc57de33b57) |
-| Mock merchants A-E | [Five receipt-only EOAs](contracts/deployments/demo-roles.11155111.json) | No contract deployment required |
+| Contract            | Address                                                                                                                         | Deployment transaction                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| MockUSDC            | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) | [`0xf329f3...f21991`](https://sepolia.etherscan.io/tx/0xf329f33842f286b2007693d604c66779ad879bd4061c6c4852bd62a4a9f21991) |
+| ConvergeGroupWallet | [`0xd43172d5bd904b68004d69545fd01dbcfdb82a89`](https://sepolia.etherscan.io/address/0xd43172d5bd904b68004d69545fd01dbcfdb82a89) | [`0x2ba1af...33b57`](https://sepolia.etherscan.io/tx/0x2ba1af22b6ba1ea410d482c195671caec2184fa49462feea449a9cc57de33b57)  |
+| Mock merchants A-E  | [Five receipt-only EOAs](contracts/deployments/demo-roles.11155111.json)                                                        | No contract deployment required                                                                                           |
 
 ## On-chain Transactions
 
@@ -152,13 +168,15 @@ This direct-contract rehearsal used one operator and synthetic inputs; it did no
 
 ## Condition Check Experiments
 
-The challenge requires the baseline plus two complete reruns with changed conditions. The following full application experiments remain pending. The separately recorded blockchain-only baseline does not complete them.
+The baseline and two changed-condition ordinary groups completed with fresh policies and six fresh live extractions each. They use the controlled budget-and-quiet inputs documented in [the acceptance record](docs/GROUP_ACCEPTANCE.md), independently of the earlier blockchain-only baseline.
 
-| Run | Changed condition | Expected recommendation | Required chain and log evidence |
-| --- | --- | --- | --- |
-| Baseline | Six baseline preferences | Restaurant A | Six approvals; 80 Mock USDC rejected; 45 Mock USDC paid to A; six 2.5 Mock USDC refunds |
-| Lower budget | Alice's maximum decreases from $35 to $25 | Restaurant B | New decision and six approvals; 36 Mock USDC paid to B; six 4 Mock USDC refunds |
-| Merchant excluded | A is removed from the permitted set | Restaurant B | New B policy and six approvals; attempted payment to A rejected as `MERCHANT_NOT_ALLOWED`; 36 Mock USDC paid to B; six 4 Mock USDC refunds |
+| Run                                                                            | Changed condition                | Observed recommendation | Recorded result                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Baseline](docs/evidence/group-acceptance-001-baseline.json)                   | Six budget-and-quiet preferences | A                       | 80 MockUSDC simulation rejected; [45 paid](https://sepolia.etherscan.io/tx/0xd24fa24c9a0d84c514330abca00b28ee186e833fddee92e5ef63a4baf7d9a7fd); six 2.5 refunds                              |
+| [Lower budget](docs/evidence/group-acceptance-001-lower-budget.json)           | First budget $35 → $25           | B                       | Fresh policy and six contributions; [36 paid](https://sepolia.etherscan.io/tx/0x3f6a846511de38ad8fabb3486e0fddb032c57ecc0d19d9ddda8692cd462a58a4); six 4 refunds                             |
+| [Merchant excluded](docs/evidence/group-acceptance-001-merchant-excluded.json) | Restore $35 and exclude A        | B                       | A payment simulation rejected with `MERCHANT_NOT_ALLOWED`; [36 paid to B](https://sepolia.etherscan.io/tx/0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb); six 4 refunds |
+
+All amounts are MockUSDC on Sepolia. There are 45 successful lifecycle receipts across these records; invalid requests were read-only calls, not failed mined transactions. Each record correlates confirmed input revisions, real Kiln attempts, evaluation, immutable policy, receipts and persisted history. Baseline and lower-budget recovery retain the same payment hash across process restarts.
 
 Changing an active policy in place would invalidate the meaning of earlier approvals. Each rerun therefore uses a new decision. If an older decision still holds funds, it must be cancelled or settled under its own rules.
 
@@ -170,7 +188,7 @@ This is application-level privacy, not cryptographic anonymity. Wallet addresses
 
 ## Security Model
 
-The financial policy will bind six distinct participant addresses, the token, chain, escrow contract, merchant, executor, exact payment, caps, and expiry. Contract state and per-decision balances, not browser or database assertions, decide whether a transfer is allowed. Refunds will be pull-based and protected against duplicate claims. Relevant contract invariants and access controls are specified in [project_guideline.md](project_guideline.md).
+The financial policy binds all distinct participant addresses, the token, chain, escrow contract, merchant, executor, exact payment, caps, and expiry. Contract state and per-decision balances decide whether a transfer is allowed. Refunds are pull-based and protected against duplicate claims. Relevant contract invariants and access controls are specified in [project_guideline.md](project_guideline.md).
 
 This is a hackathon prototype using mock funds. The local Solidity suite currently passes 22 tests, including fuzzing and randomized state sequences. The verified Sepolia deployment is not evidence of an end-to-end application run.
 
@@ -189,7 +207,7 @@ pnpm contracts:test
 pnpm contracts:abi
 ```
 
-`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. `pnpm dev` starts the first web workflow; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
+`pnpm check` runs TypeScript validation, formatting checks, and 70 application/foundation tests. `pnpm dev` starts the web application; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
 
@@ -206,18 +224,24 @@ For the already completed run, use `pnpm demo:chain baseline-001 --verify-only`
 to check its evidence without preparing or broadcasting transactions. A new
 run ID creates a fresh decision and spends another allocation of mock funds.
 
+For ordinary groups, follow [the three-scenario acceptance workflow](docs/GROUP_ACCEPTANCE.md).
+It uses migrations through `0008`, a separate local server on port 3010, six
+isolated authenticated clients, real Kiln calls and the application payment
+worker. `pnpm demo:groups-verify group-acceptance-001` independently checks the
+published artifacts against finalized Sepolia receipts using only RPC access.
+
 ## Environment Variables
 
-[`.env.example`](.env.example) contains placeholders for Kiln, database, sessions, chain/RPC, deployed addresses, and executor credentials, plus separate script-only deployment/demo keys. Create an ignored local `.env` when implementing integrations. Service-specific validation will be added with each integration. No credentials should be committed or pasted into evidence.
+[`.env.example`](.env.example) contains placeholders for Kiln, database, sessions, chain/RPC, deployed addresses, and executor credentials, plus separate script-only deployment/demo keys. Keep populated settings in ignored local environment files. Development commands use `.env.development` for the isolated Neon branch. Routes and workers validate the configuration they require. No credentials should be committed or pasted into evidence.
 
 ## Pre-built vs Hackathon-built Work
 
-The initial README contained only design documentation. Subsequent work added repository tooling, TypeScript schemas, checks, collaboration instructions, Solidity contracts with local tests, and the verified Sepolia deployment. No complete application has been produced yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
+The initial README contained only design documentation. Subsequent work added repository tooling, TypeScript schemas, checks, collaboration instructions, the Next.js group and Explore flows, Solidity contracts with local tests, the Sepolia deployment, and three live ordinary-group acceptance records. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
 
 ## Team
 
-Engineering responsibilities were not preassigned in the initial plan. Sage has claimed the policy encoding, token, escrow, payment enforcement, refunds, contract verification, and deployment tasks in the [self-assignment task register](project_guideline.md#19-self-assignment-task-register). Other contributors can enter their own names in open `Owner` cells. Claimed work is not yet completed work; this summary will be updated from actual contributions before submission.
+Current self-assigned owners, reviewers and evidence-backed statuses are in the [task register](project_guideline.md#19-self-assignment-task-register). Claimed work and implementation evidence do not establish final per-person contributions. Confirm the team contribution statement and event timeline before submission.
 
 ## README Update Plan
 
-This first version establishes the selected function, intended workflow, architecture, and acceptance evidence. After implementation, update it with the actual stack, working setup commands, verified Kiln usage by flow, measured efficiency data, deployment addresses, transaction receipts, experiment outcomes, tests run, known limitations, and an accurate team contribution record. Remove `Pending` only when the corresponding evidence exists.
+This draft records the implemented architecture, deployment, three correlated live acceptance runs, and current limitations. Remaining submission work includes the actual presentation MacBook rehearsal, final team contributions and prior-work disclosure. Energy remains unmeasured. Replace unknown or pending values only when corresponding evidence exists.

@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { buildGroupPolicy } from "../src/lib/group-policy.js";
 import { hashPolicy } from "../src/lib/policy.js";
+import { hashPolicy as hashAnyPolicy } from "../src/lib/signing-policy.js";
 import {
   groupEvaluationOptions,
   groupPolicyConfig,
@@ -107,6 +108,7 @@ test("saved policy UI shows full immutable identity without implying chain regis
           timeZone: slot.timeZone,
           locked: true,
           memberCount: 6,
+          targetMemberCount: 6,
           confirmedCount: 6,
         },
         participants: [],
@@ -119,6 +121,30 @@ test("saved policy UI shows full immutable identity without implying chain regis
   assert.ok(html.includes(signingPolicy.policyHash));
   assert.ok(html.includes(signingPolicy.policy.decisionId));
   assert.match(html, /not chain-verified/);
-  assert.match(html, /No wallet transaction is requested/);
-  assert.doesNotMatch(html, /<button/);
+  assert.match(html, /Waiting for verified chain state/);
+  assert.doesNotMatch(html, /Register policy on Sepolia<\/button>/);
+});
+
+test("four-member recommendations cannot produce a six-wallet payment policy", () => {
+  const four = {
+    ...snapshot,
+    members: snapshot.members.slice(0, 4),
+    preferences: snapshot.preferences.slice(0, 4),
+    maxDeposit: "40000000",
+    maxTotalSpend: "40000000",
+  };
+  assert.throws(
+    () => buildGroupPolicy({ ...args, snapshot: four }),
+    /UNSUPPORTED_PAYMENT_GROUP_SIZE/,
+  );
+  const supported = buildGroupPolicy({
+    ...args,
+    snapshot: four,
+    expectedWinner: "B",
+    config: { ...args.config, policyVersion: 2 },
+  });
+  assert.equal(supported.policy.policyVersion, 2);
+  assert.equal(supported.policy.approvalThreshold, 4);
+  assert.equal(supported.policy.participants.length, 4);
+  assert.equal(supported.policyHash, hashAnyPolicy(supported.policy));
 });

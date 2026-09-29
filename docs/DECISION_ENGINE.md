@@ -58,5 +58,6 @@ The offline fixture runner preconfirms synthetic revisions solely for testing.
 Separate development-branch rehearsals cover wallet authentication, user
 confirmation, persistence, stale-result handling, and immutable policy
 preparation with synthetic inputs. Neither rehearsal proves a full live Kiln and
-on-chain application run. Privacy-safe explanation and end-to-end payment remain
-open in the task register.
+on-chain application run. The separate explanation flow selects only public fact
+IDs and renders server-owned sentences; see [explanation and usage](EXPLANATION_USAGE.md).
+End-to-end payment remains open in the task register.

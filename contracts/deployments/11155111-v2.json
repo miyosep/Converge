@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 2,
+  "chainId": 11155111,
+  "deployer": "0x10D39DFCA635474Fa14E995E207CE071439A814B",
+  "mockUSDC": "0x4707bde238399a27f88855a34bfb31f20b386b17",
+  "convergeGroupWallet": {
+    "address": "0xe06073db9ee37801f593a040cc1f8c1f11af16bb",
+    "transactionHash": "0x234dc15c2d3ac91e19314235dc1e2db1c4ec2589a8c36f2d588d7fa6f89010c3",
+    "blockNumber": "11806529",
+    "blockHash": "0xe7a1099be29237106aee9efa8f2f3e577f1b99d0c44504b31cd10b12576a8390",
+    "deployedCodeHash": "0xcecbf443a2f525dda8deed82885d4627dced589c94357e7bdc8508c326bea273"
+  },
+  "verification": {
+    "minimumConfirmations": 2,
+    "finalizedAtVerification": false
+  }
+}

@@ -14,7 +14,12 @@ import {
   GroupPolicyError,
   type GroupPolicyConfig,
 } from "../group-policy.js";
-import { hashPolicy, policySchema } from "../policy.js";
+import { hashPolicy, policySchema } from "../signing-policy.js";
+import {
+  RESTAURANT_IDS,
+  permittedRestaurantIdsSchema,
+  permittedGroupMerchants,
+} from "../group-conditions.js";
 import {
   completePreferenceExtraction,
   confirmPreference,
@@ -28,6 +33,8 @@ import {
   type PreferenceState,
 } from "../preferences.js";
 import { addressSchema, idSchema } from "../schemas/primitives.js";
+import { groupSizeSchema } from "../group-size.js";
+import { MVP_PARTICIPANT_COUNT } from "../constants.js";
 import {
   reservationSlotSchema,
   type EvaluationInput,
@@ -36,7 +43,11 @@ import {
 export class PreferenceRepositoryError extends Error {
   constructor(
     public readonly code:
-      "GROUP_NOT_FOUND" | "NOT_MEMBER" | "GROUP_FULL" | "INCOMPLETE_GROUP",
+      | "GROUP_NOT_FOUND"
+      | "NOT_MEMBER"
+      | "GROUP_FULL"
+      | "INCOMPLETE_GROUP"
+      | "GROUP_LOCKED",
   ) {
     super(code);
     this.name = "PreferenceRepositoryError";
@@ -44,6 +55,8 @@ export class PreferenceRepositoryError extends Error {
 }
 
 type GroupRow = {
+  target_member_count: number;
+  permitted_restaurant_ids: string[];
   id: string;
   preferences_locked: boolean;
   reservation_starts_at: Date;
@@ -180,10 +193,11 @@ export class PreferenceRepository {
       reservation_time_zone: string;
       preferences_locked: boolean;
       member_count: number;
+      target_member_count: number;
       confirmed_count: number;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
-        g.preferences_locked, count(p.wallet_address)::int AS member_count,
+        g.preferences_locked, g.target_member_count, count(p.wallet_address)::int AS member_count,
         count(*) FILTER (WHERE r.status = 'CONFIRMED')::int AS confirmed_count
        FROM converge_groups g
        JOIN converge_participants mine ON mine.group_id = g.id AND mine.wallet_address = $1
@@ -200,6 +214,7 @@ export class PreferenceRepository {
       timeZone: row.reservation_time_zone,
       locked: row.preferences_locked,
       memberCount: row.member_count,
+      targetMemberCount: row.target_member_count,
       confirmedCount: row.confirmed_count,
     }));
   }
@@ -208,6 +223,8 @@ export class PreferenceRepository {
     const group = idSchema.parse(groupId);
     const participant = wallet(actor);
     const result = await this.pool.query<{
+      target_member_count: number;
+      permitted_restaurant_ids: string[];
       id: string;
       name: string;
       reservation_starts_at: Date;
@@ -226,7 +243,7 @@ export class PreferenceRepository {
       policy_created_at: Date | null;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
-        g.preferences_locked, e.id AS evaluation_id, e.created_at AS evaluated_at,
+        g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
         e.internal_result, e.input_snapshot->'catalog' AS catalog,
         e.input_snapshot->>'contributionPerParticipant' AS contribution,
         e.input_snapshot->>'maxDeposit' AS max_deposit,
@@ -258,12 +275,16 @@ export class PreferenceRepository {
       throw new Error("Stored policy hash mismatch");
     return {
       group: {
+        permittedRestaurantIds: permittedRestaurantIdsSchema.parse(
+          row.permitted_restaurant_ids,
+        ),
         id: row.id,
         name: row.name,
         startsAt: timestamp(row.reservation_starts_at)!,
         timeZone: row.reservation_time_zone,
         locked: row.preferences_locked,
         memberCount: participants.length,
+        targetMemberCount: row.target_member_count,
         confirmedCount: participants.filter((member) => member.confirmed)
           .length,
       },
@@ -291,6 +312,8 @@ export class PreferenceRepository {
   }
 
   async createGroup(input: {
+    targetMemberCount?: unknown;
+    permittedRestaurantIds?: unknown;
     name: string;
     slot: unknown;
     creator: string;
@@ -305,13 +328,27 @@ export class PreferenceRepository {
       .parse(input.displayName);
     const slot = reservationSlotSchema.parse(input.slot);
     const creator = wallet(input.creator);
+    const targetMemberCount = groupSizeSchema.parse(
+      input.targetMemberCount ?? MVP_PARTICIPANT_COUNT,
+    );
+    const permitted = permittedRestaurantIdsSchema.parse(
+      input.permittedRestaurantIds ?? [...RESTAURANT_IDS],
+    );
     const id = randomUUID();
     await transaction(this.pool, async (client) => {
       await client.query(
         `INSERT INTO converge_groups
-        (id, name, reservation_starts_at, reservation_time_zone, creator_wallet)
-        VALUES ($1, $2, $3, $4, $5)`,
-        [id, name, slot.startsAt, slot.timeZone, creator],
+        (id, name, reservation_starts_at, reservation_time_zone, creator_wallet, permitted_restaurant_ids, target_member_count)
+        VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)`,
+        [
+          id,
+          name,
+          slot.startsAt,
+          slot.timeZone,
+          creator,
+          JSON.stringify(permitted),
+          targetMemberCount,
+        ],
       );
       await client.query(
         `INSERT INTO converge_participants(group_id, wallet_address, display_name)
@@ -333,7 +370,7 @@ export class PreferenceRepository {
     const name = z.string().trim().min(1).max(80).parse(displayName);
     return transaction(this.pool, async (client) => {
       const groups = await client.query<GroupRow>(
-        "SELECT id, preferences_locked FROM converge_groups WHERE id = $1 FOR UPDATE",
+        "SELECT id, preferences_locked, target_member_count FROM converge_groups WHERE id = $1 FOR UPDATE",
         [groupId],
       );
       if (!groups.rows[0])
@@ -349,13 +386,86 @@ export class PreferenceRepository {
         "SELECT count(*)::text AS count FROM converge_participants WHERE group_id = $1",
         [groupId],
       );
-      if (Number(count.rows[0]!.count) >= 6)
+      if (Number(count.rows[0]!.count) >= groups.rows[0].target_member_count)
         throw new PreferenceRepositoryError("GROUP_FULL");
       await client.query(
         `INSERT INTO converge_participants(group_id, wallet_address, display_name)
         VALUES ($1, $2, $3) ON CONFLICT (group_id, wallet_address) DO NOTHING`,
         [groupId, participant, name],
       );
+    });
+  }
+
+  async leaveGroup(groupId: string, actor: string) {
+    const group = idSchema.parse(groupId);
+    const participant = wallet(actor);
+    return transaction(this.pool, async (client) => {
+      const groups = await client.query<{
+        creator_wallet: string;
+        preferences_locked: boolean;
+      }>(
+        `SELECT creator_wallet, preferences_locked FROM converge_groups
+         WHERE id = $1 FOR UPDATE`,
+        [group],
+      );
+      const record = groups.rows[0];
+      if (!record) throw new PreferenceRepositoryError("GROUP_NOT_FOUND");
+      const member = await client.query(
+        `SELECT 1 FROM converge_participants
+         WHERE group_id = $1 AND wallet_address = $2`,
+        [group, participant],
+      );
+      if (!member.rows.length)
+        throw new PreferenceRepositoryError("NOT_MEMBER");
+      if (record.preferences_locked)
+        throw new PreferenceRepositoryError("GROUP_LOCKED");
+
+      const successor = await client.query<{ wallet_address: string }>(
+        `SELECT wallet_address FROM converge_participants
+         WHERE group_id = $1 AND wallet_address <> $2
+         ORDER BY joined_at, wallet_address LIMIT 1`,
+        [group, participant],
+      );
+      // A pre-policy evaluation may still contain this member's revisions.
+      await client.query(
+        "DELETE FROM converge_evaluations WHERE group_id = $1",
+        [group],
+      );
+      await client.query(
+        `DELETE FROM converge_group_invites
+         WHERE group_id = $1 AND (created_by_wallet = $2 OR $3::boolean)`,
+        [group, participant, successor.rows.length === 0],
+      );
+      await client.query(
+        `DELETE FROM converge_kiln_attempts
+         WHERE group_id = $1 AND wallet_address = $2`,
+        [group, participant],
+      );
+      await client.query(
+        `UPDATE converge_participants SET current_revision_id = NULL
+         WHERE group_id = $1 AND wallet_address = $2`,
+        [group, participant],
+      );
+      await client.query(
+        `DELETE FROM converge_preference_revisions
+         WHERE group_id = $1 AND wallet_address = $2`,
+        [group, participant],
+      );
+      if (record.creator_wallet === participant && successor.rows[0])
+        await client.query(
+          "UPDATE converge_groups SET creator_wallet = $2 WHERE id = $1",
+          [group, successor.rows[0].wallet_address],
+        );
+      await client.query(
+        `DELETE FROM converge_participants
+         WHERE group_id = $1 AND wallet_address = $2`,
+        [group, participant],
+      );
+      if (!successor.rows.length)
+        await client.query("DELETE FROM converge_groups WHERE id = $1", [
+          group,
+        ]);
+      return { deletedGroup: successor.rows.length === 0 };
     });
   }
 
@@ -492,7 +602,7 @@ export class PreferenceRepository {
     const participant = wallet(actor);
     return transaction(this.pool, async (client) => {
       const groups = await client.query<GroupRow>(
-        "SELECT id, preferences_locked, reservation_starts_at, reservation_time_zone FROM converge_groups WHERE id = $1 FOR UPDATE",
+        "SELECT id, preferences_locked, target_member_count, reservation_starts_at, reservation_time_zone, permitted_restaurant_ids FROM converge_groups WHERE id = $1 FOR UPDATE",
         [group],
       );
       if (!groups.rows[0])
@@ -523,15 +633,32 @@ export class PreferenceRepository {
         [group],
       );
       if (
-        rows.rows.length !== 6 ||
+        rows.rows.length !== groups.rows[0].target_member_count ||
         rows.rows.some((row) => row.status !== "CONFIRMED")
       )
         throw new PreferenceRepositoryError("INCOMPLETE_GROUP");
       const snapshot = rows.rows.map((row) =>
         toEvaluationRevision(stateFromRow(row)),
       );
+      const funding =
+        BigInt(options.contributionPerParticipant) * BigInt(rows.rows.length);
+      const spendingCap =
+        BigInt(options.maxTotalSpend) < funding
+          ? BigInt(options.maxTotalSpend)
+          : funding;
+      const depositCap =
+        BigInt(options.maxDeposit) < spendingCap
+          ? BigInt(options.maxDeposit)
+          : spendingCap;
       const evaluationInput = {
         ...options,
+        maxTotalSpend: spendingCap.toString(),
+        maxDeposit: depositCap.toString(),
+        permittedMerchants: permittedGroupMerchants(
+          groups.rows[0].permitted_restaurant_ids,
+          options.catalog,
+          options.permittedMerchants,
+        ),
         members: rows.rows.map((row) =>
           addressSchema.parse(row.wallet_address),
         ),

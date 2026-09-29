@@ -4,7 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ConstraintSummary } from "./constraint-summary";
 import { GroupNavigation } from "./workspace-frame";
+import { LeaveGroupButton } from "./leave-group-button";
+import { AppHeader, WelcomeWorkspace } from "./product-ui";
+import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
+import {
+  connectWalletAccount,
+  signWalletLogin,
+  walletConnectionError,
+} from "../../src/lib/wallet-connection";
 import type { GroupSummary } from "../../src/lib/group-view";
+import { RESTAURANT_IDS } from "../../src/lib/group-conditions";
+import { RestaurantPicker } from "./restaurant-picker";
+import {
+  groupSizeSchema,
+  MIN_GROUP_MEMBERS,
+  MAX_GROUP_MEMBERS,
+} from "../../src/lib/group-size";
 import {
   ArrowRight,
   Check,
@@ -18,14 +33,6 @@ import {
   Wallet,
 } from "lucide-react";
 
-type Provider = {
-  request(args: { method: string; params?: unknown[] }): Promise<unknown>;
-};
-declare global {
-  interface Window {
-    ethereum?: Provider;
-  }
-}
 type Participant = {
   walletAddress: string;
   displayName: string;
@@ -67,6 +74,8 @@ export function GroupWorkspace({
   mode?: "home" | "create" | "preferences";
 }) {
   const [wallet, setWallet] = useState<string | null>(null);
+
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [groupId, setGroupId] = useState(initialGroupId);
   const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
@@ -79,6 +88,14 @@ export function GroupWorkspace({
   const [name, setName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [when, setWhen] = useState("");
+  const [sizeInput, setSizeInput] = useState("4");
+  const [targetMemberCount, setTargetMemberCount] = useState<number | null>(
+    null,
+  );
+  const validSize = groupSizeSchema.safeParse(Number(sizeInput)).success;
+  const [permittedRestaurantIds, setPermittedRestaurantIds] = useState<
+    string[]
+  >([...RESTAURANT_IDS]);
   const [text, setText] = useState("");
   const [correction, setCorrection] = useState("");
   const [busy, setBusy] = useState(false);
@@ -90,13 +107,15 @@ export function GroupWorkspace({
     const base = `/api/groups/${encodeURIComponent(id)}`;
     try {
       const [progress, own] = await Promise.all([
-        api<{ participants: Participant[]; group: { locked: boolean } }>(
-          `${base}/overview`,
-        ),
+        api<{
+          participants: Participant[];
+          group: { locked: boolean; targetMemberCount: number };
+        }>(`${base}/overview`),
         api<{ preference: Preference | null }>(`${base}/preferences`),
       ]);
       setParticipants(progress.participants);
       setGroupLocked(progress.group.locked);
+      setTargetMemberCount(progress.group.targetMemberCount);
       setPreference(own.preference);
       setText(own.preference?.rawText ?? "");
       setCorrection(
@@ -119,7 +138,8 @@ export function GroupWorkspace({
     setInviteToken(mode === "create" ? "" : (params.get("invite") ?? ""));
     api<{ walletAddress: string }>("/api/auth/session")
       .then((result) => setWallet(result.walletAddress))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
   }, [initialGroupId, mode]);
 
   useEffect(() => {
@@ -152,7 +172,7 @@ export function GroupWorkspace({
     try {
       await work();
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Request failed");
+      setNotice(walletConnectionError(error));
     } finally {
       setBusy(false);
     }
@@ -160,41 +180,45 @@ export function GroupWorkspace({
 
   async function connect() {
     await run(async () => {
-      if (!window.ethereum)
-        throw new Error("Install a wallet extension to continue");
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }],
-      });
-      const accounts = (await window.ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
-      const address = accounts[0];
-      if (!address) throw new Error("No wallet selected");
+      const provider = await getMetaMaskProvider();
+      if (!provider) return;
+      setNotice("Open MetaMask to approve the connection and Sepolia network.");
+      const address = await connectWalletAccount(provider);
       const challenge = await api<{ challengeId: string; message: string }>(
         "/api/auth/challenge",
         { address },
       );
-      const signature = (await window.ethereum.request({
-        method: "personal_sign",
-        params: [challenge.message, address],
-      })) as string;
+      setNotice(
+        "Confirm the sign-in message in MetaMask. If no popup appears, open MetaMask.",
+      );
+      const signature = await signWalletLogin(
+        provider,
+        challenge.message,
+        address,
+      );
       const session = await api<{ walletAddress: string }>("/api/auth/verify", {
         challengeId: challenge.challengeId,
         signature,
       });
       setWallet(session.walletAddress);
+      setNotice("");
     });
   }
 
   async function createGroup() {
     await run(async () => {
+      if (!validSize)
+        throw new Error(
+          `Choose a whole number from ${MIN_GROUP_MEMBERS} to ${MAX_GROUP_MEMBERS}.`,
+        );
       const timestamp = new Date(when);
       if (!Number.isFinite(timestamp.getTime()))
         throw new Error("Choose a date and time");
       const result = await api<{ groupId: string }>("/api/groups", {
         name,
         displayName,
+        targetMemberCount: Number(sizeInput),
+        permittedRestaurantIds,
         slot: {
           startsAt: timestamp.toISOString().replace(/\.\d{3}Z$/, "Z"),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -202,7 +226,9 @@ export function GroupWorkspace({
       });
       setGroupId(result.groupId);
       localStorage.setItem("converge:last-group", result.groupId);
-      setNotice("Group created. Invite five others to join.");
+      setNotice(
+        `Group created. Invite ${Number(sizeInput) - 1} others to join.`,
+      );
       window.location.assign(`/group/${encodeURIComponent(result.groupId)}`);
     });
   }
@@ -275,27 +301,20 @@ export function GroupWorkspace({
     });
   }
 
+  const welcome = !wallet && !groupId && mode === "home";
+  const hasUnsavedCorrection =
+    !!preference?.extraction &&
+    correction !== JSON.stringify(preference.extraction, null, 2);
   return (
-    <main className="shell">
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Converge home">
-          <span className="brand-mark">C</span>
-          <span>Converge</span>
-        </a>
-        <div className="top-actions">
-          <Link className="text-button" href="/evidence">
-            Evidence
-          </Link>
-          <a className="text-button" href="/demo">
-            Explore Demo
-          </a>
-          <span className="network">
-            <span className="network-dot" /> Ethereum Sepolia
-          </span>
-          {wallet ? (
+    <div className="shell">
+      <AppHeader
+        action={
+          wallet ? (
             <button
               className="wallet-button"
               type="button"
+              aria-label={`Sign out of wallet ${shortAddress(wallet)}`}
+              title="Sign out"
               onClick={() =>
                 void run(async () => {
                   await api("/api/auth/logout", {});
@@ -305,83 +324,122 @@ export function GroupWorkspace({
                 })
               }
             >
-              <Wallet size={16} /> {shortAddress(wallet)} <LogOut size={15} />
+              <Wallet size={16} aria-hidden="true" /> {shortAddress(wallet)}{" "}
+              <LogOut size={15} aria-hidden="true" />
             </button>
           ) : (
             <button
-              className="primary"
+              className="wallet-button"
               type="button"
               onClick={() => void connect()}
-              disabled={busy}
+              disabled={busy || sessionLoading}
             >
-              <Wallet size={16} /> Connect wallet
+              <Wallet size={16} aria-hidden="true" />{" "}
+              {busy ? "Connecting…" : "Connect wallet"}
             </button>
-          )}
-        </div>
-      </header>
-      <div className="workspace">
-        <aside className="sidebar">
-          <div className="sidebar-label">WORKSPACE</div>
-          <div className="nav-row active">
-            <Users size={17} /> Group decision
-          </div>
-          <div className="sidebar-foot">
-            <ShieldCheck size={18} />
-            <span>
-              Preferences stay visible only to their owner. Payment requires six
-              separate approvals.
-            </span>
-          </div>
-        </aside>
-        <section className="content">
-          <div className="heading">
-            <div>
-              <div className="eyebrow">GROUP WORKSPACE</div>
-              <h1>
-                {groupId && participants.length
-                  ? "Your preferences"
-                  : mode === "create"
-                    ? "Create a group"
-                    : "Your groups"}
-              </h1>
-            </div>
-            {wallet && groupId && participants.length > 0 && (
-              <button
-                className="icon-button"
-                title="Refresh group"
-                aria-label="Refresh group"
-                onClick={() => void refresh(groupId)}
+          )
+        }
+      />
+      <div className={`workspace ${welcome ? "welcome-workspace" : ""}`}>
+        {!welcome && (
+          <aside className="sidebar">
+            <div className="sidebar-label">YOUR SPACE</div>
+            <nav aria-label="Workspace navigation">
+              <Link
+                className={`nav-row ${mode !== "create" ? "active" : ""}`}
+                href="/"
+                aria-current={mode !== "create" ? "page" : undefined}
               >
-                <RefreshCw size={18} />
-              </button>
-            )}
-          </div>
-          <p className="mode-description">
-            Decide together with six independently controlled wallets. For a
-            guided session with automated participants, use Explore Demo.
-          </p>
+                <Users size={18} />
+                Your groups
+              </Link>
+              <Link
+                className={`nav-row ${mode === "create" ? "active" : ""}`}
+                href="/group/new"
+                aria-current={mode === "create" ? "page" : undefined}
+              >
+                <Plus size={18} />
+                New group
+              </Link>
+            </nav>
+            <div className="sidebar-foot">
+              <ShieldCheck size={18} />
+              <span>
+                Preferences stay visible only to their owner. Payment requires
+                every participant's approval.
+              </span>
+            </div>
+          </aside>
+        )}
+        <main className="content" id="main-content" tabIndex={-1}>
+          {!welcome && (
+            <>
+              <div className="heading">
+                <div>
+                  <div className="eyebrow">GROUP WORKSPACE</div>
+                  <h1>
+                    {groupId && participants.length
+                      ? "Your preferences"
+                      : mode === "create"
+                        ? "Create a group"
+                        : "Your groups"}
+                  </h1>
+                </div>
+                {wallet && groupId && participants.length > 0 && (
+                  <button
+                    className="icon-button"
+                    title="Refresh group"
+                    aria-label="Refresh group"
+                    onClick={() => void refresh(groupId)}
+                  >
+                    <RefreshCw size={18} />
+                  </button>
+                )}
+              </div>
+              <p className="mode-description">
+                {mode === "create"
+                  ? "Choose your group size and invite your people to decide together."
+                  : groupId
+                    ? "Your voice stays private. Your group moves forward together."
+                    : "Your people, your preferences, your next shared plan."}
+              </p>
+            </>
+          )}
           {groupId && <GroupNavigation id={groupId} active="preferences" />}
           {notice && (
             <div className="notice" role="status">
               {notice}
             </div>
           )}
-          {!wallet && (
-            <div className="empty-state">
-              <Wallet size={27} />
-              <h2>Connect your wallet</h2>
-              <p>
-                Sign a message to access your private group workspace. No
-                transaction is required to sign in.
-              </p>
-              <button
-                className="primary"
-                onClick={() => void connect()}
-                disabled={busy}
-              >
-                Connect wallet <ArrowRight size={16} />
-              </button>
+          {sessionLoading ? (
+            <div className="session-loading" role="status">
+              Opening your workspace…
             </div>
+          ) : welcome ? (
+            <WelcomeWorkspace busy={busy} onConnect={() => void connect()} />
+          ) : (
+            !wallet && (
+              <div className="empty-state">
+                <Wallet size={27} />
+                <h2>
+                  {groupId
+                    ? "Your group is waiting"
+                    : "Let's get your group together"}
+                </h2>
+                <p>
+                  Sign a message to access your private group workspace. No
+                  transaction is required to sign in.
+                </p>
+                <button
+                  className="primary"
+                  onClick={() => void connect()}
+                  disabled={busy}
+                >
+                  {busy ? "Connecting…" : "Connect wallet to continue"}{" "}
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            )
           )}
           {wallet && groupId && inviteToken && participants.length === 0 && (
             <div className="section-block">
@@ -433,7 +491,7 @@ export function GroupWorkspace({
                   <Users size={30} />
                   <h2>Your next decision starts here</h2>
                   <p>
-                    Create a group, invite five others, and let everyone share
+                    Create a group, invite your people, and let everyone share
                     their requirements privately.
                   </p>
                   <Link className="primary flow-link" href="/group/new">
@@ -451,7 +509,7 @@ export function GroupWorkspace({
                       <span className="pill">
                         {group.locked
                           ? "Proposal saved"
-                          : group.confirmedCount === 6
+                          : group.confirmedCount === group.targetMemberCount
                             ? "Ready for evaluation"
                             : "Collecting preferences"}
                       </span>
@@ -465,8 +523,8 @@ export function GroupWorkspace({
                       </p>
                       <div className="panel-heading">
                         <span>
-                          {group.memberCount} / 6 joined ·{" "}
-                          {group.confirmedCount} confirmed
+                          {group.memberCount} / {group.targetMemberCount} joined
+                          · {group.confirmedCount} confirmed
                         </span>
                         <ArrowRight size={19} />
                       </div>
@@ -508,12 +566,44 @@ export function GroupWorkspace({
                       onChange={(e) => setWhen(e.target.value)}
                     />
                   </label>
+                  <label>
+                    Group size, including you
+                    <input
+                      type="number"
+                      min={MIN_GROUP_MEMBERS}
+                      max={MAX_GROUP_MEMBERS}
+                      step={1}
+                      value={sizeInput}
+                      onChange={(event) => setSizeInput(event.target.value)}
+                      aria-describedby="group-size-help"
+                      aria-invalid={!validSize}
+                    />
+                    <small id="group-size-help">
+                      {validSize
+                        ? `Invite ${Number(sizeInput) - 1} others. Everyone must confirm before recommendations are ready.`
+                        : `Enter a whole number from ${MIN_GROUP_MEMBERS} to ${MAX_GROUP_MEMBERS}.`}
+                    </small>
+                  </label>
                 </div>
+                <p className="flow-note">
+                  Groups of {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} can collect
+                  preferences, compare restaurants and approve a shared test
+                  payment. The Explore demo uses six participants.
+                </p>
+                <RestaurantPicker
+                  selected={permittedRestaurantIds}
+                  onChange={setPermittedRestaurantIds}
+                />
                 <button
                   className="primary"
                   onClick={() => void createGroup()}
                   disabled={
-                    busy || !name.trim() || !displayName.trim() || !when
+                    busy ||
+                    !name.trim() ||
+                    !displayName.trim() ||
+                    !when ||
+                    !validSize ||
+                    permittedRestaurantIds.length === 0
                   }
                 >
                   <Plus size={16} /> Create group
@@ -587,15 +677,22 @@ export function GroupWorkspace({
                           Correct any field before confirming. Unresolved
                           requirements must be addressed.
                         </p>
-                        <textarea
-                          className="json-editor"
-                          aria-label="Structured interpretation"
-                          value={correction}
-                          onChange={(e) => setCorrection(e.target.value)}
-                          rows={13}
-                          spellCheck={false}
-                        />
-                        <div className="button-row">
+                        <details className="advanced-editor">
+                          <summary>
+                            Advanced: edit structured conditions
+                          </summary>
+                          <p>
+                            Prefer plain language? Update your requirements
+                            above and select “Update & re-interpret”.
+                          </p>
+                          <textarea
+                            className="json-editor"
+                            aria-label="Structured interpretation"
+                            value={correction}
+                            onChange={(e) => setCorrection(e.target.value)}
+                            rows={13}
+                            spellCheck={false}
+                          />
                           <button
                             className="secondary"
                             onClick={() => void correct()}
@@ -603,13 +700,21 @@ export function GroupWorkspace({
                           >
                             <RefreshCw size={15} /> Save correction
                           </button>
+                        </details>
+                        {hasUnsavedCorrection && (
+                          <p role="status" className="flow-note">
+                            Save your structured correction before confirming
+                            these preferences.
+                          </p>
+                        )}
+                        <div className="button-row">
                           {preference.status !== "CONFIRMED" && (
                             <button
                               className="primary"
                               onClick={() => void confirm()}
-                              disabled={busy}
+                              disabled={busy || hasUnsavedCorrection}
                             >
-                              <Check size={16} /> Confirm
+                              <Check size={16} /> Confirm my preferences
                             </button>
                           )}
                         </div>
@@ -658,7 +763,8 @@ export function GroupWorkspace({
                   <div className="section-title">
                     <h2>Participants</h2>
                     <strong>
-                      {participants.filter((p) => p.confirmed).length} / 6
+                      {participants.filter((p) => p.confirmed).length} /{" "}
+                      {targetMemberCount ?? "—"}
                     </strong>
                   </div>
                   <p>
@@ -692,7 +798,12 @@ export function GroupWorkspace({
                   <button
                     className="secondary full"
                     onClick={() => void invite()}
-                    disabled={busy || participants.length >= 6}
+                    disabled={
+                      busy ||
+                      groupLocked ||
+                      targetMemberCount === null ||
+                      participants.length >= targetMemberCount
+                    }
                   >
                     <Link2 size={16} /> Create invite link
                   </button>
@@ -708,19 +819,27 @@ export function GroupWorkspace({
                         title="Copy invite link"
                         aria-label="Copy invite link"
                         onClick={() =>
-                          void navigator.clipboard.writeText(inviteLink)
+                          void run(async () => {
+                            await navigator.clipboard.writeText(inviteLink);
+                            setNotice(
+                              "Invite link copied. Share it with the people joining your group.",
+                            );
+                          })
                         }
                       >
                         <Copy size={16} />
                       </button>
                     </div>
                   )}
+                  <div className="flow-note">
+                    <LeaveGroupButton groupId={groupId} locked={groupLocked} />
+                  </div>
                 </div>
               </div>
             </div>
           )}
-        </section>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

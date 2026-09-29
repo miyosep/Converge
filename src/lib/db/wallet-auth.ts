@@ -164,8 +164,9 @@ export class WalletAuthRepository {
       const groups = await client.query<{
         creator_wallet: string;
         preferences_locked: boolean;
+        target_member_count: number;
       }>(
-        `SELECT creator_wallet, preferences_locked FROM converge_groups
+        `SELECT creator_wallet, preferences_locked, target_member_count FROM converge_groups
         WHERE id = $1 FOR UPDATE`,
         [group],
       );
@@ -179,7 +180,8 @@ export class WalletAuthRepository {
         WHERE group_id = $1`,
         [group],
       );
-      const remaining = 6 - Number(count.rows[0]!.total);
+      const remaining =
+        record.target_member_count - Number(count.rows[0]!.total);
       if (remaining <= 0) throw new WalletAuthError("GROUP_FULL");
       await client.query(
         `INSERT INTO converge_group_invites
@@ -202,8 +204,11 @@ export class WalletAuthRepository {
     const name = z.string().trim().min(1).max(80).parse(displayName);
     const hash = tokenHash(tokenSchema.parse(inviteToken));
     return transaction(this.pool, async (client) => {
-      const groups = await client.query<{ preferences_locked: boolean }>(
-        "SELECT preferences_locked FROM converge_groups WHERE id = $1 FOR UPDATE",
+      const groups = await client.query<{
+        preferences_locked: boolean;
+        target_member_count: number;
+      }>(
+        "SELECT preferences_locked, target_member_count FROM converge_groups WHERE id = $1 FOR UPDATE",
         [group],
       );
       if (!groups.rows[0]) throw new WalletAuthError("GROUP_NOT_FOUND");
@@ -232,7 +237,7 @@ export class WalletAuthRepository {
         WHERE group_id = $1`,
         [group],
       );
-      if (Number(count.rows[0]!.total) >= 6)
+      if (Number(count.rows[0]!.total) >= groups.rows[0].target_member_count)
         throw new WalletAuthError("GROUP_FULL");
       await client.query(
         `INSERT INTO converge_participants

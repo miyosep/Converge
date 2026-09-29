@@ -6,7 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { PreferenceRepository } from "../src/lib/db/preferences.js";
 import { verifiedPostgresUrl } from "../src/lib/db/connection.js";
 import type { GroupOverview } from "../src/lib/group-view.js";
-import { hashPolicy } from "../src/lib/policy.js";
+import { hashPolicy } from "../src/lib/signing-policy.js";
 
 if (process.env.NEON_BRANCH !== "dev-preferences")
   throw new Error("This synthetic rehearsal is restricted to dev-preferences");

@@ -9,6 +9,8 @@ import {
 import { WalletAuthError, WalletAuthRepository } from "../db/wallet-auth.js";
 import { PreferenceError } from "../preferences.js";
 import { GroupPolicyError } from "../group-policy.js";
+import { GroupInsightsRepository } from "../db/group-insights.js";
+import { GroupExecutionRepository } from "../db/group-execution.js";
 import type { KilnAttempt } from "../kiln/client.js";
 
 const SESSION_COOKIE = "converge_session";
@@ -29,6 +31,8 @@ export function services() {
   return {
     auth: new WalletAuthRepository(pool, origin),
     preferences: new PreferenceRepository(pool),
+    insights: new GroupInsightsRepository(pool),
+    execution: new GroupExecutionRepository(pool),
   };
 }
 

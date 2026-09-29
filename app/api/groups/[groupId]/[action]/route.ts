@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createPublicClient, getAddress, http } from "viem";
+import { sepolia } from "viem/chains";
+import { readGroupChain } from "../../../../../src/lib/group-chain.js";
 import { createKilnClient } from "../../../../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
 import {
   groupEvaluationOptions,
-  groupPolicyConfig,
+  currentGroupPolicyConfig,
+  groupPolicyConfigFor,
 } from "../../../../../src/lib/server/group-config.js";
 import {
   api,
@@ -22,6 +26,45 @@ export async function GET(request: NextRequest, context: Context) {
   return api(async () => {
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "history") {
+      await services().preferences.getOverview(groupId, actor);
+      return NextResponse.json(
+        await services().execution.history(groupId, actor),
+      );
+    }
+    if (action === "chain") {
+      const overview = await services().preferences.getOverview(groupId, actor);
+      if (!overview.signingPolicy)
+        return NextResponse.json({ error: "NO_POLICY" }, { status: 409 });
+      if (!process.env.RPC_URL)
+        return NextResponse.json(
+          { error: "CHAIN_UNAVAILABLE" },
+          { status: 503 },
+        );
+      try {
+        const client = createPublicClient({
+          chain: sepolia,
+          transport: http(process.env.RPC_URL, {
+            timeout: 15000,
+            retryCount: 0,
+          }),
+        });
+        return NextResponse.json(
+          await readGroupChain(
+            client,
+            overview.signingPolicy,
+            groupPolicyConfigFor(overview.signingPolicy.policy),
+            getAddress(actor),
+          ),
+        );
+      } catch {
+        // RPC errors can contain credentials. Never return or log provider text.
+        return NextResponse.json(
+          { error: "CHAIN_VERIFICATION_FAILED" },
+          { status: 503 },
+        );
+      }
+    }
     if (action === "overview")
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),
@@ -43,6 +86,12 @@ export async function POST(request: NextRequest, context: Context) {
     verifyOrigin(request);
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "leave") {
+      z.strictObject({}).parse(await request.json());
+      return NextResponse.json(
+        await services().preferences.leaveGroup(groupId, actor),
+      );
+    }
     if (action === "evaluate") {
       z.strictObject({}).parse(await request.json());
       const repository = services().preferences;
@@ -64,7 +113,7 @@ export async function POST(request: NextRequest, context: Context) {
       await services().preferences.preparePolicy(
         groupId,
         actor,
-        groupPolicyConfig,
+        currentGroupPolicyConfig(),
       );
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),

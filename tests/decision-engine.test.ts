@@ -9,6 +9,7 @@ import { demoRolesSchema } from "../src/lib/demo-roles.js";
 import { createRestaurantCatalog } from "../src/lib/fixtures/restaurants.js";
 import { createBaselinePreferences } from "../src/lib/fixtures/preferences.js";
 import type { EvaluationInput } from "../src/lib/schemas/decision.js";
+import { groupSizeSchema } from "../src/lib/group-size.js";
 
 const address = (value: number) =>
   getAddress(`0x${value.toString(16).padStart(40, "0")}`);
@@ -39,6 +40,39 @@ function baseline(budget = 3500): EvaluationInput {
     catalog: createRestaurantCatalog(roles, [slot.startsAt]),
   };
 }
+
+test("ordinary group sizes validate and recommendations use actual funding", () => {
+  for (const count of [2, 4, 8, 100])
+    assert.equal(groupSizeSchema.parse(count), count);
+  for (const count of [0, 1, 4.5, 101, "4", null])
+    assert.equal(groupSizeSchema.safeParse(count).success, false);
+  for (const count of [2, 4, 8]) {
+    const input = baseline();
+    const template = input.preferences[0]!;
+    input.members = Array.from({ length: count }, (_, index) =>
+      address(index + 100),
+    );
+    input.preferences = input.members.map((participant, index) => ({
+      ...structuredClone(template),
+      participant,
+      revisionId: `revision-${index}`,
+      confirmedRevisionId: `revision-${index}`,
+    }));
+    input.maxDeposit = input.maxTotalSpend = (
+      BigInt(count) * 10000000n
+    ).toString();
+    const result = evaluateDecision(input);
+    assert.equal(result.winnerId, count === 2 ? null : count === 4 ? "B" : "A");
+    if (count === 4)
+      assert.ok(
+        result.candidates
+          .find((candidate) => candidate.id === "A")
+          ?.violations.some((v) => v.code === "DEPOSIT_UNAFFORDABLE"),
+      );
+    input.preferences.pop();
+    assert.throws(() => evaluateDecision(input));
+  }
+});
 
 test("the specified baseline, lower-budget, and changed-merchant scenarios choose A/B/B", () => {
   const initial = evaluateDecision(baseline());

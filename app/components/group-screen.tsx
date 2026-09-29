@@ -6,6 +6,10 @@ import { ArrowRight, LockKeyhole, RefreshCw, Users } from "lucide-react";
 import { formatUnits } from "viem";
 import { scorePercent, type GroupOverview } from "../../src/lib/group-view";
 import { GroupPolicyPanel } from "./group-policy-panel";
+import { GroupInsightsPanel } from "./group-insights-panel";
+import { GroupExecutionPanel } from "./group-execution-panel";
+import { LeaveGroupButton } from "./leave-group-button";
+import { restaurantLabel } from "../../src/lib/restaurant-options";
 import {
   GroupNavigation,
   WorkspaceFrame,
@@ -35,6 +39,7 @@ export function GroupStageContent({
   onPreparePolicy?: (() => void) | undefined;
 }) {
   const { group, participants, evaluation } = overview;
+  const targetMemberCount = group.targetMemberCount;
   const root = `/group/${encodeURIComponent(group.id)}`;
   const selected = evaluation?.catalog.find(
     (candidate) => candidate.id === evaluation.winnerId,
@@ -45,11 +50,19 @@ export function GroupStageContent({
       <div className="flow-grid">
         <section className="flow-panel">
           <div className="panel-heading">
-            <h2>Six people. One decision.</h2>
-            <span className="pill">{participants.length} / 6 joined</span>
+            <h2>Your people. One decision.</h2>
+            <span className="pill">
+              {participants.length} / {targetMemberCount} joined
+            </span>
           </div>
           <p className="flow-muted">
             Everyone reviews and confirms their own private requirements.
+          </p>
+          <p>
+            Permitted restaurants:{" "}
+            {(group.permittedRestaurantIds ?? ["A", "B", "C", "D", "E"])
+              .map(restaurantLabel)
+              .join(", ")}
           </p>
           <div className="flow-members">
             {participants.map((person) => (
@@ -82,28 +95,28 @@ export function GroupStageContent({
           <span className="eyebrow">GROUP PROGRESS</span>
           <div className="big-number">
             {confirmed}
-            <span> / 6</span>
+            <span> / {targetMemberCount}</span>
           </div>
           <p className="flow-muted">members have confirmed</p>
           <progress
             className="flow-progress"
             value={confirmed}
-            max={6}
+            max={targetMemberCount}
             aria-label="Confirmed participants"
           />
           <h3>
             {evaluation?.status === "PROPOSAL_READY"
               ? "Proposal saved"
-              : confirmed === 6
+              : confirmed === targetMemberCount
                 ? "Ready for evaluation"
                 : "Waiting for your group"}
           </h3>
           <p>
             {evaluation?.status === "PROPOSAL_READY"
               ? "View the recorded candidate comparison before reviewing spending terms."
-              : confirmed === 6
-                ? "All six confirmations are recorded. Open Results to evaluate your group."
-                : "Results become available after all six members confirm and an evaluation is recorded."}
+              : confirmed === targetMemberCount
+                ? "Everyone has confirmed. Open Results to evaluate your group."
+                : `Results become available after all ${targetMemberCount} members confirm and an evaluation is recorded.`}
           </p>
           <Link className="text-button" href={`${root}/results`}>
             View results →
@@ -126,14 +139,16 @@ export function GroupStageContent({
               <div>
                 <h2>Evaluate confirmed preferences</h2>
                 <p className="flow-muted">
-                  Uses your six members' confirmed inputs and the synthetic
+                  Uses every member's confirmed inputs and the synthetic
                   restaurant catalog. A matching proposal locks the inputs; a
                   no-match result leaves them editable.
                 </p>
               </div>
               <button
                 className="primary"
-                disabled={busy || confirmed !== 6 || !onEvaluate}
+                disabled={
+                  busy || confirmed !== targetMemberCount || !onEvaluate
+                }
                 onClick={onEvaluate}
               >
                 {busy
@@ -143,7 +158,11 @@ export function GroupStageContent({
                     : "Evaluate group"}
               </button>
             </div>
-            {confirmed !== 6 && <p>{confirmed} of 6 confirmations received.</p>}
+            {confirmed !== targetMemberCount && (
+              <p>
+                {confirmed} of {targetMemberCount} confirmations received.
+              </p>
+            )}
             {evaluation?.status === "NO_MATCH" && (
               <Link
                 className="secondary flow-link"
@@ -157,14 +176,14 @@ export function GroupStageContent({
         {!evaluation ? (
           <EmptyPanel
             title={
-              confirmed === 6
+              confirmed === targetMemberCount
                 ? "Waiting for an evaluation"
                 : "Your group is still deciding"
             }
             description={
-              confirmed === 6
+              confirmed === targetMemberCount
                 ? "All preferences are confirmed. Evaluate the sample catalog to compare candidates. A matching result locks these confirmed preferences."
-                : `${confirmed} of 6 members have confirmed. No candidate has been selected yet.`
+                : `${confirmed} of ${targetMemberCount} members have confirmed. No candidate has been selected yet.`
             }
             href={`${root}/preferences`}
             label="Review my preferences"
@@ -272,6 +291,7 @@ export function GroupStageContent({
                 {evaluation.engineVersion}
               </p>
             </section>
+            <GroupInsightsPanel groupId={group.id} evaluation={evaluation} />
           </>
         )}
       </>
@@ -282,6 +302,14 @@ export function GroupStageContent({
         overview={overview}
         busy={busy}
         onPrepare={onPreparePolicy}
+      />
+    );
+  if (overview.signingPolicy)
+    return (
+      <GroupExecutionPanel
+        key={overview.signingPolicy.policyHash}
+        groupId={group.id}
+        saved={overview.signingPolicy}
       />
     );
   return (
@@ -373,7 +401,11 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
         failure instanceof Error ? failure.message : "REQUEST_FAILED";
       const messages: Record<string, string> = {
         INCOMPLETE_GROUP:
-          "All six members must confirm before evaluation. Refresh the group to see the latest progress.",
+          "Every member must join and confirm before evaluation. Refresh the group to see the latest progress.",
+        UNSUPPORTED_PAYMENT_GROUP_SIZE:
+          "This legacy payment policy requires six members. Create a new group to use flexible-size payments. Your group's preferences and recommendation are saved.",
+        PAYMENT_NOT_CONFIGURED:
+          "The payment service is not configured yet. Your group's recommendation is saved.",
         AUTH_REQUIRED:
           "Your session expired. Reconnect your wallet to continue.",
         NOT_MEMBER: "Only group members can perform this action.",
@@ -474,13 +506,19 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
         </section>
       ) : (
         overview && (
-          <GroupStageContent
-            overview={overview}
-            stage={stage}
-            busy={busy}
-            onEvaluate={() => void act("evaluate")}
-            onPreparePolicy={() => void act("decisions")}
-          />
+          <>
+            <GroupStageContent
+              overview={overview}
+              stage={stage}
+              busy={busy}
+              onEvaluate={() => void act("evaluate")}
+              onPreparePolicy={() => void act("decisions")}
+            />
+            <section className="flow-panel">
+              <h2>Membership</h2>
+              <LeaveGroupButton groupId={id} locked={overview.group.locked} />
+            </section>
+          </>
         )
       )}
     </WorkspaceFrame>

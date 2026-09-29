@@ -1,190 +1,373 @@
 .kagami {
+  --kagami-ink: #243a2d;
+  --kagami-paper: #f7f2e8;
   min-height: 100vh;
-  background: #f7f2e9;
-  color: #24362e;
+  background: var(--kagami-paper);
+  color: var(--kagami-ink);
   font-family: Georgia, "Times New Roman", serif;
 }
-
-.kagami * {
-  box-sizing: border-box;
-}
-
 .kagami a {
   color: inherit;
 }
-
-.kagami-nav {
-  align-items: center;
+.kagami-demo-bar {
   display: flex;
   justify-content: space-between;
-  padding: 22px max(5vw, 22px);
+  gap: 16px;
+  padding: 10px max(5vw, 24px);
+  background: #e7e8da;
+  font:
+    11px/1.5 "Segoe UI",
+    Arial,
+    sans-serif;
+  color: #46523d;
 }
-
+.kagami-demo-bar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.kagami-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px max(5vw, 24px);
+  gap: 20px;
+}
 .kagami-brand {
-  font-size: 21px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 23px;
   letter-spacing: 0.16em;
   text-decoration: none;
+  white-space: nowrap;
+  min-height: 48px;
 }
-
 .kagami-brand span {
-  font-size: 27px;
-  margin-right: 8px;
+  font-size: 33px;
+  letter-spacing: 0;
 }
-
-.kagami-nav div {
+.kagami-nav > div {
   display: flex;
-  gap: 28px;
+  gap: 22px;
 }
-
-.kagami-nav div a {
+.kagami-nav > div a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 8px;
   font:
-    12px Arial,
+    12px/1.5 "Segoe UI",
+    Arial,
     sans-serif;
   letter-spacing: 0.1em;
   text-decoration: none;
   text-transform: uppercase;
 }
-
-.kagami-hero {
-  background: #18382f;
-  color: #f6eee1;
-  min-height: 470px;
-  padding: 80px max(7vw, 24px);
+.kagami-nav a:hover {
+  color: #9a542f;
 }
-
+.kagami-hero {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  align-items: center;
+  gap: 40px;
+  min-height: 610px;
+  padding: 70px max(7vw, 24px);
+  background: #213b2e;
+  color: #f8f0df;
+}
 .kagami-eyebrow {
   font:
-    12px Arial,
+    11px/1.6 "Segoe UI",
+    Arial,
     sans-serif;
   letter-spacing: 0.18em;
 }
-
 .kagami-hero h1 {
-  font-size: clamp(42px, 6vw, 76px);
+  font-size: clamp(42px, 4.8vw, 70px);
   font-weight: 400;
-  line-height: 1.08;
-  max-width: 900px;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  margin: 30px 0;
 }
-
-.kagami-hero > p:not(.kagami-eyebrow) {
-  line-height: 1.7;
-  max-width: 620px;
+.kagami-hero h1 em {
+  color: #dec79c;
+  font-weight: 400;
 }
-
+.kagami-hero-copy > p:not(.kagami-eyebrow) {
+  max-width: 470px;
+  color: #e3dfd1;
+  font-size: 15px;
+  line-height: 1.85;
+}
 .kagami-button {
-  background: #e5c58b;
-  color: #18382f !important;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  min-height: 48px;
+  padding: 14px 22px;
+  margin-top: 18px;
+  background: #e0c69a;
+  color: #243a2d !important;
   font:
-    13px Arial,
+    13px/1.5 "Segoe UI",
+    Arial,
     sans-serif;
-  margin-top: 22px;
-  padding: 14px 20px;
   text-decoration: none;
 }
-
-.kagami-section {
-  margin: 0 auto;
-  max-width: 980px;
-  padding: 80px 24px;
+.kagami-button:hover {
+  background: #eed9b8;
 }
-
-.kagami-section h2 {
-  font-size: clamp(34px, 4vw, 48px);
-  font-weight: 400;
+.kagami-hero a:focus-visible,
+.kagami-footer a:focus-visible {
+  outline-color: #f8f0df;
 }
-
-.kagami-section > p:not(.kagami-eyebrow) {
-  font-size: 17px;
+.kagami-plate-art {
+  position: relative;
+  aspect-ratio: 1;
+  min-width: 0;
+}
+.kagami-plate {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e7e1ce;
+  border: 1px solid #c3bba4;
+  box-shadow:
+    inset 0 0 0 12px #ddd6c1,
+    inset 0 0 0 14px #c9c3ac,
+    inset 0 0 0 37px #e2dcc7,
+    inset 0 0 0 39px #cbc5ae,
+    10px 17px 25px #0b231e40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-15deg);
+  color: #3f5944;
+}
+.kagami-plate span {
+  font-size: clamp(50px, 8vw, 100px);
+  line-height: 1.2;
+}
+.kagami-plate small {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+}
+.chopstick {
+  position: absolute;
+  right: 3%;
+  top: 0;
+  height: 89%;
+  width: 5px;
+  background: #c5a475;
+  border-radius: 3px;
+  transform: rotate(17deg);
+  box-shadow: 4px 8px 10px #0b231e60;
+}
+.chopstick-two {
+  right: 0;
+  transform: rotate(19deg);
+}
+.plate-caption {
+  position: absolute;
+  bottom: -35px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #dfcda9;
+  font-size: 15px;
+  letter-spacing: 0.2em;
   line-height: 1.8;
-  max-width: 740px;
 }
-
-.kagami-note {
-  color: #6c665d;
+.plate-caption small {
   font:
-    14px/1.6 Arial,
+    9px/1.8 "Segoe UI",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.15em;
+}
+.kagami-section {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 70px 32px;
+  scroll-margin-top: 24px;
+}
+.kagami-section .kagami-eyebrow {
+  color: #6b624e;
+  margin-bottom: 18px;
+}
+.kagami-section h2 {
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 28px;
+}
+.kagami-section > p:not(.kagami-eyebrow) {
+  max-width: 740px;
+  font-size: 17px;
+  line-height: 1.9;
+}
+.kagami-note {
+  color: #635d51;
+  font:
+    14px/1.8 "Segoe UI",
+    Arial,
     sans-serif !important;
 }
-
 .kagami-visit {
-  border-bottom: 1px solid #d9d2c4;
-  border-top: 1px solid #d9d2c4;
+  border-block: 1px solid #dad3c4;
 }
-
 .kagami-reserve button {
-  background: #18382f;
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  background: #243a2d;
   border: 0;
-  color: white;
-  cursor: pointer;
+  border-radius: 3px;
+  color: #fff;
   font:
-    13px Arial,
+    13px/1.6 "Segoe UI",
+    Arial,
     sans-serif;
-  margin: 12px 0;
-  padding: 13px 18px;
+  padding: 12px 20px;
+  margin: 12px 0 18px;
 }
-
+.kagami-reserve button:hover:not(:disabled) {
+  background: #3c5545;
+}
 .kagami-receipt {
-  background: white;
+  background: #fffcf6;
   border: 1px solid #d9d2c4;
   margin: 20px 0;
-  padding: 25px;
+  padding: 30px;
 }
-
 .kagami-receipt strong {
-  font-size: 22px;
+  display: block;
+  font-size: 25px;
+  font-weight: 400;
+  margin-bottom: 22px;
 }
-
 .kagami-receipt dl div {
   border-top: 1px solid #e4dfd5;
   display: grid;
-  gap: 20px;
   grid-template-columns: 150px minmax(0, 1fr);
-  padding: 15px 0;
+  gap: 20px;
+  padding: 17px 0;
 }
-
 .kagami-receipt dt,
 .kagami-receipt dd {
   font:
-    14px/1.5 Arial,
+    14px/1.7 "Segoe UI",
+    Arial,
     sans-serif;
   margin: 0;
+  overflow-wrap: anywhere;
 }
-
+.kagami-receipt dt {
+  color: #635d51;
+}
 .kagami-code {
   overflow-wrap: anywhere;
 }
-
 .kagami-return {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font:
-    14px Arial,
+    14px/1.6 "Segoe UI",
+    Arial,
     sans-serif;
-  margin-top: 15px;
+  margin-top: 12px;
 }
-
 .kagami-footer {
-  background: #18382f;
-  color: #f6eee1;
   display: flex;
-  font:
-    13px Arial,
-    sans-serif;
   justify-content: space-between;
-  padding: 30px max(5vw, 22px);
+  align-items: center;
+  gap: 24px;
+  padding: 30px max(5vw, 24px);
+  background: #213b2e;
+  color: #f8f0df;
+  font:
+    12px/1.6 "Segoe UI",
+    Arial,
+    sans-serif;
 }
-
-@media (max-width: 600px) {
-  .kagami-nav div {
-    gap: 12px;
+@media (max-width: 800px) {
+  .kagami-hero {
+    grid-template-columns: 1fr;
+    padding-block: 50px 85px;
+    gap: 30px;
   }
-
-  .kagami-nav div a {
+  .kagami-hero h1 {
+    font-size: clamp(40px, 7vw, 60px);
+  }
+  .kagami-plate-art {
+    width: 75%;
+    max-width: 360px;
+    margin: 15px auto 0;
+  }
+  .kagami-plate span {
+    font-size: 65px;
+  }
+}
+@media (max-width: 600px) {
+  .kagami-demo-bar {
+    padding: 10px 20px;
+    align-items: center;
     font-size: 10px;
   }
-
+  .kagami-demo-bar > span {
+    max-width: 160px;
+  }
+  .kagami-demo-bar a {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .kagami-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 16px 20px 8px;
+    gap: 12px;
+  }
+  .kagami-nav > div {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .kagami-nav > div a {
+    font-size: 11px;
+    padding-inline: 4px;
+  }
+  .kagami-section {
+    padding: 48px 24px;
+  }
+  .kagami-hero {
+    padding-inline: 24px;
+  }
+  .kagami-hero h1 {
+    font-size: 42px;
+  }
+  .kagami-hero .kagami-eyebrow {
+    font-size: 9px;
+  }
+  .kagami-receipt {
+    padding: 22px;
+  }
   .kagami-receipt dl div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+  .kagami-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
   }
 }

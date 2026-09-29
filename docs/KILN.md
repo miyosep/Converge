@@ -2,11 +2,11 @@
 
 ## Selected Model
 
-The project owner reported an updated competition announcement on September 29,
-2026 (KST) and explicitly selected `qwen3-32b` for all project work. This replaces
-the old model requirement in the original pasted brief; the historical brief is
-not edited. Constants, usage validation, tests, environment examples, and project
-documentation now agree on the new model. It is not a temporary fallback.
+The project owner confirmed `qwen3-32b` as the current competition model on
+September 29, 2026 (KST). This supersedes the `gpt-oss-120b` wording in the
+original pasted brief; that historical file is not edited. Constants, usage
+validation, tests, environment examples, and project documentation use the
+confirmed model. It is not a temporary fallback.
 
 The official [model reference](https://kiln.bricksum.com/docs/en/models) lists
 Qwen3 32B as available and without structured-output support. Availability must
@@ -75,13 +75,18 @@ Production storage must preserve this boundary and authorize access to per-user
 data. Provider billing semantics are documented under
 [usage and billing](https://kiln.bricksum.com/docs/en/usage-billing).
 
-## Remaining Integration
+## Current Integration
 
 Authenticated private submissions, persistent revisions, human corrections,
 explicit confirmations, and blocking of unresolved clarifications are connected
 to the web app. The ordinary-group decision engine also saves public candidate
-results and prepares an immutable off-chain policy. Pending work includes
-privacy-safe explanation generation, durable per-flow aggregates, application
-cache accounting, on-chain ordinary-group execution, and the baseline plus two
-changed-condition full application runs. The existing blockchain-only baseline
-predates these live calls and must not be labeled AI-driven retroactively.
+results and prepares an immutable off-chain policy. The Results page now has a
+privacy-safe explanation flow and member-only usage aggregation; see
+[explanation and usage](EXPLANATION_USAGE.md). The worktree also contains an
+opt-in ordinary-group execution worker and receipt-backed history. Three live
+ordinary groups completed extraction, confirmation, explanation, payment and
+refunds; see [the correlated acceptance records](GROUP_ACCEPTANCE.md). They
+record 28 extraction attempts (18 successful, 10 failed), three successful
+explanations, three explanation-cache hits and 41,819 measured tokens. One failed
+revision required resubmission after bounded repair; it never entered a policy.
+The existing blockchain-only baseline predates these calls and remains separate.

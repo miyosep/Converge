@@ -2,6 +2,10 @@ import baseline from "../../docs/evidence/baseline-001.json";
 import fixtures from "../../docs/evidence/decision-engine-fixtures.json";
 import kiln from "../../docs/evidence/kiln-smoke.json";
 import { formatUnits } from "viem";
+import groupBaseline from "../../docs/evidence/group-acceptance-001-baseline.json";
+import groupLowerBudget from "../../docs/evidence/group-acceptance-001-lower-budget.json";
+import groupMerchantExcluded from "../../docs/evidence/group-acceptance-001-merchant-excluded.json";
+import { acceptanceEvidence } from "./acceptance-evidence.js";
 
 const flows = [
   "constraint_extraction",
@@ -10,6 +14,8 @@ const flows = [
   "clarification",
 ] as const;
 export type EvidenceRun = {
+  completeness?: string;
+  scenarioCaption?: string;
   id: string;
   title: string;
   scope: string;
@@ -42,6 +48,9 @@ const unknownUsage = () =>
 // Explicitly published, synthetic artifacts only. Never enumerate private evidence or .demo.
 // Deliberately omit calldata, original preferences, extractions and private journal fields.
 export const publishedEvidence: EvidenceRun[] = [
+  acceptanceEvidence(groupBaseline),
+  acceptanceEvidence(groupLowerBudget),
+  acceptanceEvidence(groupMerchantExcluded),
   {
     id: baseline.runId,
     title: "Sepolia baseline",

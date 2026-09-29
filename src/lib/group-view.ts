@@ -4,12 +4,14 @@ import type { RestaurantCatalog } from "./schemas/decision.js";
 import type { SigningPolicy } from "./group-policy.js";
 
 export type GroupSummary = {
+  permittedRestaurantIds?: string[];
   id: string;
   name: string;
   startsAt: string;
   timeZone: string;
   locked: boolean;
   memberCount: number;
+  targetMemberCount: number;
   confirmedCount: number;
 };
 
@@ -31,6 +33,8 @@ export function savedEvaluationView(input: {
     catalog: input.catalog.restaurants.map((restaurant) => ({
       id: restaurant.id,
       name: restaurant.name,
+      cuisine: restaurant.cuisine,
+      area: restaurant.area,
       merchant: restaurant.merchant,
       mealPricePerPersonCents: restaurant.mealPricePerPersonCents,
       depositBaseUnits: restaurant.depositBaseUnits,

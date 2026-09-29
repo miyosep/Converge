@@ -57,6 +57,15 @@ export default function KagamiRestaurant() {
 
   return (
     <main className="kagami">
+      <a className="skip-link" href="#reserve">
+        Skip to your reservation request
+      </a>
+      <div className="kagami-demo-bar">
+        <span>A fictional dining experience by Converge</span>
+        <a href="/demo">
+          Back to the demo <span aria-hidden="true">↗</span>
+        </a>
+      </div>
       <nav className="kagami-nav" aria-label="KAGAMI navigation">
         <a className="kagami-brand" href="#top">
           <span>鏡</span> KAGAMI
@@ -68,15 +77,35 @@ export default function KagamiRestaurant() {
         </div>
       </nav>
       <section className="kagami-hero" id="top">
-        <p className="kagami-eyebrow">JAPANESE RESTAURANT · FICTIONAL DEMO</p>
-        <h1>A quiet room, a warm counter, and fish chosen at dawn.</h1>
-        <p>
-          KAGAMI is the fictional Restaurant A in this Converge demonstration.
-          Bookings and payments shown here use test data and MockUSDC.
-        </p>
-        <a className="kagami-button" href="#reserve">
-          View your request
-        </a>
+        <div className="kagami-hero-copy">
+          <p className="kagami-eyebrow">JAPANESE RESTAURANT · FICTIONAL DEMO</p>
+          <h1>
+            A quiet room.
+            <br />A warm counter.
+            <br />
+            <em>A moment to share.</em>
+          </h1>
+          <p>
+            KAGAMI is the fictional Restaurant A in this Converge demonstration.
+            Bookings and payments shown here use test data and MockUSDC.
+          </p>
+          <a className="kagami-button" href="#reserve">
+            View your request <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div className="kagami-plate-art" aria-hidden="true">
+          <div className="kagami-plate">
+            <span>鏡</span>
+            <small>KAGAMI</small>
+          </div>
+          <span className="chopstick chopstick-one" />
+          <span className="chopstick chopstick-two" />
+          <span className="plate-caption">
+            季節を味わう
+            <br />
+            <small>THE ART OF SHARING A TABLE</small>
+          </span>
+        </div>
       </section>
       <section className="kagami-section" id="menu">
         <p className="kagami-eyebrow">お品書き · THE MENU</p>
