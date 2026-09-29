@@ -36,7 +36,9 @@ import tokenAbi from "../../src/lib/abi/mockUSDC.json";
 import walletAbi from "../../src/lib/abi/convergeGroupWallet.json";
 import { hashPolicy, policySchema } from "../../src/lib/policy.js";
 import type { ExploreView } from "../../src/lib/explore/types.js";
+import "../components/plans-overview.css";
 import "./styles.css";
+import "./redesign.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
 import { LiveDemoSearch } from "./live-search";
@@ -274,7 +276,7 @@ export default function ExploreDemo() {
             ? 2
             : 3;
   return (
-    <div className="shell explore-shell">
+    <div className="shell plans-shell explore-shell demo-redesign">
       <AppHeader
         active="demo"
         action={
@@ -291,52 +293,41 @@ export default function ExploreDemo() {
       <main className="explore-body" id="main-content" tabIndex={-1}>
         <Link href="/" className="explore-back">
           <ArrowLeft size={16} />
-          Your workspace
+          Home
         </Link>
         <div className="explore-heading">
           <div>
-            <p className="eyebrow">
-              <span className="accent-dot" />
-              THE GUIDED EXPERIENCE
-            </p>
             <h1>
-              One table. <em>Six perspectives.</em>
+              Explore <em>demo</em>
             </h1>
           </div>
-          <button
-            className="icon-button"
-            title="Refresh status"
-            aria-label="Refresh status"
-            disabled={busy}
-            onClick={() => void run(refresh)}
-          >
-            <RefreshCw size={18} />
-          </button>
+          <div className="demo-heading-aside">
+            <p>
+              One table.
+              <br />
+              Six perspectives.
+            </p>
+            <button
+              className="icon-button"
+              title="Refresh status"
+              aria-label="Refresh status"
+              disabled={busy}
+              onClick={() => void run(refresh)}
+            >
+              <RefreshCw size={18} aria-hidden="true" />
+            </button>
+          </div>
         </div>
-        <p className="explore-disclosure">
-          Try a shared dinner decision with your wallet and five automated
-          participants. From private preferences to a payment you approve.
-        </p>
         <div className="demo-disclosures">
           <span>
-            <ShieldCheck size={14} />
-            Test tokens only
+            <Users size={14} aria-hidden="true" /> You + 5 automated
+            participants
           </span>
           <span>
-            <Users size={14} />
-            You + 5 automated participants
+            <ShieldCheck size={14} aria-hidden="true" /> Test tokens · Simulated
+            booking
           </span>
-          <span>Live places · Demo USDC reservations</span>
-        </div>
-        <div className="flow-note">
-          <h2>Dinner around Gangnam Station</h2>
-          <p>
-            The area is fixed. After signing in, describe your dinner
-            requirements in English, select a live search candidate and review
-            its demo booking policy. USDC booking availability is assumed; venue
-            conditions remain unverified. Payments use test tokens and the demo
-            booking recipient.
-          </p>
+          <span>Gangnam Station, Seoul</span>
         </div>
         <ol className="demo-journey" aria-label="Demo progress">
           {[
@@ -437,17 +428,35 @@ export default function ExploreDemo() {
             )}
             {!state ? (
               <section className="explore-section demo-start">
-                <span className="section-icon">
-                  <Wallet size={23} />
-                </span>
-                <p className="eyebrow">YOUR FIRST STEP</p>
+                <div className="demo-start-top">
+                  <span className="eyebrow">A LITTLE TASTE OF CONVERGE</span>
+                  <span className="demo-test-label">GUIDED DEMO</span>
+                </div>
+                <div
+                  className="demo-seat-line"
+                  aria-label="One seat for you and five automated participants"
+                >
+                  <span className="demo-seat-you">
+                    <Wallet size={23} aria-hidden="true" />
+                  </span>
+                  {[1, 2, 3, 4, 5].map((number) => (
+                    <span
+                      className="demo-seat-bot"
+                      key={number}
+                      aria-hidden="true"
+                    >
+                      {String(number).padStart(2, "0")}
+                    </span>
+                  ))}
+                </div>
                 <h2>
-                  {wallet ? "Your seat is ready." : "Take a seat at the table."}
+                  {wallet ? "Your seat is " : "Take a seat, "}
+                  <em>{wallet ? "ready" : "see it come together"}</em>
                 </h2>
                 <p>
                   {wallet
-                    ? "Start a new session to share your preferences. We'll guide you through the recommendation and spending terms."
-                    : "Connect your browser wallet and sign a message to get started. You'll review the terms before approving any test payment."}
+                    ? "Share your dinner preferences. Five automated participants will join you through the decision and test payment."
+                    : "Bring your preferences. Five automated participants join you to find a place and try a shared payment."}
                 </p>
                 {view?.accessCodeRequired && (
                   <label>
@@ -492,16 +501,18 @@ export default function ExploreDemo() {
                 )}
                 <p className="start-hint">
                   <LockKeyhole size={14} />
-                  Signing in does not move funds.
+                  Sign in with a wallet message. No funds move when you connect.
                 </p>
               </section>
             ) : (
               <>
-                <section
-                  className="explore-section"
+                <details
+                  className="explore-section demo-sessions"
                   aria-label="Your demo sessions"
                 >
-                  <h2>Your demos</h2>
+                  <summary>
+                    Demo sessions <span>History &amp; start again</span>
+                  </summary>
                   <label>
                     Current and previous sessions
                     <select
@@ -555,7 +566,7 @@ export default function ExploreDemo() {
                       )}
                     </>
                   )}
-                </section>
+                </details>
                 <div className="explore-members" aria-label="Six participants">
                   {["You", "Bob", "Charlie", "Dana", "Erin", "Farah"].map(
                     (name, index) => (
@@ -581,7 +592,7 @@ export default function ExploreDemo() {
                   ["preferences", "review"].includes(state.phase) &&
                   !state.extraction && (
                     <LiveDemoSearch
-                      key={state.id}
+                      key={`search:${state.id}`}
                       run={state}
                       disabled={pending || !view?.workerOnline}
                       configured={Boolean(view?.searchConfigured)}
@@ -882,7 +893,7 @@ export default function ExploreDemo() {
                   </section>
                 )}
                 <DemoTransactionHistory
-                  key={state.id}
+                  key={`history:${state.id}`}
                   transactions={state.transactions}
                 />
               </>
@@ -890,15 +901,17 @@ export default function ExploreDemo() {
           </div>
           <aside className="demo-aside">
             <div className="demo-guide">
-              <span className="eyebrow">GOOD TO KNOW</span>
-              <h2>You stay in control.</h2>
+              <span className="eyebrow">YOUR CALL, AT EVERY STEP</span>
+              <h2>
+                You stay <em>in control</em>
+              </h2>
               <div>
                 <LockKeyhole size={20} />
                 <section>
                   <h3>Your preferences are private</h3>
                   <p>
-                    Share what matters to you, then review the AI's
-                    interpretation.
+                    Tell us what matters. Your original preferences stay
+                    private.
                   </p>
                 </section>
               </div>
@@ -922,6 +935,18 @@ export default function ExploreDemo() {
                   </p>
                 </section>
               </div>
+              <details className="demo-scope">
+                <summary>About this demo</summary>
+                <p>
+                  Live restaurant search around Gangnam Station. Describe your
+                  preferences in English. Venue conditions and availability are
+                  unverified.
+                </p>
+                <p>
+                  Booking and the reservation time are simulated. Sepolia test
+                  tokens go to a demo recipient, not the real restaurant.
+                </p>
+              </details>
               <Link href="/evidence">
                 Explore the recorded evidence
                 <ExternalLink size={15} aria-hidden="true" />

@@ -26,19 +26,25 @@ export function LiveDemoSearch({
   const result = run.discovery;
   const amount = Number(deposit);
   return (
-    <section className="explore-section">
-      <h2>Dinner around Gangnam Station</h2>
+    <section className="explore-section demo-live-search">
+      <span className="eyebrow">LET’S FIND YOUR TABLE</span>
+      <h2>
+        What sounds <em>good to you?</em>
+      </h2>
       <p>
         <strong>{EXPLORE_SEARCH_LOCATION}</strong> · Six participants
       </p>
       <p>
-        Demo reservation: January 5, 2030, 7:00 PM (Asia/Seoul). This is a
-        simulated slot.
+        Tell us the cuisine, budget and atmosphere you have in mind. Write in
+        English.
       </p>
-      <p>
-        The area is fixed. Describe cuisine, budget and atmosphere in English.
-        Map search does not guarantee a walking-distance boundary.
-      </p>
+      <details className="demo-scope">
+        <summary>Search area &amp; demo reservation</summary>
+        <p>
+          The search area is fixed; walking distance is not guaranteed.
+          Simulated reservation: January 5, 2030, 7:00 PM (Asia/Seoul).
+        </p>
+      </details>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -79,8 +85,8 @@ export function LiveDemoSearch({
         </div>
         {!configured && (
           <p role="status">
-            Live search is not configured. The site owner needs to connect Kiln
-            and xAPI.
+            Restaurant search is temporarily unavailable. Please try again
+            later.
           </p>
         )}
         <button
@@ -165,16 +171,19 @@ export function LiveDemoSearch({
                 >
                   View source & location ↗
                 </a>
-                <ul>
-                  {place.evidence.map((entry, index) => (
-                    <li key={index}>
-                      {entry.condition}:{" "}
-                      {entry.status === "unknown"
-                        ? "Not verified"
-                        : entry.status}
-                    </li>
-                  ))}
-                </ul>
+                <details className="demo-place-evidence">
+                  <summary>How it fits</summary>
+                  <ul>
+                    {place.evidence.map((entry, index) => (
+                      <li key={index}>
+                        {entry.condition}:{" "}
+                        {entry.status === "unknown"
+                          ? "Not verified"
+                          : entry.status}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               </article>
             ))}
           </div>
