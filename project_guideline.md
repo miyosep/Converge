@@ -945,7 +945,7 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 
 | ID | Work item | Deliverable and completion criterion | Depends on | Owner | Reviewer | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| T01 | Project scaffold | Tooling, lockfile, CI, and env template ready; Next.js app scaffold and app lint/build remain | None | | | In progress |
+| T01 | Project scaffold | Tooling, lockfile, CI, and env template ready; Next.js App Router scaffold with all 8 UI pages done; app lint and production build remain | None | nanxundyx-netizen | | In review |
 | T02 | Shared schemas | Primitives, extraction, statuses, public participant, errors, and usage ready; full group/candidate/policy/execution/evidence schemas remain | T01 | | | In progress |
 | T03 | Policy encoding | Final ABI field order and cross-language hash test vectors | T02 | Sage | | In progress |
 | T04 | Mock token | Six-decimal mock token and restricted demo deployment configuration | T01 | Sage | | In progress |
