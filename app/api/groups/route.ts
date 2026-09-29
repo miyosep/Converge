@@ -10,6 +10,15 @@ import {
 
 export const runtime = "nodejs";
 
+export async function GET(request: NextRequest) {
+  return api(async () => {
+    const actor = await sessionWallet(request);
+    return NextResponse.json({
+      groups: await services().preferences.listGroups(actor),
+    });
+  });
+}
+
 export async function POST(request: NextRequest) {
   return api(async () => {
     verifyOrigin(request);

@@ -25,7 +25,12 @@ async function main() {
     policy: unknown;
     policyHash: Hex;
     automatedParticipants: Address[];
-    transactions: { label: string; hash: Hex; confirmed: boolean }[];
+    transactions: {
+      label: string;
+      hash: Hex;
+      confirmed: boolean;
+      failed?: boolean;
+    }[];
     [key: string]: unknown;
   };
   assert.equal(evidence.chainId, sepolia.id);
@@ -51,6 +56,7 @@ async function main() {
     hash: Hex;
     blockNumber: string;
     blockHash: Hex;
+    status: "success" | "reverted";
     logIndex: number[];
   }[] = [];
   const allTransactions = [
@@ -59,6 +65,7 @@ async function main() {
   ];
   const seen = new Set<string>();
   let paymentEvents = 0;
+  let paymentHash: Hex | undefined;
   let refundEvents = 0;
   const latest = await client.getBlockNumber({ cacheTime: 0 });
   for (const tx of allTransactions) {
@@ -66,7 +73,11 @@ async function main() {
     seen.add(tx.hash.toLowerCase());
     assert.equal(tx.confirmed, true, `Unconfirmed transaction: ${tx.label}`);
     const receipt = await client.getTransactionReceipt({ hash: tx.hash });
-    assert.equal(receipt.status, "success", `Transaction failed: ${tx.label}`);
+    assert.equal(
+      receipt.status,
+      tx.failed ? "reverted" : "success",
+      `Unexpected transaction status: ${tx.label}`,
+    );
     assert.ok(
       latest >= receipt.blockNumber + 1n,
       `Need a second block for ${tx.label}`,
@@ -100,6 +111,7 @@ async function main() {
         );
         assert.equal(args.amount, BigInt(policy.paymentAmount));
         paymentEvents++;
+        paymentHash = tx.hash;
       }
       if (event.eventName === "RefundClaimed") refundEvents++;
     }
@@ -108,10 +120,17 @@ async function main() {
       hash: tx.hash,
       blockNumber: String(receipt.blockNumber),
       blockHash: receipt.blockHash,
+      status: receipt.status,
       logIndex,
     });
   }
   assert.equal(paymentEvents, 1);
+  if (run.reservation) {
+    assert.equal(run.reservation.reference, policy.reservationReference);
+    assert.equal(run.reservation.decisionId, policy.decisionId);
+    assert.equal(run.reservation.status, "DEMO_CONFIRMED");
+    assert.equal(run.reservation.paymentHash, paymentHash);
+  }
   assert.equal(refundEvents, 6);
   const decision = (await client.readContract({
     address: policy.verifyingContract,
@@ -138,6 +157,7 @@ async function main() {
   }
   const updated = {
     ...evidence,
+    ...(run.reservation ? { reservation: run.reservation } : {}),
     transactions: allTransactions,
     verification: {
       verifiedAt: new Date().toISOString(),

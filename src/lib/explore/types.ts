@@ -1,6 +1,7 @@
 import type { Extraction } from "../schemas/constraints.js";
 import type { Policy } from "../policy.js";
 import type { publicEvaluation } from "../decision-engine.js";
+import type { MockReservation } from "./mock-reservation.js";
 
 export type ExploreCommand =
   | { action: "extract"; text: string }
@@ -31,6 +32,7 @@ export type ExploreRun = {
   restaurant?: string;
   policy?: Policy;
   policyHash?: `0x${string}`;
+  reservation?: MockReservation | undefined;
   transactions: {
     label: string;
     hash: `0x${string}`;

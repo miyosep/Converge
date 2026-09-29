@@ -1,0 +1,39 @@
+# UI direction
+
+Use the existing root `app/` and light workspace styling. PR #3 is a reference for information layout only; do not merge its `src/app/`, framework configuration, global theme, or mock results wholesale.
+
+## Group workspace and Explore Demo
+
+- `/` and `/api/groups` serve ordinary groups with independently controlled participant wallets and private persisted preferences.
+- `/demo` and `/api/demo` serve the guided session with one user and five automated participants, synthetic restaurants, and bounded test funding. Keep the demo disclosure visible.
+- Share presentation components where useful, but do not share group IDs, demo session state, automated participation, or funding actions between these flows.
+- Only display results supplied by the relevant flow. Ordinary group results, approval, execution, and evidence views require their own authorized APIs before they can show data. Do not substitute demo outcomes for missing group functionality.
+- Candidate comparisons must use public evaluation projections. Do not expose private rejection reasons or participant constraints in a shared result table.
+- Evidence views must distinguish synthetic data, simulation/read-only checks, pending transactions, reverted transactions, and confirmed receipts. Missing records remain missing.
+
+## Adopted references
+
+PR #3 informed the structured condition review, submitted/confirmed progress, candidate comparison table, and explicit policy/allowance explanation. Current values come from existing preference, evaluation, and policy responses; PR sample values are not used.
+
+## Implemented ordinary-group routes
+
+| Route                     | UI and data                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                       | Authenticated group list, empty/loading/retry states, and create-group navigation                                                              |
+| `/group/new`              | Existing wallet-authenticated group creation                                                                                                   |
+| `/group/[id]`             | Member lobby, confirmation progress, and workflow navigation                                                                                   |
+| `/group/[id]/preferences` | Existing private input, extraction review, correction, confirmation, and invitations                                                           |
+| `/group/[id]/results`     | Run evaluation after six confirmations; saved candidate comparison and no-match correction                                                      |
+| `/group/[id]/approve`     | Prepare/retrieve an immutable policy; inspect addresses, amounts, wallets, expiry and hash                                             |
+| `/group/[id]/execution`   | Explicit unavailable state for balances, transactions, and refunds until group reconciliation exists                                           |
+| `/evidence`               | Allowlisted published synthetic artifacts: Sepolia receipts, separate live Kiln smoke usage, and separate deterministic condition-change tests |
+
+`GET /api/groups` lists only groups belonging to the authenticated wallet. `GET /api/groups/:id/overview` requires membership and returns group metadata, participant progress, and an allowlisted saved evaluation. It never returns raw preferences, participant-specific failure reasons, or the private evaluation snapshot.
+
+Ordinary-group evaluation and immutable policy preparation are now connected. `POST /api/groups/:id/evaluate` accepts an empty body and evaluates six confirmed revisions using server-owned catalog and limits. A proposal freezes preferences; no match allows correction and reconfirmation. Changed revisions hide stale results. `POST /api/groups/:id/decisions` saves one immutable policy from the frozen snapshot. Both operations require same-origin requests and authenticated membership; repeated requests return saved results. The approval page displays the policy addresses, amounts, six wallets, expiry, and hash.
+
+Remaining integrations: on-chain registration, participant signatures/contributions, and settlement reconciliation. Policy preparation sends no transactions. The catalog and Sepolia MockUSDC deployment remain test infrastructure; ordinary groups use their own wallets without demo sessions or automated funding. The published evidence screen is not a live group or Explore Demo record.
+
+Apply `pnpm db:migrate:dev` on the isolated `dev-preferences` branch for policy storage (migration 0005). With the local server running, `node --env-file=.env.development --import tsx scripts/group-workflow-rehearsal.ts` verifies synthetic ordinary groups, no-match correction, policy idempotency/immutability, privacy, and authorization. Its sanitized report is `docs/evidence/group-workflow-dev.json`; it makes no AI calls or chain transactions.
+
+Verification: production build; UI projection/render regressions for privacy, score scaling, group-specific links, and unavailable records; read-only queries against the existing development database; browser checks at desktop and 390px mobile width. Authenticated layouts were also rendered with isolated synthetic fixtures for visual review, without a production mock mode.

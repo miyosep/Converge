@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "scope": "blockchain-setup-only",
   "chainId": 11155111,
-  "checkedAt": "2026-09-28T16:29:16.039Z",
-  "blockNumber": "11801716",
-  "blockHash": "0xc7e807bafb0da20abacfb3a958ab99eb5f52a4c8101eca505a0d437b69c80d3b",
+  "checkedAt": "2026-09-29T03:16:08.639Z",
+  "blockNumber": "11804947",
+  "blockHash": "0xc5c104c38072fd3bfc8faa3d0b64655319652279c44e0130df74fff46d774f01",
   "token": "0x4707Bde238399A27f88855A34BFb31f20B386B17",
   "escrow": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
   "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
-  "executorEthWei": "1000000000000000",
+  "executorEthWei": "879991797061880",
   "merchants": {
     "A": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
     "B": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
@@ -20,41 +20,41 @@
     {
       "persona": "Alice",
       "address": "0x2163ea96654282508c6A1C2A2946B2521D882f6A",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3094508092824306",
+      "mockUSDCBaseUnits": "22500000"
     },
     {
       "persona": "Bob",
       "address": "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3766469451736819",
+      "mockUSDCBaseUnits": "22500000"
     },
     {
       "persona": "Charlie",
       "address": "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3756809064332968",
+      "mockUSDCBaseUnits": "22500000"
     },
     {
       "persona": "Dana",
       "address": "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3752853783136784",
+      "mockUSDCBaseUnits": "22500000"
     },
     {
       "persona": "Erin",
       "address": "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3743717662148575",
+      "mockUSDCBaseUnits": "22500000"
     },
     {
       "persona": "Farah",
       "address": "0x6f677023c08341985a557149a8c79b8D794F7458",
-      "ethWei": "1000000000000000",
-      "mockUSDCBaseUnits": "30000000"
+      "ethWei": "3719905829062276",
+      "mockUSDCBaseUnits": "22500000"
     }
   ],
-  "localSignersChecked": true,
+  "localSignersChecked": false,
   "status": "passed",
   "limitation": "Gas balances are nonzero; actual gas costs must be estimated before each transaction. This is not an application or Kiln acceptance run."
 }

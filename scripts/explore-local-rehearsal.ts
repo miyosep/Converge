@@ -203,6 +203,11 @@ async function main() {
       }
       const ready = (await store.read(state.id))!;
       assert.equal(ready.phase, "approval");
+      assert.equal(ready.reservation?.status, "REQUESTED");
+      assert.equal(
+        ready.reservation?.reference,
+        ready.policy?.reservationReference,
+      );
       assert.equal(
         ready.approvals,
         0,
@@ -276,6 +281,14 @@ async function main() {
           : scenario === "cancel"
             ? "cancelled"
             : "expired",
+      );
+      assert.equal(
+        finished.reservation?.status,
+        scenario === "payment"
+          ? "DEMO_CONFIRMED"
+          : scenario === "cancel"
+            ? "CANCELLED"
+            : "EXPIRED",
       );
       assert.equal(
         finished.refund,

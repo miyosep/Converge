@@ -28,7 +28,25 @@ const origin = process.env.APP_ORIGIN || "http://localhost:3000";
 const tokenAbi = tokenAbiJson as Abi;
 const walletAbi = walletAbiJson as Abi;
 const store = new ExploreStore();
-const privatePath = join(store.root, "private", "judge-rehearsal.json");
+const rehearsalName = process.env.EXPLORE_REHEARSAL_NAME || "default";
+if (!/^[a-z0-9][a-z0-9-]{0,31}$/.test(rehearsalName))
+  throw new Error("Invalid EXPLORE_REHEARSAL_NAME");
+const suffix = rehearsalName === "default" ? "" : `-${rehearsalName}`;
+const privatePath = join(
+  store.root,
+  "private",
+  `judge-rehearsal${suffix}.json`,
+);
+const journalPath = join(
+  store.root,
+  "private",
+  `judge-transactions${suffix}.json`,
+);
+const timingPath = join(
+  store.root,
+  "private",
+  `rehearsal-timings${suffix}.json`,
+);
 const preferenceText = "Under $35 per person, and somewhere quiet.";
 const timeout = Date.now() + 20 * 60_000;
 
@@ -112,6 +130,22 @@ async function main() {
     );
   }
   const runId = view.run.id;
+  const startedAt = view.run.createdAt;
+  const timings = (await optionalJson<Record<string, string>>(timingPath)) || {
+    startedAt,
+  };
+  if (timings.startedAt !== startedAt)
+    throw new Error("Timing journal belongs to a different run");
+  const mark = async (stage: string) => {
+    if (!timings[stage]) {
+      timings[stage] = new Date().toISOString();
+      await atomicJson(timingPath, timings);
+    }
+    const elapsed = Math.round(
+      (Date.parse(timings[stage]) - Date.parse(startedAt)) / 1000,
+    );
+    console.log(`${stage}: ${elapsed}s since session creation`);
+  };
   const wait = async (label: string, test: (run: ExploreRun) => boolean) => {
     let phase = "";
     while (Date.now() < timeout) {
@@ -121,7 +155,13 @@ async function main() {
         phase = latest.run.phase;
         console.log(`${label}: ${phase}`);
       }
-      if (latest.run.error && !latest.run.error.startsWith("WAITING"))
+      if (
+        latest.run.error &&
+        ![
+          "WAITING_FOR_CONFIRMATIONS",
+          "RUNNER_ACTION_PENDING_OR_FAILED",
+        ].includes(latest.run.error)
+      )
         throw new Error(`${label}: ${latest.run.error}`);
       if (test(latest.run)) return latest.run;
       await sleep(4000);
@@ -145,6 +185,7 @@ async function main() {
     "Kiln extraction",
     (state) => state.phase === "review" || !!state.policy,
   );
+  await mark("extractionReady");
   if (run.phase === "review" && !run.command) {
     assert.ok(run.extraction);
     assert.deepEqual(run.extraction.clarifications, []);
@@ -163,6 +204,7 @@ async function main() {
         state.phase,
       ),
   );
+  await mark("proposalReady");
   assert.equal(run.evaluation?.status, "PROPOSAL_READY");
   assert.ok(run.policy && run.policyHash);
   const policy = policySchema.parse(run.policy);
@@ -183,13 +225,14 @@ async function main() {
   run = await wait("Test funds and on-chain policy", (state) =>
     ["approval", "contributing", "completed"].includes(state.phase),
   );
+  await mark("policyReady");
   const tokenBalance = (await client.readContract({
     address: policy.token,
     abi: tokenAbi,
     functionName: "balanceOf",
     args: [judge.address],
   })) as bigint;
-  assert.ok(tokenBalance >= 10_000_000n);
+  if (run.phase === "approval") assert.ok(tokenBalance >= 10_000_000n);
   const judgeEth = await client.getBalance({ address: judge.address });
   assert.ok(judgeEth > 0n);
   console.log(
@@ -202,7 +245,6 @@ async function main() {
       functionName: "contributionOf",
       args: [policy.decisionId, judge.address],
     }) as Promise<bigint>;
-  const journalPath = join(store.root, "private", "judge-transactions.json");
   type JudgeJournal = Record<
     string,
     { serialized: Hex; hash: Hex; confirmed: boolean }
@@ -278,10 +320,12 @@ async function main() {
       [policy.decisionId, run.policyHash],
     );
   }
+  await mark("judgeContributionConfirmed");
   run = await wait(
     "Five automated contributions and payment",
     (state) => state.phase === "completed",
   );
+  await mark("paymentConfirmed");
   assert.equal(run.approvals, 6);
   assert.equal(run.rejection?.reason, "MaxDepositExceeded");
   assert.ok(
@@ -306,6 +350,35 @@ async function main() {
         (transaction) => transaction.label === "Your refund",
       ),
   );
+  await mark("judgeRefundConfirmed");
+  while (Date.now() < timeout) {
+    const claimed = await Promise.all(
+      policy.participants.map(
+        (participant) =>
+          client.readContract({
+            address: policy.verifyingContract,
+            abi: walletAbi,
+            functionName: "refundClaimed",
+            args: [policy.decisionId, participant],
+          }) as Promise<boolean>,
+      ),
+    );
+    if (claimed.every(Boolean)) break;
+    await sleep(4000);
+  }
+  const allRefundsClaimed = await Promise.all(
+    policy.participants.map(
+      (participant) =>
+        client.readContract({
+          address: policy.verifyingContract,
+          abi: walletAbi,
+          functionName: "refundClaimed",
+          args: [policy.decisionId, participant],
+        }) as Promise<boolean>,
+    ),
+  );
+  assert.ok(allRefundsClaimed.every(Boolean), "Six refunds did not complete");
+  await mark("allRefundsConfirmed");
   const decision = (await client.readContract({
     address: policy.verifyingContract,
     abi: walletAbi,
@@ -316,6 +389,8 @@ async function main() {
   assert.equal(decision[1], 2);
   assert.equal(decision[2], 6n);
   assert.equal(decision[4], BigInt(policy.paymentAmount));
+  assert.equal(run.reservation?.status, "DEMO_CONFIRMED");
+  assert.equal(run.reservation?.reference, policy.reservationReference);
   assert.equal(await ownContribution(), 10_000_000n);
   const publicEvidence = {
     schemaVersion: 1,
@@ -328,6 +403,7 @@ async function main() {
     policy,
     policyHash: run.policyHash,
     restaurant: run.restaurant,
+    reservation: run.reservation,
     evaluation: run.evaluation,
     rejection: run.rejection,
     transactions: [
@@ -341,6 +417,16 @@ async function main() {
     approvalCount: Number(decision[2]),
     spent: String(decision[4]),
     refunded: run.refunded,
+    allRefundsClaimed: true,
+    timings,
+    elapsedSeconds: Object.fromEntries(
+      Object.entries(timings)
+        .filter(([stage]) => stage !== "startedAt")
+        .map(([stage, at]) => [
+          stage,
+          Math.round((Date.parse(at) - Date.parse(startedAt)) / 1000),
+        ]),
+    ),
     extractedFromLiveKiln: true,
     automatedPreferences: "synthetic",
     judgeSigner: "single-operator-rehearsal",

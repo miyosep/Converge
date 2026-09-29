@@ -8,6 +8,7 @@ import {
 } from "../db/preferences.js";
 import { WalletAuthError, WalletAuthRepository } from "../db/wallet-auth.js";
 import { PreferenceError } from "../preferences.js";
+import { GroupPolicyError } from "../group-policy.js";
 import type { KilnAttempt } from "../kiln/client.js";
 
 const SESSION_COOKIE = "converge_session";
@@ -133,6 +134,8 @@ export async function api(work: () => Promise<NextResponse>) {
     if (error instanceof PreferenceRepositoryError)
       return NextResponse.json({ error: error.code }, { status: 409 });
     if (error instanceof PreferenceError)
+      return NextResponse.json({ error: error.code }, { status: 409 });
+    if (error instanceof GroupPolicyError)
       return NextResponse.json({ error: error.code }, { status: 409 });
     console.error("API request failed", error);
     return NextResponse.json({ error: "INTERNAL_ERROR" }, { status: 500 });

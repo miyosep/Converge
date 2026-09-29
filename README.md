@@ -4,7 +4,9 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented on Ethereum Sepolia. The direct-contract baseline and a wallet-connected Explore rehearsal each completed six contributions, one bounded payment, and six refunds. The Explore rehearsal used live Kiln extraction and a dedicated script-controlled judge test wallet; its [Sepolia evidence](docs/evidence/explore-live-c1564c0c4a4c.json) includes verified receipts and events. A real judge's browser-wallet walkthrough, the normal multi-user financial UI, and the MacBook rehearsal remain pending. This README remains a draft.
+In the current Explore Demo catalog, Restaurant A is presented as **KAGAMI**, a fictional storefront at `/restaurant`. Its table meal estimate is synthetic and separate from the $148 omakase shown on the concept page. Its shellfish-safety metadata is unknown. The storefront displays a simulator-only booking state after a matching Sepolia test payment; it does not accept a real reservation.
+
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented on Ethereum Sepolia. Ordinary groups can save candidate results and prepare an immutable off-chain signing policy; their on-chain approval, contribution, execution, and refund flow remains pending. The direct-contract baseline and a wallet-connected Explore rehearsal each completed six contributions, one bounded payment, and six refunds. The Explore rehearsal used live Kiln extraction and a dedicated script-controlled judge test wallet; its [Sepolia evidence](docs/evidence/explore-live-c1564c0c4a4c.json) includes verified receipts and events. A real judge's browser-wallet walkthrough and the MacBook rehearsal remain pending. This README remains a draft.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 

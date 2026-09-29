@@ -24,6 +24,7 @@ import walletAbi from "../../src/lib/abi/convergeGroupWallet.json";
 import { hashPolicy, policySchema } from "../../src/lib/policy.js";
 import type { ExploreView } from "../../src/lib/explore/types.js";
 import "./styles.css";
+import { DemoCandidateResults } from "./candidate-results";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(
@@ -425,14 +426,26 @@ export default function ExploreDemo() {
                   )}
               </section>
             )}
+            {state.evaluation && (
+              <DemoCandidateResults result={state.evaluation} />
+            )}
             {state.policy && (
               <section className="explore-section">
                 <h2>{state.restaurant}</h2>
                 <p>Eligible under the confirmed group conditions.</p>
+                {state.restaurant === "KAGAMI" && (
+                  <p>
+                    <a href="/restaurant">View the KAGAMI demo storefront</a>.
+                    Its menu and story are fictional; this policy uses synthetic
+                    restaurant metadata.
+                  </p>
+                )}
                 <dl className="explore-policy">
                   <div>
                     <dt>Your contribution</dt>
-                    <dd>10 MockUSDC</dd>
+                    <dd>
+                      {money(state.policy.contributionPerParticipant)} MockUSDC
+                    </dd>
                   </div>
                   <div>
                     <dt>Reservation deposit</dt>
@@ -440,7 +453,7 @@ export default function ExploreDemo() {
                   </div>
                   <div>
                     <dt>Total spending cap</dt>
-                    <dd>60 MockUSDC</dd>
+                    <dd>{money(state.policy.maxTotalSpend)} MockUSDC</dd>
                   </div>
                   <div>
                     <dt>Expires</dt>
@@ -454,9 +467,38 @@ export default function ExploreDemo() {
                   </div>
                   <div>
                     <dt>Approvals</dt>
-                    <dd>{state.approvals} / 6</dd>
+                    <dd>
+                      {state.approvals} / {state.policy.approvalThreshold}
+                    </dd>
                   </div>
                 </dl>
+                <div className="explore-reservation">
+                  <h3>Demo reservation request</h3>
+                  {state.reservation ? (
+                    <>
+                      <p>
+                        {state.reservation.status === "DEMO_CONFIRMED"
+                          ? "The demo restaurant service recorded a booking confirmation after checking the test payment. No real table was booked."
+                          : state.reservation.status === "DEPOSIT_OBSERVED"
+                            ? "Test deposit observed on Sepolia. No restaurant has accepted a booking."
+                            : state.reservation.status === "CANCELLED"
+                              ? "The decision was cancelled. This demo request is closed."
+                              : state.reservation.status === "EXPIRED"
+                                ? "The policy expired. This demo request is closed."
+                                : "Request recorded for the synthetic restaurant. Booking is not confirmed."}
+                      </p>
+                      <p>
+                        {state.reservation.guests} guests ·{" "}
+                        {new Date(state.reservation.startsAt).toLocaleString()}
+                      </p>
+                      <p className="explore-address">
+                        Reservation reference: {state.reservation.reference}
+                      </p>
+                    </>
+                  ) : (
+                    <p>No demo reservation request is recorded for this run.</p>
+                  )}
+                </div>
                 <details>
                   <summary>Policy details</summary>
                   <p className="explore-address">
@@ -489,12 +531,19 @@ export default function ExploreDemo() {
                 )}
                 {state.phase === "approval" && (
                   <div className="explore-actions">
+                    <p>
+                      Review the policy before signing. Your wallet may request
+                      two confirmations: token allowance, then contribution.
+                      Changing policy terms requires a new decision and fresh
+                      approvals.
+                    </p>
                     <button
                       className="primary"
                       disabled={pending}
                       onClick={() => void run(() => transaction("contribute"))}
                     >
-                      Approve &amp; contribute 10 MockUSDC
+                      Approve &amp; contribute{" "}
+                      {money(state.policy.contributionPerParticipant)} MockUSDC
                     </button>
                   </div>
                 )}

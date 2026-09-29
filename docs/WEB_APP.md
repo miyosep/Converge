@@ -1,6 +1,6 @@
 # First Web Workflow
 
-The initial Next.js app supports wallet-signature login, group creation, capped invite links, six-person progress, private preference submission through Kiln `qwen3-32b`, correction, and explicit confirmation. It does not yet create the spending proposal, send contract transactions, or claim refunds. The screen is an early working interface, not the acceptance demo.
+The Next.js app supports wallet-signature login, group creation, capped invite links, six-person progress, private preference submission through Kiln `qwen3-32b`, correction, explicit confirmation, saved candidate results, and immutable policy preparation. Policy preparation is an off-chain database operation; the ordinary-group workflow does not yet register the decision on chain, collect contributions, execute payment, or claim refunds. See [UI direction](UI_DIRECTION.md) for the available routes and data boundaries. This is not the complete acceptance demo.
 
 ## Local Development
 
@@ -8,7 +8,7 @@ Use Node.js 24.19.0 and pnpm 11.19.0 on Windows or macOS. Install with `pnpm ins
 
 Run `pnpm db:migrate:dev` and `pnpm dev`, then open `http://localhost:3000` in a browser with an EIP-1193 wallet such as MetaMask. The wallet must support Ethereum Sepolia. The login signature is not a transaction. This version verifies signatures from externally owned accounts only. Six independently controlled wallets are required to verify the actual user flow. Dedicated demo keys should never be imported into an everyday wallet profile.
 
-For local checks, run `pnpm db:auth-rehearse:dev` to validate DB replay/invite behavior and `pnpm http:rehearse:dev` while the dev server is running. `pnpm http:kiln-rehearse:dev` additionally spends a live Kiln request, submits and confirms a synthetic preference, and verifies usage persistence. These scripts generate ephemeral accounts and write synthetic records only to the development branch. They do not submit transactions. `pnpm check` and `pnpm build` validate code; the actual presentation MacBook still needs a manual browser-wallet check.
+For local checks, run `pnpm db:auth-rehearse:dev` to validate DB replay/invite behavior and `pnpm http:rehearse:dev` while the dev server is running. `pnpm http:kiln-rehearse:dev` additionally spends a live Kiln request, submits and confirms a synthetic preference, and verifies usage persistence. With the local server running, `node --env-file=.env.development --import tsx scripts/group-workflow-rehearsal.ts` checks saved results and policy preparation on `dev-preferences` using synthetic inputs. These scripts generate ephemeral accounts and write synthetic records only to the development branch. They do not submit transactions. `pnpm check` and `pnpm build` validate code; the actual presentation MacBook still needs a manual browser-wallet check.
 
 ## Boundaries
 

@@ -24,7 +24,7 @@ type CandidateResult = {
 };
 export type Evaluation = {
   engineVersion: "decision-v1";
-  fixtureVersion: "restaurants-v1";
+  fixtureVersion: "restaurants-v1" | "restaurants-v2";
   status: EvaluationStatus;
   winnerId: string | null;
   ranking: string[];

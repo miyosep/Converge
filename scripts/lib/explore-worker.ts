@@ -38,6 +38,13 @@ import {
 } from "../../src/lib/decision-engine.js";
 import { createBaselinePreferences } from "../../src/lib/fixtures/preferences.js";
 import { createRestaurantCatalog } from "../../src/lib/fixtures/restaurants.js";
+import {
+  EXPLORE_DEMO_SLOT,
+  confirmMockReservation,
+  reconcileMockReservation,
+  requestMockReservation,
+  type MockPaymentEvidence,
+} from "../../src/lib/explore/mock-reservation.js";
 import { createKilnClient } from "../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../src/lib/kiln/extraction.js";
 import {
@@ -197,6 +204,7 @@ export class ExploreWorker {
           data,
           value,
         });
+        if (request.gas !== undefined) request.gas += request.gas / 4n;
         const fee = request.maxFeePerGas ?? request.gasPrice;
         if (fee === undefined || request.gas === undefined)
           throw new Error("Missing gas estimate");
@@ -269,9 +277,19 @@ export class ExploreWorker {
     args: unknown[],
     broadcastOnly = false,
   ) {
+    let transactionLabel = label;
+    for (
+      let attempt = 1;
+      this.ledger[`${run.id}:${transactionLabel}`]?.failed;
+      attempt++
+    ) {
+      if (attempt > 2)
+        throw new Error(`Transaction retries exhausted: ${label}`);
+      transactionLabel = `${label} retry ${attempt}`;
+    }
     await this.transact(
       run,
-      label,
+      transactionLabel,
       account,
       address,
       encodeFunctionData({ abi, functionName, args }),
@@ -423,10 +441,7 @@ export class ExploreWorker {
           run.judge,
           ...this.bots.map((account) => account.address),
         ];
-        const slot = {
-          startsAt: "2030-01-05T10:00:00Z",
-          timeZone: "Asia/Seoul",
-        };
+        const slot = EXPLORE_DEMO_SLOT;
         const preferences = createBaselinePreferences(members);
         preferences[0]!.extraction = command.extraction;
         const catalog = createRestaurantCatalog(this.roles, [slot.startsAt]);
@@ -446,7 +461,7 @@ export class ExploreWorker {
           const winner = catalog.restaurants.find(
             (candidate) => candidate.id === run.evaluation!.winnerId,
           )!;
-          run.restaurant = `Restaurant ${winner.id}`;
+          run.restaurant = winner.name;
           run.policy = policySchema.parse({
             policyVersion: 1,
             chainId: sepolia.id,
@@ -470,6 +485,11 @@ export class ExploreWorker {
             ),
           });
           run.policyHash = hashPolicy(run.policy);
+          run.reservation = requestMockReservation(
+            run.policy,
+            run.restaurant,
+            slot.startsAt,
+          );
           run.phase = "proposal";
         }
       } else {
@@ -491,6 +511,12 @@ export class ExploreWorker {
     if (!createEntry?.confirmed) {
       if (Number((await this.client.getBlock()).timestamp) >= policy.expiry) {
         run.phase = "expired";
+        const reservation = reconcileMockReservation(
+          run.reservation,
+          policy,
+          "expired",
+        );
+        if (reservation) run.reservation = reservation;
         return;
       }
       if (!(await this.provision(run, run.judge, "you", "0.001", true))) return;
@@ -546,12 +572,30 @@ export class ExploreWorker {
       fromBlock: creationReceipt.blockNumber,
       toBlock: this.snapshotBlock,
     });
+    let paymentEvidence: MockPaymentEvidence | undefined;
     for (const log of logs) {
       const event = log as unknown as {
         eventName: string;
-        args: { decisionId?: string; participant?: string };
+        args: {
+          decisionId?: string;
+          participant?: string;
+          merchant?: string;
+          amount?: bigint;
+        };
         transactionHash: Hex;
       };
+      if (
+        event.eventName === "PaymentExecuted" &&
+        event.args.decisionId === id &&
+        event.args.merchant &&
+        event.args.amount !== undefined
+      )
+        paymentEvidence = {
+          hash: event.transactionHash,
+          decisionId: id,
+          merchant: event.args.merchant,
+          amount: event.args.amount,
+        };
       if (
         event.args.decisionId !== id ||
         event.args.participant?.toLowerCase() !== run.judge.toLowerCase()
@@ -583,6 +627,18 @@ export class ExploreWorker {
     if (status >= 2 || expired) {
       run.phase =
         status === 2 ? "completed" : status === 3 ? "cancelled" : "expired";
+      const reservation = reconcileMockReservation(
+        run.reservation,
+        policy,
+        run.phase,
+      );
+      if (reservation) run.reservation = reservation;
+      if (status === 2 && run.reservation && paymentEvidence)
+        run.reservation = confirmMockReservation(
+          run.reservation,
+          policy,
+          paymentEvidence,
+        );
       const refundBots: Account[] = [];
       for (const bot of this.bots) {
         const contributed = (await this.readWallet("contributionOf", [

@@ -92,7 +92,9 @@ sanitized synthetic evidence. Neither command needs the Neon CLI at runtime.
 
 EOA wallet sessions, invitation validation, and the first HTTP APIs now run on
 the development branch. The production branch has not received these migrations.
-Proposal, financial, and full end-to-end application runs remain pending.
+Saved ordinary-group evaluations and off-chain immutable policies have been
+rehearsed on `dev-preferences` with synthetic inputs. On-chain financial entities,
+settlement reconciliation, and full end-to-end application runs remain pending.
 No empty or unavailable database should cause the application to fall back to
 in-memory production state or to fabricate confirmed preferences.
 

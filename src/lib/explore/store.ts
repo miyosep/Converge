@@ -45,7 +45,25 @@ export async function atomicJson(path: string, value: unknown) {
     ) + "\n",
     { mode: 0o600 },
   );
-  await rename(temp, path);
+  // Windows can briefly deny replacement while another process reads the
+  // destination (or a scanner opens it). Keep the completed temp file and
+  // retry the same atomic replacement instead of abandoning the run.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await rename(temp, path);
+      break;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (
+        process.platform !== "win32" ||
+        !["EACCES", "EPERM", "EBUSY"].includes(code || "") ||
+        attempt >= 9
+      ) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+    }
+  }
 }
 export async function optionalJson<T>(path: string): Promise<T | undefined> {
   try {
