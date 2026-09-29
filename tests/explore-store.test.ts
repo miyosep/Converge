@@ -128,6 +128,23 @@ test("pending work and financial records never lose their active capacity throug
   } as import("../src/lib/explore/types").ExploreRun;
   assert.equal(occupiesDemoSlot(run), false);
   assert.equal(
+    occupiesDemoSlot({
+      ...run,
+      phase: "proposal",
+      policy: {} as NonNullable<typeof run.policy>,
+    }),
+    false,
+    "an unfunded draft policy does not hold a slot forever",
+  );
+  assert.equal(
+    occupiesDemoSlot({
+      ...run,
+      phase: "preparing",
+      policy: {} as NonNullable<typeof run.policy>,
+    }),
+    true,
+  );
+  assert.equal(
     occupiesDemoSlot({ ...run, command: { action: "prepare" } }),
     true,
   );

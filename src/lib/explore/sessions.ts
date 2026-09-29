@@ -24,7 +24,7 @@ export function occupiesDemoSlot(run: ExploreRun, now = Date.now()) {
   if (["completed", "cancelled", "expired"].includes(run.phase)) return false;
   if (
     run.command ||
-    run.policy ||
+    (run.policy && run.phase !== "proposal") ||
     run.transactions.length ||
     run.searchInFlight ||
     run.extractionInFlight
