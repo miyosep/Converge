@@ -79,6 +79,7 @@ export default function ExploreDemo() {
   const [refreshError, setRefreshError] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [entered, setEntered] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [text, setText] = useState("Under $35 per person, somewhere quiet.");
@@ -274,7 +275,7 @@ export default function ExploreDemo() {
     !!state && ["completed", "cancelled", "expired"].includes(state.phase);
   const demoReady = !!view?.enabled && view.workerOnline && !refreshError;
   const journeyIndex =
-    !state || ["cancelled", "expired"].includes(state.phase)
+    !entered || !state || ["cancelled", "expired"].includes(state.phase)
       ? -1
       : ["preferences", "review"].includes(state.phase)
         ? 0
@@ -378,7 +379,7 @@ export default function ExploreDemo() {
             : !view
               ? "Checking demo availability…"
               : demoReady
-                ? state
+                ? entered && state
                   ? phaseNames[state.phase]
                   : "Ready when you are"
                 : "The live demo is currently paused"}
@@ -388,7 +389,7 @@ export default function ExploreDemo() {
             {notice}
           </p>
         )}
-        {state?.error && (
+        {entered && state?.error && (
           <p className="explore-notice" role="status">
             {state.error.startsWith("WAITING")
               ? "Waiting for transaction confirmations."
@@ -440,7 +441,7 @@ export default function ExploreDemo() {
                 </div>
               </section>
             )}
-            {!view || sessionLoading ? (
+            {entered && (!view || sessionLoading) ? (
               !refreshError && (
                 <section
                   className="explore-section demo-loading"
@@ -455,7 +456,7 @@ export default function ExploreDemo() {
                   <p>Loading your demo…</p>
                 </section>
               )
-            ) : !state ? (
+            ) : !entered || !state ? (
               <section className="explore-section demo-start">
                 <div className="demo-start-top">
                   <span className="eyebrow">A LITTLE TASTE OF CONVERGE</span>
@@ -479,15 +480,14 @@ export default function ExploreDemo() {
                   ))}
                 </div>
                 <h2>
-                  {wallet ? "Your seat is " : "Take a seat, "}
-                  <em>{wallet ? "ready" : "see it come together"}</em>
+                  Take a seat, <em>see it come together</em>
                 </h2>
                 <p>
                   {wallet
                     ? "Share your dinner preferences. Five automated participants will join you through the decision and test payment."
                     : "Bring your preferences. Five automated participants join you to find a place and try a shared payment."}
                 </p>
-                {view?.accessCodeRequired && (
+                {!state && view?.accessCodeRequired && (
                   <label>
                     Demo access code
                     <input
@@ -501,7 +501,7 @@ export default function ExploreDemo() {
                 {!wallet ? (
                   <button
                     className="primary"
-                    disabled={busy || !demoReady}
+                    disabled={busy || sessionLoading || !view || !demoReady}
                     onClick={() => void run(connect)}
                   >
                     <Wallet size={17} />
@@ -510,18 +510,30 @@ export default function ExploreDemo() {
                 ) : (
                   <button
                     className="primary"
-                    disabled={pending || !wallet || !demoReady}
-                    onClick={() =>
-                      void run(() =>
-                        command({ action: "start", accessCode: code }),
-                      )
+                    disabled={
+                      busy || sessionLoading || !view || (!state && !demoReady)
                     }
+                    onClick={() => {
+                      if (state) {
+                        setEntered(true);
+                      } else {
+                        void run(async () => {
+                          await command({ action: "start", accessCode: code });
+                          await refresh();
+                          setEntered(true);
+                        });
+                      }
+                    }}
                   >
-                    {pending ? "Starting…" : "Start my demo"}
+                    {busy
+                      ? "Starting…"
+                      : state
+                        ? "Continue my demo"
+                        : "Start my demo"}
                     <ArrowRight size={17} />
                   </button>
                 )}
-                {!demoReady && (
+                {!demoReady && !state && (
                   <p className="start-hint">
                     {view
                       ? "Starting a session will be available when the live demo returns."
