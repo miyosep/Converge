@@ -29,11 +29,6 @@
   gap: 24px;
   margin-bottom: 36px;
 }
-.plans-heading .eyebrow {
-  margin: 0 0 12px;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-}
 .plans-heading h1 {
   margin: 0;
   font-size: clamp(42px, 4.6vw, 64px);
@@ -109,11 +104,6 @@
   max-width: 365px;
   margin: 0 0 28px;
   font-size: 15px;
-}
-.plans-first-note {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 12px;
 }
 .plans-first-photo {
   position: relative;
@@ -454,12 +444,7 @@
   }
   .plans-heading h1 {
     grid-column: 1;
-    grid-row: 2;
-  }
-  .plans-heading .eyebrow {
-    font-size: 9px;
-    grid-column: 1 / -1;
-    margin-bottom: 0;
+    grid-row: 1;
   }
   .plans-heading > div > p:last-child {
     font-size: 14px;
@@ -468,7 +453,7 @@
   }
   .plans-heading .plans-create {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
     align-self: center;
     min-height: 44px;
     padding: 11px 14px;

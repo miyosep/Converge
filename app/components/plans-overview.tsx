@@ -54,7 +54,6 @@ export function PlansOverview({
       <main className="plans-main" id="main-content" tabIndex={-1}>
         <header className="plans-heading">
           <div>
-            <p className="eyebrow">A LITTLE MORE TO LOOK FORWARD TO</p>
             <h1>
               My plans<span>.</span>
             </h1>
@@ -103,9 +102,6 @@ export function PlansOverview({
               <Link href="/group/new" className="primary plans-create">
                 Start a plan <ArrowRight size={18} aria-hidden="true" />
               </Link>
-              <span className="plans-first-note">
-                Invite your friends after you’ve started.
-              </span>
             </div>
             <div className="plans-first-photo">
               <img
