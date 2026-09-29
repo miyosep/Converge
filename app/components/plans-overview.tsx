@@ -56,7 +56,7 @@ export function PlansOverview({
           <div>
             <h1>My plans</h1>
             <p>
-              Your people. <em>Your next good memory.</em>
+              <em>Your people. Your next good memory.</em>
             </p>
           </div>
           {!empty && (
