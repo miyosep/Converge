@@ -4,11 +4,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { verifyRepeatDemo } from "../scripts/lib/repeat-demo-check.js";
-import {
-  ExploreStore,
-  verifyAccessCode,
-  walletId,
-} from "../src/lib/explore/store.js";
+import { ExploreStore, walletId } from "../src/lib/explore/store.js";
 
 const alice = "0x0000000000000000000000000000000000000011";
 const bob = "0x0000000000000000000000000000000000000022";
@@ -79,12 +75,4 @@ test("Explore commands reject stale confirmation, duplicate requests, and fundin
   } finally {
     await rm(root, { recursive: true, force: true });
   }
-});
-test("Demo access code is checked without accepting prefixes or missing values", () => {
-  verifyAccessCode("event-pass", "event-pass");
-  assert.throws(
-    () => verifyAccessCode("event-pass", "event"),
-    /INVALID_DEMO_CODE/,
-  );
-  assert.throws(() => verifyAccessCode("event-pass", ""), /INVALID_DEMO_CODE/);
 });

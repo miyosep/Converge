@@ -120,7 +120,6 @@ async function main() {
         "/api/demo",
         {
           action: "start",
-          accessCode: process.env.EXPLORE_DEMO_ACCESS_CODE || "",
         },
         cookie,
       )

@@ -45,10 +45,9 @@ EXPLORE_DEMO_ENABLED=true
 EXPLORE_DEMO_DIRECTORY=.demo
 EXPLORE_DEMO_MAX_RUNS=8
 EXPLORE_DEMO_MAX_ETH=0.06
-EXPLORE_DEMO_ACCESS_CODE=
 ```
 
-The code is optional for localhost. A non-local `APP_ORIGIN` requires a nonempty access code. Use HTTPS and a private event code for a shared deployment. The code is checked only when admitting a session; existing sessions remain bound to their SIWE-authenticated wallet. Browser state never selects an arbitrary participant identity.
+No demo access code is required. Users sign in with their wallet and start a session. Sessions remain bound to their SIWE-authenticated wallet, with the configured session and gas limits enforced. Use HTTPS for shared deployments. Browser state never selects an arbitrary participant identity.
 
 The worker uses the existing `RPC_URL`, `KILN_API_KEY`, `DEPLOYER_PRIVATE_KEY`, `AGENT_EXECUTOR_PRIVATE_KEY`, and participant keys 2 through 6. It checks their addresses against the checked-in manifests. It does not use participant 1's private key: that seat belongs to the judge. Merchant keys are not needed. The worker verifies Sepolia's chain ID and genesis, deployed bytecode hashes, and MockUSDC minter before running.
 

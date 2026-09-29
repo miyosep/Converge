@@ -151,7 +151,7 @@ settings were left unchanged. Sign back into Windows after a reboot.
 
 The public home, demo, discovery and evidence pages return HTTP 200. The public
 `/api/demo` reports `enabled=true`, `searchConfigured=true`,
-`accessCodeRequired=true` and `workerOnline=true`. Live Sepolia read-only
+`accessCodeRequired=false` and `workerOnline=true`. Live Sepolia read-only
 checks verified RPC, deployed contract bytecode, minter and bot identities.
 No new human-wallet production payment was submitted during deployment.
 

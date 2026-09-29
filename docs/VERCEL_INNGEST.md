@@ -81,7 +81,7 @@ of enabling two competing transactions.
    is not deployed. See `LIVE_RESTAURANT_SEARCH.md` for search setup and limitations.
 3. Set `BACKGROUND_DRIVER=inngest`, `BACKGROUND_JOBS_ENABLED=true`,
    `GROUP_EXECUTION_ENABLED=true` and `EXPLORE_DEMO_ENABLED=true` on the intended
-   production deployment. Configure a private `EXPLORE_DEMO_ACCESS_CODE`.
+   production deployment. Demo sessions require wallet sign-in; no access code is needed.
 4. Connect the Inngest application to `https://<host>/api/inngest` through its
    Vercel integration or endpoint sync. Set `INNGEST_EVENT_KEY` and
    `INNGEST_SIGNING_KEY` from that same Inngest environment. Hosted mode forces

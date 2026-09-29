@@ -84,7 +84,6 @@ export default function ExploreDemo() {
   const [entered, setEntered] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
-  const [code, setCode] = useState("");
   const [lastTx, setLastTx] = useState<string | null>(null);
   const selectedRun = useRef("");
   const refreshSequence = useRef(0);
@@ -513,17 +512,6 @@ export default function ExploreDemo() {
                   participants join you to find a place, agree together, and try
                   a shared test payment.
                 </p>
-                {!state && view?.accessCodeRequired && (
-                  <label>
-                    Demo access code
-                    <input
-                      value={code}
-                      onChange={(event) => setCode(event.target.value)}
-                      autoComplete="off"
-                      type="password"
-                    />
-                  </label>
-                )}
                 {!wallet ? (
                   <button
                     className="primary"
@@ -544,7 +532,7 @@ export default function ExploreDemo() {
                         setEntered(true);
                       } else {
                         void run(async () => {
-                          await command({ action: "start", accessCode: code });
+                          await command({ action: "start" });
                           await refresh();
                           setEntered(true);
                         });

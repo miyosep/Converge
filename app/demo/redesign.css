@@ -892,6 +892,26 @@
   background: #ece5dd;
   color: #766657;
 }
+.demo-redesign .demo-seat-line > .demo-seat-bot:nth-child(2) {
+  background: #dfe8d9;
+  color: #4b6147;
+}
+.demo-redesign .demo-seat-line > .demo-seat-bot:nth-child(3) {
+  background: #dce8ee;
+  color: #47616f;
+}
+.demo-redesign .demo-seat-line > .demo-seat-bot:nth-child(4) {
+  background: #f1ddd0;
+  color: #885b43;
+}
+.demo-redesign .demo-seat-line > .demo-seat-bot:nth-child(5) {
+  background: #e7e0ed;
+  color: #695379;
+}
+.demo-redesign .demo-seat-line > .demo-seat-bot:nth-child(6) {
+  background: #ede5cd;
+  color: #776438;
+}
 .demo-redesign .current .journey-number {
   background: var(--accent);
   border-color: var(--accent);

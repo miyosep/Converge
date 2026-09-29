@@ -1,4 +1,4 @@
-import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   mkdir,
   open,
@@ -140,12 +140,6 @@ export async function withFileLock<T>(
     await handle.close();
     await unlink(path);
   }
-}
-export function verifyAccessCode(expected: string | undefined, actual: string) {
-  if (!expected) return;
-  const digest = (value: string) => createHash("sha256").update(value).digest();
-  if (!timingSafeEqual(digest(expected), digest(actual)))
-    throw new ExploreError("INVALID_DEMO_CODE");
 }
 export class ExploreStore {
   constructor(readonly root = demoDirectory()) {}
