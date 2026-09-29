@@ -54,9 +54,7 @@ export function PlansOverview({
       <main className="plans-main" id="main-content" tabIndex={-1}>
         <header className="plans-heading">
           <div>
-            <h1>
-              My plans<span>.</span>
-            </h1>
+            <h1>My plans</h1>
             <p>Your people. Your next good memory.</p>
           </div>
           {!empty && (
@@ -87,18 +85,11 @@ export function PlansOverview({
         ) : empty ? (
           <section className="plans-first" aria-labelledby="first-plan-title">
             <div className="plans-first-copy">
-              <span className="plans-small-label">
-                <span aria-hidden="true" /> YOUR FIRST GATHERING
-              </span>
               <h2 id="first-plan-title">
                 Something good
                 <br />
                 starts with <em>a plan.</em>
               </h2>
-              <p>
-                Dinner with friends. A weekend away. Bring your people together
-                and find what works for everyone.
-              </p>
               <Link href="/group/new" className="primary plans-create">
                 Start a plan <ArrowRight size={18} aria-hidden="true" />
               </Link>
