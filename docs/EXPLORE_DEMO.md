@@ -30,7 +30,7 @@ Keep existing `.env` and `.env.development` files. The worker loads `.env` first
 ```dotenv
 EXPLORE_DEMO_ENABLED=true
 EXPLORE_DEMO_DIRECTORY=.demo
-EXPLORE_DEMO_MAX_RUNS=7
+EXPLORE_DEMO_MAX_RUNS=8
 EXPLORE_DEMO_MAX_ETH=0.06
 EXPLORE_DEMO_ACCESS_CODE=
 ```
@@ -58,7 +58,7 @@ The `--check` command is read-only. The running worker does not send transaction
 
 ## Limits and Recovery
 
-- A wallet gets one resumable run per persistent directory. The default directory admits seven runs total, including historical rehearsals. Do not delete it to reset a run: it holds grant limits and signed transaction recovery data.
+- A wallet gets one resumable run per persistent directory. The default directory admits eight runs total, including historical rehearsals and one prepared-bot benchmark. Do not delete it to reset a run: it holds grant limits and signed transaction recovery data.
 - The default 0.06 ETH limit is a lifetime upper bound across the worker's signed transactions in this directory. It reserves `value + gas limit * maximum gas price` before broadcast, including bot/executor costs and ETH grants. Actual costs can be lower. Raising this limit is an explicit operator configuration change, not a transfer into the deployer wallet. Before admitting more judges, check the actual deployer balance and run `pnpm demo:explore-prepare --check`; a higher cap alone cannot fund a transaction.
 - Each wallet gets at most one gas top-up and one token top-up per run and funding purpose. A judge who transfers their grant elsewhere does not receive an unlimited refill. Five automated participants are funded only as needed. The creator's gas target is 0.004 ETH; other automated signers target 0.001 ETH.
 - Signed transactions are saved before broadcast and reused on retry. One worker lock serializes each signer's nonces; independent automated wallets can send their allowance, contribution, or refund transactions in a batch. Do not run other funding, deployment, or blockchain rehearsal scripts with these same keys while this worker is active.
