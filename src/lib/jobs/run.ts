@@ -120,6 +120,7 @@ export async function runJob(input: Job): Promise<boolean> {
         BigInt(contract.blockNumber),
         cap,
         () => lease.assert(),
+        4000n,
       );
       await worker.tick(saved);
       const progress = (
@@ -128,7 +129,11 @@ export async function runJob(input: Job): Promise<boolean> {
           [saved.policy.decisionId],
         )
       ).rows[0];
-      return progress?.status === "pending" || progress?.state.status === 1;
+      return (
+        worker.historyPending ||
+        progress?.status === "pending" ||
+        progress?.state.status === 1
+      );
     });
   } catch (error) {
     if (error instanceof JobBusy) return true;

@@ -67,13 +67,17 @@ export async function readGroupChain(
   config: GroupPolicyConfig,
   actor: Address,
   confirmations = 2,
+  atBlock?: bigint,
 ): Promise<GroupChainState> {
   const policy = verifyGroupSigningPolicy(saved, config, actor);
   const walletAbi = policyWalletAbi(policy);
   if ((await client.getChainId()) !== policy.chainId)
     throw new Error("WRONG_CHAIN");
   const height = await client.getBlockNumber({ cacheTime: 0 });
-  const blockNumber = height - BigInt(confirmations - 1);
+  const safeHeight = height - BigInt(confirmations - 1);
+  const blockNumber = atBlock ?? safeHeight;
+  if (blockNumber < 0n || blockNumber > safeHeight)
+    throw new Error("UNCONFIRMED_SNAPSHOT_BLOCK");
   const block = await client.getBlock({ blockNumber });
   const read = (
     address: Address,

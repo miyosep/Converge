@@ -42,6 +42,7 @@ const kinds = new Set([
   "RefundClaimed",
 ]);
 export class GroupExecutionWorker {
+  historyPending = false;
   constructor(
     readonly client: PublicClient,
     readonly transport: Transport,
@@ -51,18 +52,18 @@ export class GroupExecutionWorker {
     readonly startBlock: bigint,
     readonly gasCap: bigint,
     readonly guard?: () => Promise<void>,
+    readonly maxHistoryBlocks?: bigint,
   ) {}
 
   async reconcile(saved: ExecutionPolicy) {
-    const state = await readGroupChain(
+    let state = await readGroupChain(
       this.client,
       saved,
       this.config,
       saved.policy.participants[0]!,
     );
-    const target = BigInt(state.blockNumber);
-    const targetHash = (await this.client.getBlock({ blockNumber: target }))
-      .hash;
+    let target = BigInt(state.blockNumber);
+    let targetHash = (await this.client.getBlock({ blockNumber: target })).hash;
     const checkpoint = await this.store.checkpoint(saved.policy.decisionId);
     let from = this.startBlock;
     if (
@@ -75,6 +76,20 @@ export class GroupExecutionWorker {
       ).hash === checkpoint.blockHash
     )
       from = BigInt(checkpoint.blockNumber) + 1n;
+    this.historyPending = false;
+    if (this.maxHistoryBlocks && from + this.maxHistoryBlocks - 1n < target) {
+      target = from + this.maxHistoryBlocks - 1n;
+      state = await readGroupChain(
+        this.client,
+        saved,
+        this.config,
+        saved.policy.participants[0]!,
+        2,
+        target,
+      );
+      targetHash = (await this.client.getBlock({ blockNumber: target })).hash;
+      this.historyPending = true;
+    }
     const events: GroupChainEvent[] = [];
     const receipts = new Map<Hex, TransactionReceipt>();
     for (let cursor = from; cursor <= target; cursor += 2000n) {
@@ -185,6 +200,8 @@ export class GroupExecutionWorker {
 
   async tick(saved: ExecutionPolicy, execute = true) {
     const state = await this.reconcile(saved);
+    // Persist bounded history pages before attempting any payment from live state.
+    if (this.historyPending) return;
     const id = saved.policy.decisionId;
     const existing = await this.store.load(id);
     if (!execute) return;
