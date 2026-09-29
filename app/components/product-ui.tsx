@@ -1,4 +1,5 @@
-import { PlanPreview } from "./plan-preview";
+import { ScrollStory } from "./scroll-story";
+import { PlanningProblems } from "./planning-problems";
 import { BrandMark } from "./brand-mark";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -6,9 +7,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   LockKeyhole,
-  MessageSquareText,
   ShieldCheck,
-  Users,
   Wallet,
   UserRound,
   Flower2,
@@ -24,9 +23,7 @@ export function Brand() {
   return (
     <Link className="brand" href="/" aria-label="Converge home">
       <BrandMark className="brand-symbol" />
-      <span>
-        converge<span className="brand-period">.</span>
-      </span>
+      <span>converge</span>
     </Link>
   );
 }
@@ -154,7 +151,7 @@ export function WelcomeWorkspace({
         <div className="sky-hero-wash" aria-hidden="true" />
         <div className="human-copy">
           <h1 id="welcome-title">
-            Less planning.
+            Less planning,
             <br />
             <em>More together.</em>
           </h1>
@@ -205,29 +202,12 @@ export function WelcomeWorkspace({
             </div>
           </div>
         </div>
-        <a className="sky-scroll-cue" href="#product-preview">
-          See how a plan comes together <span aria-hidden="true">↓</span>
+        <a className="sky-scroll-cue" href="#why-converge">
+          Why plans get stuck <span aria-hidden="true">↓</span>
         </a>
       </section>
-      <section
-        id="product-preview"
-        className="product-preview-section"
-        aria-labelledby="product-preview-heading"
-      >
-        <div className="product-preview-intro">
-          <p className="eyebrow">A LITTLE LESS “WHAT WORKS FOR EVERYONE?”</p>
-          <h2 id="product-preview-heading">
-            Different wishes.
-            <br />
-            One shared plan.
-          </h2>
-          <p>
-            Pick an example. See how your preferences become a plan you can all
-            approve.
-          </p>
-        </div>
-        <PlanPreview />
-      </section>
+      <PlanningProblems />
+      <ScrollStory />
       <section className="occasion-strip" aria-label="Ideas for your next plan">
         <p>Whatever brings you together.</p>
         <div>
@@ -245,59 +225,6 @@ export function WelcomeWorkspace({
           ))}
         </div>
       </section>
-      <section
-        id="how-it-works"
-        className="human-how"
-        aria-labelledby="how-it-works-title"
-      >
-        <div className="human-section-heading">
-          <div>
-            <p className="eyebrow">FROM “WE SHOULD” TO “LET'S GO”</p>
-            <h2 id="how-it-works-title">
-              Plan together. Let your agent handle payment.
-            </h2>
-          </div>
-          <p>
-            You set the terms.
-            <br />
-            Your agent follows them.
-          </p>
-        </div>
-        <div className="human-how-grid">
-          {[
-            {
-              Icon: Users,
-              title: "Bring your people",
-              description:
-                "Pick the kind of outing, choose a few places to consider, and share an invite with your group.",
-            },
-            {
-              Icon: MessageSquareText,
-              title: "Tell us what matters",
-              description:
-                "Share your budget, needs and nice-to-haves in your own words. Review what AI understood. Your original preferences stay private.",
-            },
-            {
-              Icon: ShieldCheck,
-              title: "You approve. Your agent pays.",
-              description:
-                "Choose a plan and review the place, amount and your share. Once everyone approves and contributes, your agent executes the payment within those agreed terms.",
-            },
-          ].map(({ Icon, title, description }, i) => (
-            <article key={title}>
-              <div className="human-step-icon">
-                <Icon size={24} strokeWidth={1.6} />
-                <span>0{i + 1}</span>
-              </div>
-              <h3>{title}</h3>
-              <p>{description}</p>
-            </article>
-          ))}
-        </div>
-        <p className="human-signin">
-          Prototype payments use test tokens. Reservations are simulated.
-        </p>
-      </section>
       <aside
         className="calendar-feature"
         aria-labelledby="calendar-feature-title"
@@ -306,9 +233,8 @@ export function WelcomeWorkspace({
         <div>
           <h3 id="calendar-feature-title">A shared plan. On your calendar.</h3>
           <p>
-            Google Calendar integration supports automatic event creation once
-            connected and your group's payment is confirmed. For now, copy your
-            plan details into your calendar — no connection needed.
+            Copy your plan into Google Calendar. Connect your account later for
+            automatic updates after payment.
           </p>
           <span>
             Account connection coming later · Copy & paste available now

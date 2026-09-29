@@ -128,9 +128,6 @@ main:focus {
   height: 37px;
   color: var(--accent);
 }
-.brand-period {
-  color: var(--accent);
-}
 .main-nav {
   display: flex;
   align-items: center;

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import "./styles.css";
+import "./components/scroll-story.css";
+import "./components/planning-problems.css";
 
 export const metadata = {
   title: "Converge",
