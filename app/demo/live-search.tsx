@@ -14,10 +14,7 @@ function DemoBookingTerms({
   disabled: boolean;
   onCommand: (command: ExploreCommand) => void;
 }) {
-  const [deposit, setDeposit] = useState("45");
   const [accepted, setAccepted] = useState(false);
-  const amount = Number(deposit);
-  const validAmount = Number.isInteger(amount) && amount >= 1 && amount <= 60;
   const place = run.selectedPlace!;
   return (
     <section className="explore-section demo-booking-terms">
@@ -43,43 +40,16 @@ function DemoBookingTerms({
         className="demo-request-review"
         onSubmit={(event) => {
           event.preventDefault();
-          if (disabled || !validAmount || !accepted) return;
+          if (disabled || !accepted) return;
           onCommand({
             action: "select_place",
             revision: run.revision,
             placeId: place.id,
-            depositUsdc: amount,
+            depositUsdc: 45,
             acknowledgeDemo: true,
           });
         }}
       >
-        <h3>
-          Before you <em>approve together</em>
-        </h3>
-        <p>
-          Set the test deposit for this plan. This is not a restaurant quote.
-        </p>
-        <label htmlFor="demo-deposit">Group test deposit (MockUSDC)</label>
-        <input
-          id="demo-deposit"
-          type="number"
-          min={1}
-          max={60}
-          step={1}
-          required
-          value={deposit}
-          disabled={disabled}
-          aria-describedby="demo-payment-summary"
-          onChange={(event) => {
-            setDeposit(event.target.value);
-            setAccepted(false);
-          }}
-        />
-        <p id="demo-payment-summary">
-          Each person contributes 10 MockUSDC, for a total of 60.
-          {validAmount &&
-            ` The group can claim back the remaining ${60 - amount} after payment.`}
-        </p>
         <label className="demo-consent">
           <input
             type="checkbox"
@@ -87,18 +57,16 @@ function DemoBookingTerms({
             disabled={disabled}
             onChange={(event) => setAccepted(event.target.checked)}
           />
-          I understand this is a simulated booking on Sepolia. The test deposit
-          goes to a demo recipient, not the restaurant.
+          I understand this is a test booking using test tokens.
         </label>
-        <button
-          className="primary"
-          disabled={disabled || !validAmount || !accepted}
-        >
+        <button className="primary" disabled={disabled || !accepted}>
           {run.command?.action === "select_place"
-            ? "Saving booking terms…"
-            : "Confirm booking terms"}
+            ? "Getting your plan ready…"
+            : "Continue to approval"}
         </button>
-        <p>No payment now. You’ll approve in your wallet next.</p>
+        <p>
+          You’ll review the payment details before approving in your wallet.
+        </p>
       </form>
     </section>
   );
