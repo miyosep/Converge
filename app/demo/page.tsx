@@ -40,6 +40,7 @@ import "./styles.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
 import { LiveDemoSearch } from "./live-search";
+import { canRestartDemo } from "../../src/lib/explore/sessions";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(
@@ -82,13 +83,26 @@ export default function ExploreDemo() {
   const [code, setCode] = useState("");
   const [lastTx, setLastTx] = useState<string | null>(null);
   const revision = useRef("");
+  const selectedRun = useRef("");
+  const refreshSequence = useRef(0);
   const refresh = useCallback(async () => {
-    const result = await api<ExploreView>("/api/demo").catch(
-      (error: unknown) => {
+    const sequence = ++refreshSequence.current;
+    const requestedRun = selectedRun.current;
+    const result = await api<ExploreView>(
+      `/api/demo${selectedRun.current ? `?runId=${selectedRun.current}` : ""}`,
+    ).catch((error: unknown) => {
+      if (
+        sequence === refreshSequence.current &&
+        requestedRun === selectedRun.current
+      )
         setRefreshError(true);
-        throw error;
-      },
-    );
+      throw error;
+    });
+    if (
+      sequence !== refreshSequence.current ||
+      requestedRun !== selectedRun.current
+    )
+      return;
     setRefreshError(false);
     setView(result);
     const key = `${result.run?.id}:${result.run?.revision}`;
@@ -144,9 +158,14 @@ export default function ExploreDemo() {
     setNotice("");
     setLastTx(null);
     revision.current = "";
+    selectedRun.current = "";
   }
   async function command(body: unknown) {
-    await api("/api/demo", body);
+    const result = await api<{ run: NonNullable<ExploreView["run"]> }>(
+      `/api/demo${view?.run ? `?runId=${view.run.id}` : ""}`,
+      body,
+    );
+    selectedRun.current = result.run.id;
   }
   async function transaction(
     action: "allowance" | "contribute" | "refund" | "cancel",
@@ -238,6 +257,8 @@ export default function ExploreDemo() {
     setNotice("Transaction submitted. Waiting for on-chain confirmation.");
   }
   const state = view?.run;
+  const historical =
+    !!state && !!view?.currentRunId && state.id !== view.currentRunId;
   const pending = busy || !!state?.command;
   const terminal =
     !!state && ["completed", "cancelled", "expired"].includes(state.phase);
@@ -476,6 +497,65 @@ export default function ExploreDemo() {
               </section>
             ) : (
               <>
+                <section
+                  className="explore-section"
+                  aria-label="Your demo sessions"
+                >
+                  <h2>Your demos</h2>
+                  <label>
+                    Current and previous sessions
+                    <select
+                      value={state.id}
+                      disabled={busy}
+                      onChange={(event) => {
+                        selectedRun.current = event.target.value;
+                        setLastTx(null);
+                        void run(refresh);
+                      }}
+                    >
+                      {(view?.history ?? [state]).map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.id === view?.currentRunId ? "Current · " : ""}
+                          {new Date(item.createdAt).toLocaleString()} ·{" "}
+                          {item.restaurant ?? phaseNames[item.phase]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {historical ? (
+                    <p>
+                      Previous session. Its payment records and available
+                      refunds remain accessible here.
+                    </p>
+                  ) : (
+                    <>
+                      <p>
+                        Start again with the same wallet. Previous payment and
+                        refund records are kept.
+                      </p>
+                      <button
+                        className="secondary"
+                        disabled={busy || !demoReady || !canRestartDemo(state)}
+                        onClick={() =>
+                          void run(() =>
+                            command({
+                              action: "restart",
+                              previousRunId: state.id,
+                            }),
+                          )
+                        }
+                      >
+                        Start a new demo
+                      </button>
+                      {!canRestartDemo(state) && (
+                        <p>
+                          Finish or cancel the current decision and wait for
+                          pending transactions before starting again.
+                        </p>
+                      )}
+                    </>
+                  )}
+                </section>
                 <div className="explore-members" aria-label="Six participants">
                   {["You", "Bob", "Charlie", "Dana", "Erin", "Farah"].map(
                     (name, index) => (
@@ -497,7 +577,8 @@ export default function ExploreDemo() {
                     ),
                   )}
                 </div>
-                {["preferences", "review"].includes(state.phase) &&
+                {!historical &&
+                  ["preferences", "review"].includes(state.phase) &&
                   !state.extraction && (
                     <LiveDemoSearch
                       key={state.id}
@@ -507,7 +588,8 @@ export default function ExploreDemo() {
                       onCommand={(body) => void run(() => command(body))}
                     />
                   )}
-                {["preferences", "review"].includes(state.phase) &&
+                {!historical &&
+                  ["preferences", "review"].includes(state.phase) &&
                   state.extraction && (
                     <section className="explore-section">
                       <h2>Your dinner preferences</h2>
@@ -719,7 +801,7 @@ export default function ExploreDemo() {
                         Maximum deposit: {money(state.policy.maxDeposit)} USDC
                       </p>
                     </details>
-                    {state.phase === "proposal" && (
+                    {!historical && state.phase === "proposal" && (
                       <button
                         className="primary"
                         disabled={pending || !view?.workerOnline}

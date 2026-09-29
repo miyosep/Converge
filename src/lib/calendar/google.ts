@@ -6,6 +6,7 @@ import {
 } from "node:crypto";
 import { z } from "zod";
 import type { GroupOverview } from "../group-view.js";
+import { unanimousPlace } from "../discovery/live-plan.js";
 
 export const CALENDAR_SCOPE =
   "https://www.googleapis.com/auth/calendar.events.owned";
@@ -177,16 +178,27 @@ export function calendarEvent(
     durationMinutes > 10080
   )
     throw new Error("INVALID_DURATION");
-  const selected = overview.evaluation?.catalog.find(
-    (v) => v.id === overview.evaluation?.winnerId,
-  );
+  const live =
+    overview.livePlan &&
+    unanimousPlace(
+      overview.livePlan,
+      overview.participants.map((member) => member.walletAddress),
+      overview.group.targetMemberCount,
+    );
+  const selected =
+    live ||
+    overview.evaluation?.catalog.find(
+      (v) => v.id === overview.evaluation?.winnerId,
+    );
   if (!selected || !overview.signingPolicy) throw new Error("PLAN_NOT_READY");
   const start = new Date(overview.group.startsAt),
     end = new Date(start.getTime() + durationMinutes * 60000);
   return {
     id,
     summary: `[Converge prototype] ${overview.group.name}`,
-    location: `${selected.name} — sample venue`,
+    location: live
+      ? `${live.name} — ${live.address}`
+      : `${selected.name} — sample venue`,
     description:
       "Shared plan from Converge. Test payment recorded; this is NOT a real venue reservation. Duration was chosen by you. No private preferences or other participants' details are included.",
     start: { dateTime: start.toISOString(), timeZone: overview.group.timeZone },

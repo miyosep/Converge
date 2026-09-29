@@ -9,9 +9,11 @@ const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 export function GroupExecutionPanel({
   groupId,
   saved,
+  showChain = true,
 }: {
   groupId: string;
   saved: SigningPolicy;
+  showChain?: boolean;
 }) {
   const [history, setHistory] = useState<GroupHistory | null>(null);
   const [error, setError] = useState("");
@@ -122,13 +124,15 @@ export function GroupExecutionPanel({
           <p>No confirmed events are recorded yet.</p>
         )}
       </section>
-      <section className="flow-panel">
-        <GroupChainPanel
-          key={saved.policyHash}
-          groupId={groupId}
-          saved={saved}
-        />
-      </section>
+      {showChain && (
+        <section className="flow-panel">
+          <GroupChainPanel
+            key={saved.policyHash}
+            groupId={groupId}
+            saved={saved}
+          />
+        </section>
+      )}
     </>
   );
 }

@@ -197,8 +197,10 @@ export class PreferenceRepository {
       target_member_count: number;
       confirmed_count: number;
       permitted_restaurant_ids: string[];
+      live_category?: import("../catalog-options.js").Category;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
+        (SELECT snapshot->>'category' FROM converge_live_plans WHERE group_id=g.id) AS live_category,
         g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, count(p.wallet_address)::int AS member_count,
         count(*) FILTER (WHERE r.status = 'CONFIRMED')::int AS confirmed_count
        FROM converge_groups g
@@ -210,7 +212,8 @@ export class PreferenceRepository {
       [wallet(actor)],
     );
     return result.rows.map((row) => ({
-      category: categoryForIds(row.permitted_restaurant_ids),
+      category:
+        row.live_category ?? categoryForIds(row.permitted_restaurant_ids),
       id: row.id,
       name: row.name,
       startsAt: timestamp(row.reservation_starts_at)!,
@@ -244,6 +247,8 @@ export class PreferenceRepository {
       signing_policy: unknown | null;
       policy_hash: string | null;
       policy_created_at: Date | null;
+      live_snapshot?: import("../discovery/live-plan.js").LivePlan;
+      live_votes?: Record<string, string>;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
         g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
@@ -259,11 +264,13 @@ export class PreferenceRepository {
               AND current.current_revision_id = revision->>'revisionId'
           )
         ) AS evaluation_current,
-        policy.policy AS signing_policy, policy.policy_hash, policy.created_at AS policy_created_at
+        policy.policy AS signing_policy, policy.policy_hash, policy.created_at AS policy_created_at,
+        live.snapshot AS live_snapshot, live.votes AS live_votes
        FROM converge_groups g
        JOIN converge_participants p ON p.group_id = g.id AND p.wallet_address = $2
        LEFT JOIN converge_evaluations e ON e.group_id = g.id
        LEFT JOIN converge_group_policies policy ON policy.group_id = g.id
+       LEFT JOIN converge_live_plans live ON live.group_id = g.id
        WHERE g.id = $1`,
       [group, participant],
     );
@@ -277,8 +284,13 @@ export class PreferenceRepository {
     if (signingPolicy && hashPolicy(signingPolicy) !== row.policy_hash)
       throw new Error("Stored policy hash mismatch");
     return {
+      ...(row.live_snapshot
+        ? { livePlan: { ...row.live_snapshot, votes: row.live_votes ?? {} } }
+        : {}),
       group: {
-        category: categoryForIds(row.permitted_restaurant_ids),
+        category:
+          row.live_snapshot?.category ??
+          categoryForIds(row.permitted_restaurant_ids),
         permittedRestaurantIds: permittedRestaurantIdsSchema.parse(
           row.permitted_restaurant_ids,
         ),
@@ -450,6 +462,10 @@ export class PreferenceRepository {
       );
       // A pre-policy evaluation may still contain this member's revisions.
       await client.query(
+        "UPDATE converge_live_plans SET votes=votes - $2 WHERE group_id=$1",
+        [group, participant],
+      );
+      await client.query(
         "DELETE FROM converge_evaluations WHERE group_id = $1",
         [group],
       );
@@ -519,8 +535,12 @@ export class PreferenceRepository {
       revision_id: string | null;
       status: PreferenceState["status"] | null;
     }>(
-      `SELECT p.wallet_address, p.display_name, r.revision_id, r.status
-      FROM converge_participants p LEFT JOIN converge_preference_revisions r
+      `SELECT p.wallet_address, p.display_name,
+      CASE WHEN l.group_id IS NOT NULL THEN v.revision_id ELSE r.revision_id END AS revision_id,
+      CASE WHEN l.group_id IS NOT NULL THEN CASE WHEN v.confirmed THEN 'CONFIRMED' ELSE 'AWAITING_CONFIRMATION' END ELSE r.status END AS status
+      FROM converge_participants p LEFT JOIN converge_live_plans l ON l.group_id=p.group_id
+      LEFT JOIN converge_live_preferences v ON v.group_id=p.group_id AND v.wallet_address=p.wallet_address
+      LEFT JOIN converge_preference_revisions r
       ON r.group_id = p.group_id AND r.wallet_address = p.wallet_address
         AND r.revision_id = p.current_revision_id
       WHERE p.group_id = $1 ORDER BY p.joined_at, p.wallet_address`,

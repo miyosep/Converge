@@ -1,0 +1,146 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { createKilnClient } from "../src/lib/kiln/client.js";
+import {
+  interpretLivePreference,
+  recommendForGroup,
+} from "../src/lib/discovery/group-preferences.js";
+const preferences = [
+  {
+    requirements: [
+      { text: "Vegetarian menu", importance: "required" as const },
+    ],
+    clarifications: [],
+  },
+  {
+    requirements: [
+      { text: "Wheelchair entrance", importance: "required" as const },
+      { text: "Quiet atmosphere", importance: "preferred" as const },
+    ],
+    clarifications: [],
+  },
+];
+const base = {
+  xapiKey: "test-key",
+  runId: "group-search",
+  area: "Seoul",
+  category: "restaurant" as const,
+  people: 2,
+  startsAt: "2030-01-05T10:00:00Z",
+  preferences,
+};
+function client(output: unknown, inspect: (body: any) => void = () => {}) {
+  return createKilnClient({
+    apiKey: "test",
+    maxAttempts: 1,
+    onAttempt: () => {},
+    fetchImpl: async (_url, init) => {
+      inspect(JSON.parse(String(init?.body)));
+      return Response.json({
+        model: "qwen3-32b",
+        choices: [
+          {
+            message: { role: "assistant", content: JSON.stringify(output) },
+            finish_reason: "stop",
+          },
+        ],
+      });
+    },
+  });
+}
+test("group search includes every confirmed member, reuses xAPI and keeps private conditions out of shared output", async () => {
+  const query = "vegetarian wheelchair quiet restaurants Seoul";
+  const result = await recommendForGroup({
+    ...base,
+    client: client(
+      { query, consideredIds: [0, 1, 2], conflicts: [] },
+      (body) => {
+        const input = JSON.parse(body.messages[1].content);
+        assert.deepEqual(
+          input.requirements.map((r: any) => r.text),
+          preferences.flatMap((p) => p.requirements.map((r) => r.text)),
+        );
+        assert.match(body.messages[0].content, /ALL members/);
+      },
+    ),
+    fetchImpl: async (url, init) => {
+      assert.equal(url, "https://action.xapi.to/v1/actions/execute");
+      assert.deepEqual(JSON.parse(String(init?.body)), {
+        action_id: "web.search.places",
+        input: { q: query, hl: "en", page: 1 },
+      });
+      return Response.json({
+        success: true,
+        data: {
+          places: [
+            { title: "Venue", address: "Seoul", website: "javascript:bad" },
+            { title: "Venue", address: "Seoul" },
+          ],
+        },
+      });
+    },
+  });
+  assert.equal(result.places.length, 1);
+  assert.equal(result.places[0]!.websiteUrl, null);
+  assert.equal(result.places[0]!.evidence[0]!.status, "unknown");
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /Vegetarian|Wheelchair|Quiet atmosphere/,
+  );
+});
+test("missing opinions, omitted requirements and conflicts cannot silently produce a group search", async () => {
+  const neverSearch = async () => {
+    assert.fail("No paid search permitted");
+  };
+  for (const consideredIds of [[0], [0, 0, 2], [0, 1, 9]]) {
+    await assert.rejects(
+      recommendForGroup({
+        ...base,
+        fetchImpl: neverSearch,
+        client: client({ query: "restaurants", consideredIds, conflicts: [] }),
+      }),
+      /INCOMPLETE_GROUP_INTERPRETATION/,
+    );
+  }
+  await assert.rejects(
+    recommendForGroup({
+      ...base,
+      people: 3,
+      fetchImpl: neverSearch,
+      client: client({}),
+    }),
+    /PREFERENCES_NOT_CONFIRMED/,
+  );
+  const result = await recommendForGroup({
+    ...base,
+    fetchImpl: neverSearch,
+    client: client({
+      query: "restaurants",
+      consideredIds: [0, 1, 2],
+      conflicts: ["PRIVATE conflicting conditions"],
+    }),
+  });
+  assert.equal(result.places.length, 0);
+  assert.equal(result.conflicts.length, 1);
+  assert.doesNotMatch(JSON.stringify(result), /PRIVATE/);
+});
+test("individual interpretation preserves the request and fixed group context for member confirmation", async () => {
+  const result = await interpretLivePreference(
+    client(preferences[0], (body) => {
+      const input = JSON.parse(body.messages[1].content);
+      assert.equal(input.text, "I need vegetarian food");
+      assert.equal(input.people, 2);
+      assert.match(body.messages[0].content, /Each member will confirm/);
+    }),
+    {
+      runId: "member",
+      text: "I need vegetarian food",
+      category: "restaurant",
+      area: "Seoul",
+      people: 2,
+      startsAt: base.startsAt,
+      timeZone: "Asia/Seoul",
+    },
+  );
+  assert.deepEqual(result, preferences[0]);
+});

@@ -121,6 +121,10 @@ export function GroupWorkspace({
         api<GroupOverview>(`${base}/overview`),
         api<{ preference: Preference | null }>(`${base}/preferences`),
       ]);
+      if (progress.livePlan) {
+        window.location.assign(`/group/${encodeURIComponent(id)}`);
+        return;
+      }
       setDiagnostics(groupDiagnostics(progress).diagnostics);
       setParticipants(progress.participants);
       setGroupLocked(progress.group.locked);

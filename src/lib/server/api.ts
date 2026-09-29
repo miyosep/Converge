@@ -13,6 +13,7 @@ import { GroupPolicyError } from "../group-policy.js";
 import { GroupInsightsRepository } from "../db/group-insights.js";
 import { GroupExecutionRepository } from "../db/group-execution.js";
 import { CalendarRepository } from "../db/calendar.js";
+import { LivePlanRepository, LivePlanError } from "../db/live-plans.js";
 import type { KilnAttempt } from "../kiln/client.js";
 
 const SESSION_COOKIE = "converge_session";
@@ -32,6 +33,7 @@ export function services() {
     insights: new GroupInsightsRepository(pool),
     execution: new GroupExecutionRepository(pool),
     calendar: new CalendarRepository(pool),
+    livePlans: new LivePlanRepository(pool),
   };
 }
 
@@ -129,6 +131,11 @@ export async function api(work: () => Promise<NextResponse>) {
     return result;
   } catch (error) {
     if (error instanceof ApiError) return apiFailure(error.status, error.code);
+    if (error instanceof LivePlanError)
+      return apiFailure(
+        error.message === "NOT_MEMBER" ? 403 : 409,
+        error.message,
+      );
     if (error instanceof ZodError || error instanceof SyntaxError)
       return apiFailure(400, "INVALID_INPUT");
     if (error instanceof WalletAuthError) {

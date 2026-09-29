@@ -9,8 +9,8 @@ browser does not stop processing; losing power, sleep or internet pauses it.
 ## Configure the shared database and web
 
 Use the same pooled `DATABASE_URL` on the PC and Vercel. Apply all checked-in
-migrations through `0015_job_wakeup_acknowledgements.sql` before starting the updated
-processor. The preflight checks the new acknowledgement column. Use the direct URL
+migrations through `0017_live_group_preferences.sql` before deploying the updated
+web app and processor. The preflight checks acknowledgements and live preference tables. Use the direct URL
 with the migration runner. Test in a Neon branch first.
 
 Set these on the Vercel production deployment:
@@ -24,7 +24,7 @@ GROUP_EXECUTION_ENABLED=true
 
 Retain `APP_ORIGIN`, database, session, RPC, Kiln and demo access-code configuration.
 For live place search, configure `XAPI_KEY` and `KILN_API_KEY` on both the web
-deployment (general `/discover` search) and the PC's `.env.hybrid` (queued Explore
+deployment (general `/discover` search and friends’ confirmed-preference search) and the PC's `.env.hybrid` (queued Explore
 Demo searches). Keep `RESTAURANT_SEARCH_PROVIDER=xapi`. The PC does not inherit
 the web deployment's credentials; see `LIVE_DEMO_BOOKING.md` for the booking flow.
 Google connection/callback flows still require the Google settings on Vercel.

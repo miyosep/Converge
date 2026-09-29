@@ -4,8 +4,15 @@ import { z } from "zod";
 import { createPublicClient, getAddress, http } from "viem";
 import { sepolia } from "viem/chains";
 import { readGroupChain } from "../../../../../src/lib/group-chain.js";
-import { createKilnClient } from "../../../../../src/lib/kiln/client.js";
+import {
+  createKilnClient,
+  KilnError,
+} from "../../../../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
+import {
+  interpretLivePreference,
+  recommendForGroup,
+} from "../../../../../src/lib/discovery/group-preferences.js";
 import {
   groupEvaluationOptions,
   currentGroupPolicyConfig,
@@ -29,6 +36,10 @@ export async function GET(request: NextRequest, context: Context) {
   return api(async () => {
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "live-preferences")
+      return NextResponse.json({
+        preference: await services().livePlans.ownPreference(groupId, actor),
+      });
     if (action === "history") {
       await services().preferences.getOverview(groupId, actor);
       await notifyJob({ kind: "group", id: groupId });
@@ -83,6 +94,137 @@ export async function POST(request: NextRequest, context: Context) {
     verifyOrigin(request);
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "live-preferences") {
+      const body = z
+        .strictObject({
+          text: z.string().trim().min(1).max(2000),
+          expectedRevisionId: z.string().nullable(),
+        })
+        .parse(await request.json());
+      const key = process.env.KILN_API_KEY;
+      if (!key) return apiFailure(503, "KILN_NOT_CONFIGURED");
+      const repository = services().livePlans;
+      const context = await repository.submitPreference(
+        groupId,
+        actor,
+        body.text,
+        body.expectedRevisionId,
+      );
+      let extraction;
+      try {
+        extraction = await interpretLivePreference(
+          createKilnClient({
+            apiKey: key,
+            maxAttempts: 2,
+            timeoutMs: 25000,
+            onAttempt: (attempt) => repository.recordUsage(groupId, attempt),
+          }),
+          { ...context, runId: context.revisionId, text: context.rawText },
+        );
+      } catch {
+        await repository.completePreference(
+          groupId,
+          actor,
+          context.revisionId,
+          null,
+        );
+        return apiFailure(502, "EXTRACTION_FAILED");
+      }
+      return NextResponse.json({
+        preference: await repository.completePreference(
+          groupId,
+          actor,
+          context.revisionId,
+          extraction,
+        ),
+      });
+    }
+    if (action === "live-confirm") {
+      const body = z
+        .strictObject({ revisionId: z.string() })
+        .parse(await request.json());
+      return NextResponse.json({
+        preference: await services().livePlans.confirmPreference(
+          groupId,
+          actor,
+          body.revisionId,
+        ),
+      });
+    }
+    if (action === "recommend") {
+      z.strictObject({}).parse(await request.json());
+      if (!process.env.KILN_API_KEY || !process.env.XAPI_KEY)
+        return apiFailure(503, "PLACES_NOT_CONFIGURED");
+      const repository = services().livePlans;
+      const context = await repository.beginRecommendation(groupId, actor);
+      let result;
+      try {
+        result = await recommendForGroup({
+          ...context,
+          runId: context.token,
+          xapiKey: process.env.XAPI_KEY,
+          client: createKilnClient({
+            apiKey: process.env.KILN_API_KEY,
+            maxAttempts: 2,
+            timeoutMs: 25000,
+            onAttempt: (attempt) => repository.recordUsage(groupId, attempt),
+          }),
+        });
+      } catch (error) {
+        const codes = [
+          "INCOMPLETE_GROUP_INTERPRETATION",
+          "GROUP_REQUIREMENTS_TOO_LARGE",
+          "PREFERENCES_NOT_CONFIRMED",
+          "PLACES_UNAVAILABLE",
+          "SEARCH_CREDIT_EXHAUSTED",
+        ];
+        console.warn("Group recommendation unavailable", {
+          groupId,
+          code:
+            error instanceof KilnError
+              ? error.code
+              : error instanceof Error && codes.includes(error.message)
+                ? error.message
+                : "REQUEST_FAILED",
+        });
+        await repository.completeRecommendation(
+          groupId,
+          actor,
+          context.token,
+          context.revision,
+          null,
+        );
+        return apiFailure(502, "GROUP_SEARCH_UNAVAILABLE");
+      }
+      await repository.completeRecommendation(
+        groupId,
+        actor,
+        context.token,
+        context.revision,
+        result,
+      );
+      return NextResponse.json(
+        await services().preferences.getOverview(groupId, actor),
+      );
+    }
+    if (action === "vote") {
+      const body = z
+        .strictObject({
+          placeId: z.string().min(1).max(100),
+          acknowledgeDemo: z.literal(true),
+          recommendationRevision: z.string().min(1),
+        })
+        .parse(await request.json());
+      await services().livePlans.vote(
+        groupId,
+        actor,
+        body.placeId,
+        body.recommendationRevision,
+      );
+      return NextResponse.json(
+        await services().preferences.getOverview(groupId, actor),
+      );
+    }
     if (action === "leave") {
       z.strictObject({}).parse(await request.json());
       return NextResponse.json(
@@ -93,6 +235,7 @@ export async function POST(request: NextRequest, context: Context) {
       z.strictObject({}).parse(await request.json());
       const repository = services().preferences;
       const overview = await repository.getOverview(groupId, actor);
+      if (overview.livePlan) return apiFailure(409, "USE_LIVE_PLAN_VOTE");
       if (Date.parse(overview.group.startsAt) <= Date.now())
         return apiFailure(409, "RESERVATION_PASSED");
       await repository.evaluateAndFreeze(
@@ -107,11 +250,19 @@ export async function POST(request: NextRequest, context: Context) {
     }
     if (action === "decisions") {
       z.strictObject({}).parse(await request.json());
-      await services().preferences.preparePolicy(
-        groupId,
-        actor,
-        currentGroupPolicyConfig(),
-      );
+      const overview = await services().preferences.getOverview(groupId, actor);
+      if (overview.livePlan)
+        await services().livePlans.prepare(
+          groupId,
+          actor,
+          currentGroupPolicyConfig(),
+        );
+      else
+        await services().preferences.preparePolicy(
+          groupId,
+          actor,
+          currentGroupPolicyConfig(),
+        );
       await notifyJob({ kind: "group", id: groupId });
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),

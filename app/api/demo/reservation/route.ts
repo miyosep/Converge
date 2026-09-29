@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exploreStore } from "../../../../src/lib/explore/runtime-store.js";
-import { ExploreError, walletId } from "../../../../src/lib/explore/store.js";
+import { ExploreError } from "../../../../src/lib/explore/store.js";
 import {
   EXPLORE_DEMO_SLOT,
   requestMockReservation,
@@ -20,11 +20,13 @@ async function ownedRun(request: NextRequest) {
     throw new ApiError(503, "DEMO_DISABLED");
   const store = exploreStore();
   const wallet = await sessionWallet(request);
-  const id = walletId(wallet);
-  const run = await store.read(id);
+  const run = await store.owned(
+    wallet,
+    request.nextUrl.searchParams.get("runId") ?? undefined,
+  );
   if (!run || run.judge.toLowerCase() !== wallet.toLowerCase())
     throw new ApiError(404, "RUN_NOT_FOUND");
-  return { store, id, run };
+  return { store, id: run.id, run };
 }
 
 export async function GET(request: NextRequest) {

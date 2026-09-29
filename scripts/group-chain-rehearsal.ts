@@ -1,3 +1,4 @@
+import { buildLiveGroupPolicy } from "../src/lib/discovery/live-plan.js";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
@@ -77,7 +78,8 @@ class MemoryExecutionStore implements ExecutionStore {
 
 // Disposable local EVM only. No environment credentials or Sepolia writes.
 async function main() {
-  const version = process.argv.includes("--v2") ? 2 : 1;
+  const livePlace = process.argv.includes("--live-place");
+  const version = process.argv.includes("--v2") || livePlace ? 2 : 1;
   const memberCount =
     version === 2
       ? Number(
@@ -196,7 +198,7 @@ async function main() {
       executor: accounts[memberCount]!.address,
     };
     const now = Number((await reader.getBlock()).timestamp);
-    const policy = policySchema.parse({
+    let policy = policySchema.parse({
       ...config,
       policyVersion: version,
       decisionId: keccak256(stringToHex("ordinary-group")),
@@ -210,6 +212,56 @@ async function main() {
       expiry: now + 3600,
       reservationReference: keccak256(stringToHex("reservation")),
     });
+    if (livePlace) {
+      const addresses = members.map((member) => member.address);
+      policy = buildLiveGroupPolicy({
+        groupId: "live-group-rehearsal",
+        config,
+        members: addresses,
+        target: memberCount,
+        nowSeconds: now,
+        slot: {
+          startsAt: new Date((now + 7200) * 1000)
+            .toISOString()
+            .replace(/\.\d{3}Z$/, "Z"),
+          timeZone: "Asia/Seoul",
+        },
+        plan: {
+          recommendationReady: true,
+          recommendationRevision: "all-confirmed-preferences",
+          category: "restaurant",
+          merchant: policy.merchant,
+          depositUsdc: memberCount * 7.5,
+          source: "xAPI (Google Maps)",
+          searchedAt: new Date().toISOString(),
+          intent: {
+            area: "Seoul",
+            cuisine: "",
+            koreanQuery: "Group search",
+            budget: null,
+            people: memberCount,
+            facilities: [],
+            otherRequirements: [],
+            clarifications: [],
+          },
+          places: [
+            {
+              id: "test-venue",
+              name: "Live flow rehearsal fixture",
+              address: "Seoul",
+              price: null,
+              mapsUrl: "https://www.google.com/maps",
+              websiteUrl: null,
+              evidence: [],
+              attributions: [],
+            },
+          ],
+          votes: Object.fromEntries(
+            addresses.map((address) => [address.toLowerCase(), "test-venue"]),
+          ),
+        },
+      }).policy;
+    }
     const saved: SigningPolicy = {
       policy,
       policyHash: hashPolicy(policy),

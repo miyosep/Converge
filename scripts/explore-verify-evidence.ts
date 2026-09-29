@@ -10,7 +10,7 @@ import {
 } from "viem";
 import { sepolia } from "viem/chains";
 import walletAbiJson from "../src/lib/abi/convergeGroupWallet.json";
-import { ExploreStore, walletId } from "../src/lib/explore/store.js";
+import { ExploreStore } from "../src/lib/explore/store.js";
 import { hashPolicy, policySchema } from "../src/lib/policy.js";
 
 async function main() {
@@ -34,7 +34,7 @@ async function main() {
     [key: string]: unknown;
   };
   assert.equal(evidence.chainId, sepolia.id);
-  assert.equal(evidence.runId, walletId(evidence.judge));
+  assert.match(evidence.runId, /^[a-f0-9]{64}$/);
   const policy = policySchema.parse(evidence.policy);
   assert.equal(hashPolicy(policy), evidence.policyHash);
   assert.deepEqual(
@@ -49,6 +49,7 @@ async function main() {
   assert.equal(await client.getChainId(), sepolia.id);
   const run = await new ExploreStore().read(evidence.runId);
   assert.ok(run);
+  assert.equal(run.judge.toLowerCase(), evidence.judge.toLowerCase());
   assert.equal(run.phase, "completed");
   assert.equal(run.refunded, true);
   const receipts: {

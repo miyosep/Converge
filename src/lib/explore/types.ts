@@ -21,6 +21,8 @@ export type ExploreRun = {
   id: string;
   judge: `0x${string}`;
   createdAt: string;
+  sequence?: number;
+  previousRunId?: string;
   phase:
     | "preferences"
     | "review"
@@ -70,6 +72,11 @@ export type ExploreRun = {
 };
 
 export type ExploreView = {
+  history?: Pick<
+    ExploreRun,
+    "id" | "createdAt" | "phase" | "restaurant" | "refund" | "refunded"
+  >[];
+  currentRunId?: string;
   searchConfigured?: boolean;
   enabled: boolean;
   accessCodeRequired: boolean;

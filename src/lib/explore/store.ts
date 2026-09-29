@@ -13,6 +13,7 @@ import { z } from "zod";
 import { addressSchema } from "../schemas/primitives.js";
 import { extractionSchema } from "../schemas/constraints.js";
 import type { ExploreRun } from "./types.js";
+import { canRestartDemo, latestRuns } from "./sessions.js";
 
 export const commandSchema = z.discriminatedUnion("action", [
   z.strictObject({
@@ -162,39 +163,87 @@ export class ExploreStore {
       .filter((name) => /^[a-f0-9]{64}\.json$/.test(name))
       .map((name) => name.slice(0, -5));
   }
-  async create(address: string, maxRuns: number) {
-    const judge = addressSchema.parse(address);
-    const id = walletId(judge);
+  async listRuns(address?: string): Promise<ExploreRun[]> {
+    const runs = (
+      await Promise.all((await this.ids()).map((id) => this.read(id)))
+    ).filter((run): run is ExploreRun => !!run);
+    return latestRuns(
+      address
+        ? runs.filter(
+            (run) => run.judge.toLowerCase() === address.toLowerCase(),
+          )
+        : runs,
+    );
+  }
+  async owned(address: string, id?: string) {
+    const run = id ? await this.read(id) : (await this.listRuns(address))[0];
+    if (run && run.judge.toLowerCase() !== address.toLowerCase())
+      throw new ExploreError("RUN_NOT_FOUND");
+    return run;
+  }
+  async withAdmissionLock<T>(work: () => Promise<T>): Promise<T> {
     await this.init();
-    return withFileLock(join(this.root, "admission.lock"), async () => {
-      const existing = await this.read(id);
-      if (existing) return existing;
-      if ((await this.ids()).length >= maxRuns)
-        throw new ExploreError("DEMO_SESSION_LIMIT");
-      const run: ExploreRun = {
-        id,
-        judge,
-        createdAt: new Date().toISOString(),
-        phase: "preferences",
-        revision: 0,
-        extractionCalls: 0,
-        transactions: [],
-        approvals: 0,
-        contributions: [],
-        refund: "0",
-        refunded: false,
-      };
-      await this.save(run);
-      return run;
+    return withFileLock(join(this.root, "admission.lock"), work);
+  }
+  async create(address: string, maxRuns: number, previousRunId?: string) {
+    const judge = addressSchema.parse(address);
+    return this.withAdmissionLock(async () => {
+      const existing = await this.owned(judge);
+      if (!previousRunId && existing) return existing;
+      if (previousRunId) {
+        const previous = await this.owned(judge, previousRunId);
+        if (!previous || !existing) throw new ExploreError("RUN_NOT_FOUND");
+        // A retried click must return the same successor, never create another run.
+        if (existing.id !== previousRunId) return existing;
+      }
+      const id = existing
+        ? createHash("sha256").update(`next:${existing.id}`).digest("hex")
+        : walletId(judge);
+      return this.withRunLock(existing?.id ?? id, async () => {
+        const previous = existing ? await this.read(existing.id) : undefined;
+        if (previous && !canRestartDemo(previous))
+          throw new ExploreError("FINISH_CURRENT_DEMO");
+        const newest = new Map<string, ExploreRun>();
+        for (const item of await this.listRuns()) {
+          if (!newest.has(item.judge.toLowerCase()))
+            newest.set(item.judge.toLowerCase(), item);
+        }
+        const others = [...newest.values()].filter(
+          (item) =>
+            item.judge.toLowerCase() !== judge.toLowerCase() &&
+            !["completed", "cancelled", "expired"].includes(item.phase),
+        );
+        if (others.length >= maxRuns)
+          throw new ExploreError("DEMO_SESSION_LIMIT");
+        const run: ExploreRun = {
+          id,
+          judge,
+          sequence: (previous ? (previous.sequence ?? 0) : -1) + 1,
+          ...(previous ? { previousRunId: previous.id } : {}),
+          createdAt: new Date().toISOString(),
+          phase: "preferences",
+          revision: 0,
+          extractionCalls: 0,
+          transactions: [],
+          approvals: 0,
+          contributions: [],
+          refund: "0",
+          refunded: false,
+        };
+        await this.save(run);
+        return run;
+      });
     });
   }
-  async queue(address: string, input: unknown) {
+  async queue(address: string, input: unknown, runId = walletId(address)) {
     const command = commandSchema.parse(input);
-    const id = walletId(address);
-    return withFileLock(`${this.path(id)}.lock`, async () => {
+    const id = runId;
+    return this.withRunLock(id, async () => {
       const run = await this.read(id);
       if (!run || run.judge.toLowerCase() !== address.toLowerCase())
         throw new ExploreError("RUN_NOT_FOUND");
+      if ((await this.owned(address))?.id !== id)
+        throw new ExploreError("DEMO_SESSION_REPLACED");
       if (run.command) throw new ExploreError("DEMO_BUSY");
       if (command.action === "search" || command.action === "select_place") {
         validateLiveCommand(run, command);

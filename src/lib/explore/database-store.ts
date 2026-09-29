@@ -1,12 +1,6 @@
 import type { Pool } from "pg";
-import { addressSchema } from "../schemas/primitives.js";
-import {
-  ExploreStore,
-  ExploreError,
-  commandSchema,
-  validateLiveCommand,
-  walletId,
-} from "./store.js";
+import { ExploreStore, ExploreError } from "./store.js";
+import { latestRuns } from "./sessions.js";
 import type { ExploreRun } from "./types.js";
 import {
   JobBusy,
@@ -89,69 +83,23 @@ export class DatabaseExploreStore extends ExploreStore {
       throw error;
     }
   }
-  override async create(address: string, maxRuns: number) {
-    const judge = addressSchema.parse(address);
-    const id = walletId(judge);
+  override async listRuns(address?: string): Promise<ExploreRun[]> {
+    const result = await this.pool.query<{ data: ExploreRun }>(
+      address
+        ? "SELECT data FROM converge_explore_runs WHERE lower(data->>'judge')=$1"
+        : "SELECT data FROM converge_explore_runs",
+      address ? [address.toLowerCase()] : [],
+    );
+    return latestRuns(result.rows.map((row) => row.data));
+  }
+  override async withAdmissionLock<T>(work: () => Promise<T>): Promise<T> {
     return withJobLease(this.pool, "explore:admission", async (admission) => {
       this.admissionLease = admission;
       try {
-        return await this.withRunLock(id, async () => {
-          const existing = await this.read(id);
-          if (existing) return existing;
-          if ((await this.ids()).length >= maxRuns)
-            throw new ExploreError("DEMO_SESSION_LIMIT");
-          const run: ExploreRun = {
-            id,
-            judge,
-            createdAt: new Date().toISOString(),
-            phase: "preferences",
-            revision: 0,
-            extractionCalls: 0,
-            transactions: [],
-            approvals: 0,
-            contributions: [],
-            refund: "0",
-            refunded: false,
-          };
-          await admission.assert();
-          await this.save(run);
-          return run;
-        });
+        return await work();
       } finally {
         this.admissionLease = undefined;
       }
-    });
-  }
-  override async queue(address: string, input: unknown) {
-    const command = commandSchema.parse(input);
-    const id = walletId(address);
-    return this.withRunLock(id, async () => {
-      const run = await this.read(id);
-      if (!run || run.judge.toLowerCase() !== address.toLowerCase())
-        throw new ExploreError("RUN_NOT_FOUND");
-      if (run.command) throw new ExploreError("DEMO_BUSY");
-      if (command.action === "search" || command.action === "select_place") {
-        validateLiveCommand(run, command);
-      } else if (command.action === "extract") {
-        if (
-          !["preferences", "review"].includes(run.phase) ||
-          Boolean(run.searchCalls) ||
-          run.extractionCalls >= 3
-        )
-          throw new ExploreError("EXTRACTION_LIMIT_OR_LOCKED");
-      } else if (command.action === "confirm") {
-        if (
-          run.phase !== "review" ||
-          !run.extraction ||
-          command.revision !== run.revision
-        )
-          throw new ExploreError("STALE_REVISION");
-      } else if (run.phase !== "proposal")
-        throw new ExploreError("POLICY_NOT_READY");
-      run.command = command;
-      delete run.error;
-      await this.save(run);
-      return run;
     });
   }
 }

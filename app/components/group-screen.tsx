@@ -11,6 +11,7 @@ import { scorePercent, type GroupOverview } from "../../src/lib/group-view";
 import { GroupPolicyPanel } from "./group-policy-panel";
 import { GroupInsightsPanel } from "./group-insights-panel";
 import { GroupExecutionPanel } from "./group-execution-panel";
+import { LiveGroupPanel } from "./live-group-panel";
 import { LeaveGroupButton } from "./leave-group-button";
 import { candidateLabel, categories } from "../../src/lib/catalog-options";
 import {
@@ -477,8 +478,8 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
           <RefreshCw size={18} />
         </button>
       </div>
-      <GroupNavigation id={id} active={stage} />
-      {overview && !loading && !error && (
+      {!overview?.livePlan && <GroupNavigation id={id} active={stage} />}
+      {overview && !overview.livePlan && !loading && !error && (
         <DiagnosticsList diagnostics={groupDiagnostics(overview).diagnostics} />
       )}
       {actionNotice && (
@@ -517,17 +518,23 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
       ) : (
         overview && (
           <>
-            <GroupStageContent
-              overview={overview}
-              stage={stage}
-              busy={busy}
-              onEvaluate={() => void act("evaluate")}
-              onPreparePolicy={() => void act("decisions")}
-            />
-            <section className="flow-panel">
-              <h2>Membership</h2>
-              <LeaveGroupButton groupId={id} locked={overview.group.locked} />
-            </section>
+            {overview.livePlan ? (
+              <LiveGroupPanel key={overview.group.id} initial={overview} />
+            ) : (
+              <GroupStageContent
+                overview={overview}
+                stage={stage}
+                busy={busy}
+                onEvaluate={() => void act("evaluate")}
+                onPreparePolicy={() => void act("decisions")}
+              />
+            )}
+            {!overview.livePlan && (
+              <section className="flow-panel">
+                <h2>Membership</h2>
+                <LeaveGroupButton groupId={id} locked={overview.group.locked} />
+              </section>
+            )}
           </>
         )
       )}

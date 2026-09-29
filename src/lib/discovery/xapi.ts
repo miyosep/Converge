@@ -41,7 +41,7 @@ const metric = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) && value >= 0
     ? value
     : null;
-async function readJson(response: Response): Promise<unknown> {
+export async function readJson(response: Response): Promise<unknown> {
   const reader = response.body?.getReader();
   if (!reader) throw new Error("EMPTY_RESPONSE");
   let length = 0;
@@ -99,7 +99,7 @@ const completionSchema = z.object({
 const clarificationSchema = z.strictObject({
   clarifications: z.array(z.string().min(1).max(300)).min(1).max(8),
 });
-const resultSchema = z.object({
+export const resultSchema = z.object({
   success: z.literal(true),
   data: z.object({
     places: z
@@ -118,6 +118,51 @@ const resultSchema = z.object({
       .max(100),
   }),
 });
+
+export async function searchXapiPlaces(config: {
+  xapiKey: string;
+  query: string;
+  fetchImpl?: typeof fetch;
+  onStatus?: (status: number) => void;
+}) {
+  const response = await (config.fetchImpl ?? fetch)(
+    "https://action.xapi.to/v1/actions/execute",
+    {
+      method: "POST",
+      redirect: "error",
+      cache: "no-store",
+      signal: AbortSignal.timeout(30000),
+      headers: {
+        "XAPI-Key": config.xapiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action_id: "web.search.places",
+        input: { q: config.query, hl: "en", page: 1 },
+      }),
+    },
+  );
+  config.onStatus?.(response.status);
+  if (response.status === 402) {
+    await response.body?.cancel();
+    throw new DiscoveryAgentError("SEARCH_CREDIT_EXHAUSTED");
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error("PROVIDER_ERROR");
+  }
+  const raw = await readJson(response);
+  if (
+    z
+      .object({
+        success: z.literal(false),
+        error: z.object({ code: z.literal("PLATFORM_HTTP_402") }),
+      })
+      .safeParse(raw).success
+  )
+    throw new DiscoveryAgentError("SEARCH_CREDIT_EXHAUSTED");
+  return resultSchema.parse(raw);
+}
 
 async function discoverOnce(config: {
   kilnKey: string;
@@ -274,43 +319,14 @@ async function discoverOnce(config: {
   validationError = undefined;
   const searchStarted = Date.now();
   try {
-    const response = await fetchImpl(
-      "https://action.xapi.to/v1/actions/execute",
-      {
-        method: "POST",
-        redirect: "error",
-        cache: "no-store",
-        signal: AbortSignal.timeout(30000),
-        headers: {
-          "XAPI-Key": config.xapiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action_id: "web.search.places",
-          input: { q: query, hl: "en", page: 1 },
-        }),
+    const data = await searchXapiPlaces({
+      xapiKey: config.xapiKey,
+      query,
+      fetchImpl,
+      onStatus: (value) => {
+        status = value;
       },
-    );
-    status = response.status;
-    if (response.status === 402) {
-      await response.body?.cancel();
-      throw new DiscoveryAgentError("SEARCH_CREDIT_EXHAUSTED");
-    }
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new Error("PROVIDER_ERROR");
-    }
-    const raw = await readJson(response);
-    if (
-      z
-        .object({
-          success: z.literal(false),
-          error: z.object({ code: z.literal("PLATFORM_HTTP_402") }),
-        })
-        .safeParse(raw).success
-    )
-      throw new DiscoveryAgentError("SEARCH_CREDIT_EXHAUSTED");
-    const data = resultSchema.parse(raw);
+    });
     const seen = new Set<string>();
     const places = data.data.places
       .map((place) => ({

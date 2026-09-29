@@ -76,6 +76,7 @@ export type DiscoveredPlace = {
   attributions: { name: string; url: string | null }[];
 };
 export type DiscoveryResult = {
+  searchId?: string;
   intent: DiscoveryIntent;
   query: string;
   searchedAt: string;

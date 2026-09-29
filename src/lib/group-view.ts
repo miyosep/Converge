@@ -53,6 +53,7 @@ export function savedEvaluationView(input: {
 
 export type SavedEvaluation = ReturnType<typeof savedEvaluationView>;
 export type GroupOverview = {
+  livePlan?: import("./discovery/live-plan.js").LivePlan;
   group: GroupSummary;
   participants: {
     walletAddress: string;

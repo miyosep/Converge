@@ -5,6 +5,7 @@ import {
   ApiError,
   sessionWallet,
   verifyOrigin,
+  services,
 } from "../../../src/lib/server/api.js";
 import { createKilnClient, KilnError } from "../../../src/lib/kiln/client.js";
 import { discoverRestaurants } from "../../../src/lib/discovery/search.js";
@@ -19,10 +20,35 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 90;
 
+export async function GET(request: NextRequest) {
+  return api(async () => {
+    const actor = await sessionWallet(request);
+    return NextResponse.json({
+      saved: await services().livePlans.latestSearch(actor),
+    });
+  });
+}
+
+export async function PATCH(request: NextRequest) {
+  return api(async () => {
+    verifyOrigin(request);
+    const actor = await sessionWallet(request);
+    const { z } = await import("zod");
+    const body = z
+      .strictObject({
+        searchId: z.string().uuid(),
+        placeIds: z.array(z.string().min(1).max(100)).max(5),
+      })
+      .parse(await request.json());
+    await services().livePlans.select(actor, body.searchId, body.placeIds);
+    return NextResponse.json({ saved: true });
+  });
+}
+
 export async function POST(request: NextRequest) {
   return api(async () => {
     verifyOrigin(request);
-    await sessionWallet(request);
+    const actor = await sessionWallet(request);
     const raw = await request.text();
     if (raw.length > 12000) throw new ApiError(413, "INPUT_TOO_LARGE");
     const input = discoveryRequestSchema.parse(JSON.parse(raw));
@@ -46,14 +72,18 @@ export async function POST(request: NextRequest) {
       if (provider === "xapi") {
         const runId = `discover-${randomUUID()}`;
         return NextResponse.json(
-          await discoverWithXapi({
-            kilnKey: apiKey,
-            xapiKey: placesKey,
+          await services().livePlans.saveSearch(
+            actor,
             input,
-            onUsage: (usage) => {
-              console.info("Restaurant discovery usage", { runId, ...usage });
-            },
-          }),
+            await discoverWithXapi({
+              kilnKey: apiKey,
+              xapiKey: placesKey,
+              input,
+              onUsage: (usage) => {
+                console.info("Restaurant discovery usage", { runId, ...usage });
+              },
+            }),
+          ),
         );
       }
       const client = createKilnClient({
@@ -65,13 +95,17 @@ export async function POST(request: NextRequest) {
         },
       });
       return NextResponse.json(
-        await discoverRestaurants(
-          client,
-          `discover-${randomUUID()}`,
+        await services().livePlans.saveSearch(
+          actor,
           input,
-          placesKey,
-          undefined,
-          provider,
+          await discoverRestaurants(
+            client,
+            `discover-${randomUUID()}`,
+            input,
+            placesKey,
+            undefined,
+            provider,
+          ),
         ),
       );
     } catch (error) {

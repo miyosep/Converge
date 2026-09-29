@@ -36,7 +36,12 @@ where English requests for restaurants, stays, spaces, sports facilities and cla
 become Kiln `qwen3-32b` tool calls executed through xAPI Places. Results include map
 links and evidence, and users can compare up to five candidates. Sign in on the
 search page when prompted; the request stays in place. Nightly, hourly and total
-budgets retain their original units.
+budgets retain their original units. Searches and selected candidates survive refresh.
+From a saved shortlist, create a friends group and invite members. Every member
+privately submits and confirms their own requirements; Kiln combines all confirmed
+requirements into a new xAPI search. All members must choose the same resulting
+place before preparing the shared v2 payment policy and approving independently.
+See [friends planning and repeatable demos](docs/LIVE_GROUP_PLANS.md).
 
 **Hackathon assumption:** returned places can be reserved with USDC. Booking
 availability and USDC acceptance are not checked. Prices and facilities remain
@@ -54,7 +59,7 @@ approve one immutable policy and contribute before
 payment. The deployed **v2 contract supports 2–100 participants**, including four.
 Existing v1 policies remain supported. Explore Demo retains six participants;
 legacy sessions keep the five-candidate catalog, while new sessions use live search.
-Apply migrations through `0014`.
+Apply migrations through `0017` before deploying these flows.
 See [variable-size payments](docs/GROUP_WALLET_V2.md) for deployment and verification.
 
 The legacy fixture payment demonstration supports one test restaurant reservation deposit:
@@ -140,7 +145,7 @@ metadata remains synthetic.
 
 The deterministic decision engine selects A/B/B for the three offline fixture scenarios. The three live ordinary-group runs also select A/B/B using the explicitly documented budget-and-quiet input variant. Each live group has six fresh extractions, confirmations and a Kiln explanation; these records are separate from the earlier smoke and blockchain-only rehearsals. See [acceptance inputs and evidence](docs/GROUP_ACCEPTANCE.md), [decision engine details](docs/DECISION_ENGINE.md), and [Kiln integration](docs/KILN.md).
 
-Preference revision transitions enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) runs on an isolated Neon development branch with migrations through `0008`; production remains unmigrated. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. The [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, per-attempt usage, immutable policies, wallet actions, the payment worker and receipt-backed history. All three live acceptance groups completed this HTTP-to-chain-to-refund flow.
+Preference revision transitions enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) runs on an isolated Neon development branch with the checked-in migrations. The live friends flow requires `0016` and `0017`; apply them before deploying this version. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. The [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, per-attempt usage, immutable policies, wallet actions, the payment worker and receipt-backed history. All three live acceptance groups completed this HTTP-to-chain-to-refund flow.
 
 | Flow                    | Purpose                                                 | Expected usage before retries                                      |
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -245,7 +250,7 @@ pnpm contracts:test
 pnpm contracts:abi
 ```
 
-`pnpm check` runs TypeScript validation, formatting checks, and 70 application/foundation tests. `pnpm dev` starts the web application; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
+`pnpm check` runs TypeScript validation, formatting checks, and application/foundation tests. `pnpm dev` starts the web application; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
 

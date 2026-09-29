@@ -9,6 +9,7 @@ import {
   walletConnectionError,
 } from "../../src/lib/wallet-connection";
 import { SignInDialog } from "./sign-in-dialog";
+import { LivePlanBuilder } from "./live-plan-builder";
 import {
   discoveryCategories,
   EXPLORE_SEARCH_LOCATION,
@@ -113,6 +114,50 @@ export function RestaurantDiscovery({
   const [signInOpen, setSignInOpen] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [signInNotice, setSignInNotice] = useState("");
+  const restoring = useRef(true);
+  const selectionWrites = useRef(Promise.resolve());
+  async function restore() {
+    if (explore) return;
+    try {
+      const response = await fetch("/api/discover", { cache: "no-store" });
+      if (!response.ok) return;
+      const { saved } = await response.json();
+      if (saved && restoring.current) {
+        setResult(saved.result);
+        setSelected(saved.selectedPlaceIds);
+        setCategory(saved.request.category);
+        setLocation(saved.request.location);
+        setText(saved.request.text);
+      }
+    } catch {
+      /* A new search remains available when restoring fails. */
+    }
+  }
+  useEffect(() => {
+    void restore();
+  }, []);
+  function selectPlaces(ids: string[]) {
+    setSelected(ids);
+    setComparing(false);
+    if (!result?.searchId) return;
+    const searchId = result.searchId;
+    selectionWrites.current = selectionWrites.current
+      .catch(() => {})
+      .then(async () => {
+        try {
+          const response = await fetch("/api/discover", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ searchId, placeIds: ids }),
+          });
+          if (!response.ok) throw new Error("SAVE_FAILED");
+        } catch {
+          setError(
+            "Your comparison selection could not be saved. Select the candidates again before leaving this page.",
+          );
+        }
+      });
+  }
   async function signIn() {
     setSigningIn(true);
     setSignInNotice("Open MetaMask to sign in.");
@@ -144,6 +189,7 @@ export function RestaurantDiscovery({
       setNeedsLogin(false);
       setError("");
       onSignedIn?.();
+      void restore();
     } catch (failure) {
       setSignInNotice(walletConnectionError(failure));
     } finally {
@@ -153,6 +199,7 @@ export function RestaurantDiscovery({
   const pending = useRef<AbortController | null>(null);
   useEffect(() => () => pending.current?.abort(), []);
   function invalidate() {
+    restoring.current = false;
     pending.current?.abort();
     pending.current = null;
     setBusy(false);
@@ -452,18 +499,24 @@ export function RestaurantDiscovery({
                     selected={selected.includes(place.id)}
                     disabled={selected.length >= 5}
                     onToggle={() => {
-                      setSelected((previous) =>
-                        previous.includes(place.id)
-                          ? previous.filter((id) => id !== place.id)
-                          : previous.length < 5
-                            ? [...previous, place.id]
-                            : previous,
+                      selectPlaces(
+                        selected.includes(place.id)
+                          ? selected.filter((id) => id !== place.id)
+                          : selected.length < 5
+                            ? [...selected, place.id]
+                            : selected,
                       );
-                      setComparing(false);
                     }}
                   />
                 ))}
               </div>
+              {!explore && result.searchId && selected.length > 0 && (
+                <LivePlanBuilder
+                  key={result.searchId}
+                  searchId={result.searchId}
+                  placeIds={selected}
+                />
+              )}
               <p className="discovery-attribution">
                 Place information: <strong>{result.source}</strong> · Retrieved{" "}
                 {new Date(result.searchedAt).toLocaleString()}. Source

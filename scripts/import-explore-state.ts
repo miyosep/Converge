@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { Pool } from "pg";
@@ -45,7 +46,22 @@ async function main() {
           if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
         }
         for (const run of runs)
-          if (!run || walletId(run.judge) !== run.id)
+          if (
+            !run ||
+            (run.previousRunId
+              ? !runs.some(
+                  (parent) =>
+                    parent &&
+                    parent.id === run.previousRunId &&
+                    parent.judge.toLowerCase() === run.judge.toLowerCase() &&
+                    run.id ===
+                      createHash("sha256")
+                        .update(`next:${parent.id}`)
+                        .digest("hex") &&
+                    run.sequence === (parent.sequence ?? 0) + 1,
+                )
+              : walletId(run.judge) !== run.id)
+          )
             throw new Error("INVALID_RUN_ID");
         for (const [key, entry] of Object.entries(ledger)) {
           if (!ids.includes(key.slice(0, 64)))

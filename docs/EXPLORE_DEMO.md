@@ -13,7 +13,7 @@ New sessions connect saved live candidates to a demo payment policy using the ex
 5. Prepare test funds, approve the exact allowance and contribute 10 MockUSDC. Bots contribute only after the judge. The executor submits only the approved deposit; a receipt-checked event changes the reservation simulator to `DEMO_CONFIRMED`.
 6. Claim the remaining share. With a 48 MockUSDC deposit, 60 are collected and each participant receives 2 back. Cancellation/expiry permit recovery under the existing contract. No real booking is sent to the venue.
 
-The worker environment needs `KILN_API_KEY` and `XAPI_KEY` in addition to existing chain configuration. `/discover` remains a separate general five-category comparison tool; only the guided `/demo` session performs this booking-policy flow.
+The worker environment needs `KILN_API_KEY` and `XAPI_KEY` in addition to existing chain configuration. `/discover` also starts friends groups: all members submit and confirm private preferences, search together and agree before independent wallet approvals. See [the friends flow](LIVE_GROUP_PLANS.md).
 
 ## Legacy Fixture Journey and Historical Evidence
 
@@ -36,7 +36,7 @@ The authenticated `GET /api/demo/reservation` returns the current run's syntheti
 
 ## Runtime and Configuration
 
-Run the web app and worker from the same checkout and OS user on one persistent host. The private `.demo/` directory is their durable queue and transaction journal. It is ignored by Git. This implementation is not designed for ephemeral serverless filesystems or several independent hosts.
+For Vercel plus this always-on PC, use [hybrid setup](HYBRID_PC.md): Neon holds the queue and journal. The following file-based setup remains available for local-only operation. Run the web app and worker from the same checkout and OS user on one persistent host. The private `.demo/` directory is their durable queue and transaction journal. It is ignored by Git. This implementation is not designed for ephemeral serverless filesystems or several independent hosts.
 
 Keep existing `.env` and `.env.development` files. The worker loads `.env` first, then `.env.development`; later values take precedence. Existing wallet-auth database configuration is reused without a migration. Configure the following in `.env.development`:
 
@@ -71,14 +71,14 @@ The `--check` command is read-only. The running worker does not send transaction
 
 ## Limits and Recovery
 
-- A wallet gets one resumable run per persistent directory. The default directory admits eight runs total, including historical rehearsals and one prepared-bot benchmark. Do not delete it to reset a run: it holds grant limits and signed transaction recovery data.
+- A wallet resumes its latest run. **Start new demo** creates a separate round after completion, cancellation or expiry, or before any policy/funding transactions have started. Pending commands or unconfirmed transactions block restart. Past runs, refund actions and signed transaction records remain accessible in history. The default limit is eight concurrent active wallets; historical rounds do not consume admission slots. Never delete journals to reset the demo.
 - The default 0.06 ETH limit is a lifetime upper bound across the worker's signed transactions in this directory. It reserves `value + gas limit * maximum gas price` before broadcast, including bot/executor costs and ETH grants. Actual costs can be lower. Raising this limit is an explicit operator configuration change, not a transfer into the deployer wallet. Before admitting more judges, check the actual deployer balance and run `pnpm demo:explore-prepare --check`; a higher cap alone cannot fund a transaction.
 - Each wallet gets at most one gas top-up and one token top-up per run and funding purpose. A judge who transfers their grant elsewhere does not receive an unlimited refill. Five automated participants are funded only as needed. The creator's gas target is 0.004 ETH; other automated signers target 0.001 ETH.
 - Signed transactions are saved before broadcast and reused on retry. One worker lock serializes each signer's nonces; independent automated wallets can send their allowance, contribution, or refund transactions in a batch. Do not run other funding, deployment, or blockchain rehearsal scripts with these same keys while this worker is active.
 - The UI uses two block confirmations for interactive progress. These are not finalized-chain evidence. After a final acceptance run, independently verify finalized receipts and decoded events using the existing evidence workflow.
 - `DEMO_BUSY` means another command owns the run briefly; retry after it finishes. `DEMO_ETH_BUDGET_EXCEEDED` requires the operator to inspect the budget. Generic runner failures retain the journal and do not expose provider URLs or credentials.
 - Stop the worker with Ctrl+C before maintenance. A forced process termination can leave `.demo/worker.lock` or a run's `.json.lock`. Check the PID stored in the lock and verify the process is no longer alive before removing only that stale lock. Preserve run JSON and `.demo/private/transactions.json`.
-- Expired policies cannot be edited or revived. The judge can recover contributed funds using the refund action. A new event needs a deliberately prepared new session configuration, not deletion of a pending journal.
+- Expired policies cannot be edited or revived. The judge can recover contributed funds using the refund action. Use **Start new demo** after pending work settles to create a fresh policy with new approval, keeping the old refund accessible.
 
 ## Verification and Remaining Rehearsal
 

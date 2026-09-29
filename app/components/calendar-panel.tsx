@@ -2,12 +2,22 @@
 import { useState } from "react";
 import { CalendarDays, Copy, ArrowUpRight } from "lucide-react";
 import type { GroupOverview } from "../../src/lib/group-view";
+import { unanimousPlace } from "../../src/lib/discovery/live-plan";
 
 export function CalendarPanel({ overview }: { overview: GroupOverview }) {
   const [notice, setNotice] = useState("");
-  const selected = overview.evaluation?.catalog.find(
-    (item) => item.id === overview.evaluation?.winnerId,
-  );
+  const live =
+    overview.livePlan &&
+    unanimousPlace(
+      overview.livePlan,
+      overview.participants.map((member) => member.walletAddress),
+      overview.group.targetMemberCount,
+    );
+  const selected = live
+    ? { ...live, area: live.address }
+    : overview.evaluation?.catalog.find(
+        (item) => item.id === overview.evaluation?.winnerId,
+      );
   const date = new Intl.DateTimeFormat("en-US", {
     timeZone: overview.group.timeZone,
     dateStyle: "full",
@@ -19,7 +29,7 @@ export function CalendarPanel({ overview }: { overview: GroupOverview }) {
     `Place: ${selected?.name ?? "To be decided"}${selected?.area ? ` · ${selected.area}` : ""}`,
     `Group: ${overview.group.targetMemberCount} people`,
     "End time: choose in your calendar.",
-    "Prototype plan — sample venue, not a confirmed reservation.",
+    "Prototype plan — not a confirmed venue reservation.",
   ].join("\n");
   async function copy() {
     try {

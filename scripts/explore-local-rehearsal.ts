@@ -30,6 +30,7 @@ import { createBaselinePreferences } from "../src/lib/fixtures/preferences.js";
 async function main() {
   const useDatabase = process.argv.includes("--database");
   const livePlace = process.argv.includes("--live-place");
+  const repeatWallet = process.argv.includes("--repeat-wallet");
   if (
     useDatabase &&
     (process.env.NEON_BRANCH !== "dev-vercel-inngest" ||
@@ -214,14 +215,24 @@ async function main() {
       }
     }
     const advance = (id: string) => withRuntime(id, () => advanceState(id));
+    const sharedJudge = privateKeyToAccount(generatePrivateKey());
+    let previousRunId: string | undefined;
     for (const scenario of ["payment", "cancel", "expiry"] as const) {
-      const judge = privateKeyToAccount(generatePrivateKey());
+      const judge = repeatWallet
+        ? sharedJudge
+        : privateKeyToAccount(generatePrivateKey());
       const judgeWallet = createWalletClient({
         account: judge,
         chain: sepolia,
         transport,
       });
-      const state = await store.create(judge.address, 5);
+      const state = await store.create(
+        judge.address,
+        5,
+        repeatWallet ? previousRunId : undefined,
+      );
+      assert.ok(!savedIds.includes(state.id));
+      previousRunId = state.id;
       savedIds.push(state.id);
       state.phase = "review";
       state.revision = 1;
@@ -277,10 +288,11 @@ async function main() {
               revision: 1,
               extraction: state.extraction,
             },
+        state.id,
       );
       await advance(state.id);
       assert.equal((await store.read(state.id))!.phase, "proposal");
-      await store.queue(judge.address, { action: "prepare" });
+      await store.queue(judge.address, { action: "prepare" }, state.id);
       for (let i = 0; i < 30; i++) {
         if ((await advance(state.id)).phase === "approval") break;
       }
@@ -290,10 +302,14 @@ async function main() {
         assert.equal(ready.selectedPlace?.id, "local-fixture");
         assert.equal(ready.reservation?.source, "live-place-demo");
         await assert.rejects(
-          store.queue(judge.address, {
-            action: "search",
-            text: "New restaurant",
-          }),
+          store.queue(
+            judge.address,
+            {
+              action: "search",
+              text: "New restaurant",
+            },
+            state.id,
+          ),
           /POLICY_LOCKED/,
         );
       }
@@ -462,6 +478,13 @@ async function main() {
       });
       console.log(
         `Local Explore ${scenario}: passed, including judge refund and restart idempotency.`,
+      );
+    }
+    if (repeatWallet) {
+      assert.equal((await store.listRuns(sharedJudge.address)).length, 3);
+      assert.equal((await store.owned(sharedJudge.address))?.id, previousRunId);
+      console.log(
+        "Same wallet: three independent rounds preserved with their payment/refund records.",
       );
     }
     console.log(

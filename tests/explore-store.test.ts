@@ -3,6 +3,7 @@ import test from "node:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { verifyRepeatDemo } from "../scripts/lib/repeat-demo-check.js";
 import {
   ExploreStore,
   verifyAccessCode,
@@ -11,6 +12,14 @@ import {
 
 const alice = "0x0000000000000000000000000000000000000011";
 const bob = "0x0000000000000000000000000000000000000022";
+test("repeat demos preserve refunds and journals, release completed capacity and reject stale or foreign actions", async () => {
+  const root = await mkdtemp(join(tmpdir(), "converge-repeat-"));
+  try {
+    await verifyRepeatDemo(new ExploreStore(root), []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
 test("Explore admission is idempotent per wallet and enforces the total limit", async () => {
   const root = await mkdtemp(join(tmpdir(), "converge-explore-"));
   try {

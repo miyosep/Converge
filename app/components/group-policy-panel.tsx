@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import type { GroupOverview } from "../../src/lib/group-view";
 import { GroupChainPanel } from "./group-chain-panel";
 import { CalendarPanel } from "./calendar-panel";
+import { unanimousPlace } from "../../src/lib/discovery/live-plan";
 
 const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 
@@ -17,9 +18,22 @@ export function GroupPolicyPanel({
   onPrepare?: (() => void) | undefined;
 }) {
   const { evaluation, signingPolicy } = overview;
-  const selected = evaluation?.catalog.find(
-    (candidate) => candidate.id === evaluation.winnerId,
-  );
+  const livePlace =
+    overview.livePlan &&
+    unanimousPlace(
+      overview.livePlan,
+      overview.participants.map((member) => member.walletAddress),
+      overview.group.targetMemberCount,
+    );
+  const selected = livePlace
+    ? {
+        ...livePlace,
+        merchant: overview.livePlan!.merchant,
+        depositBaseUnits: String(overview.livePlan!.depositUsdc * 1_000_000),
+      }
+    : evaluation?.catalog.find(
+        (candidate) => candidate.id === evaluation.winnerId,
+      );
   const policy = signingPolicy?.policy;
   const expired = !!policy && policy.expiry <= Math.floor(Date.now() / 1000);
   const root = `/group/${encodeURIComponent(overview.group.id)}`;
