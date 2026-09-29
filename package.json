@@ -9,6 +9,9 @@
     "pnpm": "11.19.0"
   },
   "scripts": {
+    "demo:explore": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts",
+    "demo:explore-check": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts --check",
+    "demo:explore-test": "node --import tsx scripts/explore-local-rehearsal.ts",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",

@@ -199,6 +199,8 @@ Use wallet-signature login with a server-issued nonce, expiration, domain bindin
 
 Group invitations establish membership through a server-validated invitation. Freeze membership before publishing a proposal. In a local automated demo, six dedicated test accounts may perform the same operations programmatically. Any persona-switching convenience must be explicitly limited to development and disabled in a shared deployment.
 
+The separate wallet-connected **Explore Demo** at `/demo` admits one SIWE-authenticated judge and five clearly labeled automated participants. The judge's address is discovered on connection and frozen in a new policy before contributions. The judge signs their own approval, contribution, cancellation, and refund transactions; the local worker never impersonates them. A bounded test-fund grant supplies missing MockUSDC and Sepolia ETH. The other five accounts contribute only after the judge's on-chain contribution. Shared hosting requires an event access code, a persistent shared filesystem, a total session cap, and a transaction-cost budget. This is a guided demonstration, not evidence of six independently controlled users. See [Explore Demo](docs/EXPLORE_DEMO.md) for the runtime, limits, and recovery procedure. Normal group membership and authorization remain unchanged.
+
 ### 5.2 Access Rules
 
 | Resource | Participant access | Public evidence access |

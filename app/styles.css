@@ -398,6 +398,17 @@ textarea {
   }
 }
 @media (max-width: 420px) {
+  .topbar {
+    height: auto;
+    min-height: 100px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  .top-actions {
+    width: 100%;
+    gap: 10px;
+    justify-content: space-between;
+  }
   .brand {
     font-size: 17px;
   }

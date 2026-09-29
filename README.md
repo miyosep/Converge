@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. A first Next.js group/preference workflow now runs against a Neon development branch with wallet-signature login and live Kiln extraction. Proposal, on-chain UI, and full end-to-end demo remain pending. This README remains a draft and will be updated with live evidence.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. The Next.js group/preference workflow uses wallet-signature login, Neon, and live Kiln extraction. A separate wallet-connected Explore Demo now connects one judge and five automated participants to funding, approval, payment, and refund controls. Its full live browser/Sepolia rehearsal and the normal multi-user financial UI remain pending. This README remains a draft and will be updated with live evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -34,6 +34,8 @@ The proposed MVP supports **six participants** and one restaurant reservation de
 The restaurant catalog and token are synthetic. This prototype does not make a real restaurant booking, handle the remaining meal bill, or transfer real USDC.
 
 ## Demo
+
+Use **Explore Demo** on the home screen, or open `/demo`, for the wallet-connected judge flow. The judge's address is discovered at connection time; missing test funds are supplied within a bounded session. See [setup and operation](docs/EXPLORE_DEMO.md). The five automated participants and sample restaurants are disclosed in the interface.
 
 The baseline uses six separate participant accounts: Alice, Bob, Charlie, Dana, Erin, and Farah. These are demo personas, not team assignments. Dedicated accounts have been generated for a single-operator rehearsal; this does not demonstrate six independently controlled participants. Their public addresses are in [the participant manifest](contracts/deployments/demo-participants.11155111.json).
 

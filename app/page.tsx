@@ -242,6 +242,9 @@ export default function Home() {
           <span>Converge</span>
         </a>
         <div className="top-actions">
+          <a className="text-button" href="/demo">
+            Explore Demo
+          </a>
           <span className="network">
             <span className="network-dot" /> Ethereum Sepolia
           </span>
