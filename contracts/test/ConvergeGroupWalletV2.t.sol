@@ -33,7 +33,9 @@ contract ConvergeGroupWalletV2Test {
         p.merchant = MERCHANT;
         p.executor = EXECUTOR;
         p.participants = new address[](count);
-        for (uint256 i; i < count; i++) p.participants[i] = address(uint160(i + 1));
+        for (uint256 i; i < count; i++) {
+            p.participants[i] = address(uint160(i + 1));
+        }
         p.approvalThreshold = count;
         p.contributionPerParticipant = 10_000_000;
         p.paymentAmount = payment;
@@ -63,62 +65,110 @@ contract ConvergeGroupWalletV2Test {
             _contribute(p, i);
             (, ConvergeGroupWalletV2.Status status, uint256 approvals,,,) = wallet.getDecision(p.decisionId);
             assert(approvals == i + 1);
-            assert(status == (i + 1 == count ? ConvergeGroupWalletV2.Status.Active : ConvergeGroupWalletV2.Status.Funding));
+            assert(
+                status == (i + 1 == count ? ConvergeGroupWalletV2.Status.Active : ConvergeGroupWalletV2.Status.Funding)
+            );
             if (i + 1 < count) {
-                vm.expectRevert(); vm.prank(EXECUTOR);
+                vm.expectRevert();
+                vm.prank(EXECUTOR);
                 wallet.executePayment(p.decisionId, MERCHANT, payment);
             }
         }
-        vm.expectRevert(); vm.prank(address(0x4000));
+        vm.expectRevert();
+        vm.prank(address(0x4000));
         wallet.executePayment(p.decisionId, MERCHANT, payment);
-        vm.expectRevert(); vm.prank(EXECUTOR);
+        vm.expectRevert();
+        vm.prank(EXECUTOR);
         wallet.executePayment(p.decisionId, address(0x4000), payment);
-        vm.expectRevert(); vm.prank(EXECUTOR);
+        vm.expectRevert();
+        vm.prank(EXECUTOR);
         wallet.executePayment(p.decisionId, MERCHANT, payment + 1);
         vm.prank(EXECUTOR);
         wallet.executePayment(p.decisionId, MERCHANT, payment);
-        vm.expectRevert(); vm.prank(EXECUTOR);
+        vm.expectRevert();
+        vm.prank(EXECUTOR);
         wallet.executePayment(p.decisionId, MERCHANT, payment);
         uint256 remaining = count * 10_000_000 - payment;
         for (uint256 i; i < count; i++) {
             uint256 expected = remaining / count + (i < remaining % count ? 1 : 0);
             assert(wallet.refundEntitlement(p.decisionId, p.participants[i]) == expected);
-            vm.prank(p.participants[i]); wallet.claimRefund(p.decisionId);
+            vm.prank(p.participants[i]);
+            wallet.claimRefund(p.decisionId);
             assert(token.balanceOf(p.participants[i]) == expected);
-            vm.expectRevert(); vm.prank(p.participants[i]); wallet.claimRefund(p.decisionId);
+            vm.expectRevert();
+            vm.prank(p.participants[i]);
+            wallet.claimRefund(p.decisionId);
         }
-        (,,,uint256 contributed,uint256 spent,uint256 refunded) = wallet.getDecision(p.decisionId);
+        (,,, uint256 contributed, uint256 spent, uint256 refunded) = wallet.getDecision(p.decisionId);
         assert(spent + refunded == contributed && refunded == remaining);
         assert(token.balanceOf(address(wallet)) == 0);
     }
 
-    function testTwoPeople() public { _lifecycle(2, 12_000_001); }
-    function testFourPeople() public { _lifecycle(4, 36_000_003); }
-    function testSixPeople() public { _lifecycle(6, 45_000_000); }
-    function testEightPeople() public { _lifecycle(8, 45_000_003); }
-    function testOneHundredPeople() public { _lifecycle(100, 60_000_007); }
+    function testTwoPeople() public {
+        _lifecycle(2, 12_000_001);
+    }
+
+    function testFourPeople() public {
+        _lifecycle(4, 36_000_003);
+    }
+
+    function testSixPeople() public {
+        _lifecycle(6, 45_000_000);
+    }
+
+    function testEightPeople() public {
+        _lifecycle(8, 45_000_003);
+    }
+
+    function testOneHundredPeople() public {
+        _lifecycle(100, 60_000_007);
+    }
+
     function testFuzzConservation(uint8 rawCount, uint64 rawPayment) public {
         uint256 count = uint256(rawCount) % 99 + 2;
         _lifecycle(count, uint256(rawPayment) % (count * 10_000_000) + 1);
     }
+
     function testCancelAndExpiryRecoverPartialContributions() public {
         PolicyV2 memory p = _policy(4, 36_000_000);
-        _create(p); _contribute(p, 0);
-        vm.prank(p.participants[1]); wallet.cancelDecision(p.decisionId);
-        vm.prank(p.participants[0]); wallet.claimRefund(p.decisionId);
+        _create(p);
+        _contribute(p, 0);
+        vm.prank(p.participants[1]);
+        wallet.cancelDecision(p.decisionId);
+        vm.prank(p.participants[0]);
+        wallet.claimRefund(p.decisionId);
         assert(token.balanceOf(p.participants[0]) == 10_000_000);
-        p.decisionId = bytes32(uint256(2)); _create(p); _contribute(p, 2);
+        p.decisionId = bytes32(uint256(2));
+        _create(p);
+        _contribute(p, 2);
         vm.warp(p.expiry);
-        vm.prank(p.participants[2]); wallet.claimRefund(p.decisionId);
+        vm.prank(p.participants[2]);
+        wallet.claimRefund(p.decisionId);
         assert(token.balanceOf(p.participants[2]) == 10_000_000);
     }
+
     function testRejectInvalidMembershipThresholdAndVersion() public {
-        PolicyV2 memory p = _policy(1, 1); vm.expectRevert(); _create(p);
-        p = _policy(101, 1); vm.expectRevert(); _create(p);
-        p = _policy(4, 1); p.approvalThreshold = 3; vm.expectRevert(); _create(p);
-        p = _policy(4, 1); p.participants[3] = p.participants[0]; vm.expectRevert(); _create(p);
-        p = _policy(4, 1); p.policyVersion = 1; vm.expectRevert(); _create(p);
-        p = _policy(4, 1); p.participants = new address[](0); vm.expectRevert();
+        PolicyV2 memory p = _policy(1, 1);
+        vm.expectRevert();
+        _create(p);
+        p = _policy(101, 1);
+        vm.expectRevert();
+        _create(p);
+        p = _policy(4, 1);
+        p.approvalThreshold = 3;
+        vm.expectRevert();
+        _create(p);
+        p = _policy(4, 1);
+        p.participants[3] = p.participants[0];
+        vm.expectRevert();
+        _create(p);
+        p = _policy(4, 1);
+        p.policyVersion = 1;
+        vm.expectRevert();
+        _create(p);
+        p = _policy(4, 1);
+        p.participants = new address[](0);
+        vm.expectRevert();
         wallet.createDecision(p);
     }
 }

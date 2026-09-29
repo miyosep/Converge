@@ -1,0 +1,14 @@
+.git
+.env*
+.demo/
+.hybrid/
+.neon/
+.agents/
+node_modules/
+.next*/
+*.tsbuildinfo
+docs/evidence/private/
+contracts/out*/
+contracts/cache*/
+contracts/broadcast/
+contracts/deployments/*.pending*

@@ -131,3 +131,38 @@ The PC preflight passed despite deliberately incorrect inherited driver/DB value
 The migration runner now accepts legacy LF/CRLF checksum differences while still
 rejecting SQL content changes. Migration `0015` was applied only to the isolated
 test branch; deploying this release still requires applying it to the chosen live DB.
+
+## Production cutover completed on 2026-09-30
+
+The historical verification notes above describe earlier rehearsals. The live
+production setup is now https://converge-iota-seven.vercel.app (Vercel project
+`converge`, scope `juhyeong5627-4846s-projects`). Production Neon migrations
+through `0017` are applied. Seven existing Explore runs and all 108 signed
+journal entries were imported atomically; source files remain preserved.
+
+The Windows task `Converge Hybrid Processor` is installed and running from
+`C:/Users/kimsi/.codex/worktrees/hybrid-release-review/gwdc_furiosa`. Keep this
+checkout and its ignored `.env.hybrid` in place. Its lock directory is the
+original desktop checkout's `.demo`, preventing an old local signer from
+running concurrently. Do not restart the legacy worker. The original localhost
+development app is separate from the production site; use the public site for
+the shared demo. AC idle sleep was changed from ten minutes to Never; battery
+settings were left unchanged. Sign back into Windows after a reboot.
+
+The public home, demo, discovery and evidence pages return HTTP 200. The public
+`/api/demo` reports `enabled=true`, `searchConfigured=true`,
+`accessCodeRequired=true` and `workerOnline=true`. Live Sepolia read-only
+checks verified RPC, deployed contract bytecode, minter and bot identities.
+No new human-wallet production payment was submitted during deployment.
+
+Operator signing keys stay on the PC. Only web configuration is provisioned
+in Vercel's production environment. The demo access code is stored in the
+ignored PC `.env.hybrid` and Vercel; it is intentionally absent here. Google
+Calendar credentials are not configured. GitHub-to-Vercel linking requires
+repository authorization; the current deployment was uploaded using the CLI,
+and pushing main alone does not currently deploy it.
+
+Release validation: 151 application tests and production build passed before
+cutover. GitHub's four OS foundation jobs passed. The contract format check
+identified V2 formatting issues, which were corrected without ABI changes;
+all 31 local contract tests, including fuzz and invariant tests, then passed.

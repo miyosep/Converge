@@ -250,7 +250,9 @@ contract ConvergeGroupWalletV2 is ReentrancyGuard {
         if (policy.token != address(token)) revert InvalidPolicy(PolicyError.WrongToken);
         if (policy.decisionId == bytes32(0)) revert InvalidPolicy(PolicyError.InvalidDecisionId);
 
-        if (policy.participants.length < MIN_MEMBERS || policy.participants.length > MAX_MEMBERS) revert InvalidPolicy(PolicyError.InvalidParticipant);
+        if (policy.participants.length < MIN_MEMBERS || policy.participants.length > MAX_MEMBERS) {
+            revert InvalidPolicy(PolicyError.InvalidParticipant);
+        }
         bool creatorFound = false;
         for (uint256 i; i < policy.participants.length; ++i) {
             address participant = policy.participants[i];
@@ -293,7 +295,10 @@ contract ConvergeGroupWalletV2 is ReentrancyGuard {
         if (!decision.exists) return RejectReason.UnknownDecision;
         if (caller != decision.policy.executor) return RejectReason.WrongExecutor;
         if (decision.status != Status.Active) return RejectReason.NotActive;
-        if (decision.approvalCount != decision.policy.participants.length || decision.totalContributed < decision.policy.paymentAmount) {
+        if (
+            decision.approvalCount != decision.policy.participants.length
+                || decision.totalContributed < decision.policy.paymentAmount
+        ) {
             return RejectReason.InsufficientApprovals;
         }
         if (block.timestamp >= decision.policy.expiry) return RejectReason.Expired;
