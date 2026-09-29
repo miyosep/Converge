@@ -710,6 +710,142 @@ textarea {
 .invite-link button {
   flex: none;
 }
+/* Diagnostics / reminders. Severity is carried three ways at once — a left
+   rule, an icon, and a written label — because colour alone is not a signal
+   every reader receives. */
+.diagnostics {
+  position: relative;
+  margin: 0 0 24px;
+}
+.diagnostic {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-left: 3px solid #8a9b95;
+  background: #f2f6f4;
+  margin-bottom: 8px;
+}
+.diagnostic svg {
+  flex: none;
+  margin-top: 1px;
+}
+.diagnostic-body {
+  min-width: 0;
+  flex: 1;
+}
+.diagnostic-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.diagnostic-head strong {
+  font-size: 13px;
+}
+.diagnostic-severity {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #748882;
+}
+.diagnostic p {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #4c615d;
+  margin: 5px 0 0;
+}
+.diagnostic-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.diagnostic-stage {
+  font-size: 10px;
+  background: #e3f1eb;
+  color: #386962;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.diagnostic-meta code {
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  color: #7c8f89;
+}
+.diagnostic-noretry {
+  font-size: 10px;
+  color: #8a9b95;
+  font-style: italic;
+}
+.diagnostic--info {
+  border-left-color: #238b79;
+  background: #edf6f3;
+}
+.diagnostic--warning {
+  border-left-color: #c98a12;
+  background: #fdf6e7;
+}
+.diagnostic--warning .diagnostic-severity {
+  color: #8a6010;
+}
+.diagnostic--error {
+  border-left-color: #b4413a;
+  background: #fdf0ef;
+}
+.diagnostic--error .diagnostic-severity {
+  color: #8f342e;
+}
+.diagnostic-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.diagnostic-dismiss {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 10px;
+  color: #8a9b95;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.diagnostic-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  padding: 7px 9px;
+  margin-top: 12px;
+  background: #f2f6f4;
+  color: #4c615d;
+}
+.diagnostic-badge svg {
+  flex: none;
+}
+.diagnostic-badge span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.diagnostic-badge b {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.diagnostic-badge--warning {
+  background: #fdf6e7;
+  color: #8a6010;
+}
+.diagnostic-badge--error {
+  background: #fdf0ef;
+  color: #8f342e;
+}
 @media (max-width: 850px) {
   .workspace {
     display: block;
