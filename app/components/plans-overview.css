@@ -19,7 +19,7 @@
 }
 .plans-main {
   max-width: 1240px;
-  padding: 62px 40px 24px;
+  padding: 48px 40px 24px;
   margin: auto;
 }
 .plans-heading {
@@ -27,17 +27,17 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 .plans-heading h1 {
   margin: 0;
-  font-size: clamp(42px, 4.6vw, 64px);
+  font-size: clamp(38px, 4vw, 52px);
   letter-spacing: -0.055em;
   line-height: 1.1;
   font-weight: 600;
 }
 .plans-heading > div > p:last-child {
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   color: var(--muted);
   font-size: 16px;
 }
@@ -54,20 +54,20 @@
 }
 .plans-first {
   display: grid;
-  grid-template-columns: 1.08fr 1fr;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   background: #efede5;
   border-radius: 28px;
   overflow: hidden;
 }
 .plans-first-copy {
-  padding: clamp(28px, 4vw, 56px);
+  padding: clamp(28px, 3.6vw, 48px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
 }
 .plans-first h2 {
-  font-size: clamp(32px, 3.5vw, 48px);
+  font-size: clamp(30px, 3.2vw, 44px);
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.12;
@@ -82,7 +82,7 @@
 }
 .plans-first-photo {
   position: relative;
-  min-height: 420px;
+  min-height: 370px;
 }
 .plans-first-photo > img {
   position: absolute;
@@ -100,6 +100,7 @@
 .plans-photo-caption {
   position: absolute;
   left: 36px;
+  right: 28px;
   bottom: 30px;
   z-index: 1;
   color: white;
@@ -111,7 +112,7 @@
 }
 .plans-photo-caption strong {
   display: block;
-  font-size: 38px;
+  font-size: 32px;
   letter-spacing: -0.035em;
   font-weight: 500;
   line-height: 1.3;
@@ -123,17 +124,17 @@
 .plans-how {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 40px;
-  padding: 36px 4px;
+  gap: 28px;
+  padding: 28px 4px;
 }
 .plans-how > div {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 .plans-step-number {
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  font-size: 25px;
+  font-size: 20px;
   color: var(--accent);
   line-height: 1.25;
 }
@@ -368,7 +369,7 @@
     padding: 34px;
   }
   .plans-first-photo {
-    min-height: 400px;
+    min-height: 340px;
   }
 }
 @media (max-width: 760px) {
@@ -443,7 +444,7 @@
     padding: 32px 28px;
   }
   .plans-first h2 {
-    font-size: 34px;
+    font-size: clamp(28px, 6.8vw, 34px);
   }
   .plans-first-photo {
     min-height: 240px;
@@ -453,12 +454,12 @@
     bottom: 20px;
   }
   .plans-photo-caption strong {
-    font-size: 32px;
+    font-size: 28px;
   }
   .plans-how {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 30px 6px;
+    gap: 20px;
+    padding: 26px 6px;
   }
   .plans-how p {
     max-width: none;
