@@ -22,6 +22,7 @@
     "test": "tsx --test tests/*.test.ts",
     "kiln:check": "node --env-file=.env --import tsx scripts/check-kiln.ts",
     "demo:decision": "node --import tsx scripts/demo-decision.ts",
+    "demo:diagnostics": "node --import tsx scripts/demo-diagnostics.ts",
     "db:migrate:dev": "node --env-file=.env.development --import tsx scripts/db-migrate.ts dev-preferences",
     "db:rehearse:dev": "node --env-file=.env.development --import tsx scripts/db-preference-rehearsal.ts",
     "db:auth-rehearse:dev": "node --env-file=.env.development --import tsx scripts/db-auth-rehearsal.ts",

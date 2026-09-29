@@ -9,6 +9,13 @@ import {
 import { WalletAuthError, WalletAuthRepository } from "../db/wallet-auth.js";
 import { PreferenceError } from "../preferences.js";
 import { GroupPolicyError } from "../group-policy.js";
+import {
+  diagnoseErrorCode,
+  publicDiagnostics,
+  sortDiagnostics,
+  summarizeDiagnostics,
+  type Diagnostic,
+} from "../diagnostics/index.js";
 import type { KilnAttempt } from "../kiln/client.js";
 
 const SESSION_COOKIE = "converge_session";
@@ -109,16 +116,34 @@ export function clearSessionCookie(response: NextResponse) {
   });
 }
 
-export async function api(work: () => Promise<NextResponse>) {
+// Every error response carries a `diagnostics` array so the client can render a
+// reminder instead of a bare code. The shareable projection is used because an
+// API response is group-visible; internal attribution stays in the server log.
+function failure(status: number, code: string, source?: string) {
+  const resolved = diagnoseErrorCode(source ?? code) ?? diagnoseErrorCode(code);
+  const list: Diagnostic[] = resolved ? [resolved] : [];
+  return NextResponse.json(
+    {
+      error: code,
+      diagnostics: publicDiagnostics(list),
+      summary: summarizeDiagnostics(list),
+    },
+    { status },
+  );
+}
+
+export async function api(
+  work: () => Promise<NextResponse>,
+  options: { diagnostics?: Diagnostic[] } = {},
+) {
   try {
     const result = await work();
     result.headers.set("Cache-Control", "no-store");
     return result;
   } catch (error) {
-    if (error instanceof ApiError)
-      return NextResponse.json({ error: error.code }, { status: error.status });
+    if (error instanceof ApiError) return failure(error.status, error.code);
     if (error instanceof ZodError || error instanceof SyntaxError)
-      return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
+      return failure(400, "INVALID_INPUT");
     if (error instanceof WalletAuthError) {
       const status = [
         "INVALID_SIGNATURE",
@@ -129,15 +154,33 @@ export async function api(work: () => Promise<NextResponse>) {
         : error.code === "NOT_CREATOR"
           ? 403
           : 409;
-      return NextResponse.json({ error: error.code }, { status });
+      return failure(status, error.code);
     }
     if (error instanceof PreferenceRepositoryError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
-    if (error instanceof PreferenceError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
-    if (error instanceof GroupPolicyError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
+      return failure(409, error.code);
+    if (error instanceof PreferenceError) return failure(409, error.code);
+    if (error instanceof GroupPolicyError) return failure(409, error.code);
     console.error("API request failed", error);
-    return NextResponse.json({ error: "INTERNAL_ERROR" }, { status: 500 });
+    if (options.diagnostics?.length)
+      console.error(
+        "Attached diagnostics",
+        sortDiagnostics(options.diagnostics),
+      );
+    return failure(500, "INTERNAL_ERROR");
   }
+}
+
+// Success responses can carry the same reminder channel, which lets a
+// successful-but-qualified outcome (a proposal decided by tie-break, a funding
+// state still short of activation) reach the UI without a second request.
+export function withDiagnostics(
+  body: Record<string, unknown>,
+  list: Diagnostic[],
+) {
+  const sorted = sortDiagnostics(list);
+  return NextResponse.json({
+    ...body,
+    diagnostics: publicDiagnostics(sorted),
+    summary: summarizeDiagnostics(sorted),
+  });
 }

@@ -3,8 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ConstraintSummary } from "./constraint-summary";
+import { DiagnosticBadge, DiagnosticList } from "./diagnostics";
 import { GroupNavigation } from "./workspace-frame";
 import type { GroupSummary } from "../../src/lib/group-view";
+import type {
+  DiagnosticSeverity,
+  DiagnosticSummary,
+} from "../../src/lib/diagnostics/types";
 import {
   ArrowRight,
   Check,
@@ -39,6 +44,24 @@ type Preference = {
   extraction: unknown;
 };
 
+// Mirrors the shareable projection the API returns: no participant attribution,
+// no internal detail.
+type Reminder = {
+  code: string;
+  severity: DiagnosticSeverity;
+  stage: string;
+  retryable: boolean;
+  title: string;
+  guidance: string;
+};
+
+type ReminderPayload = {
+  diagnostics?: Reminder[];
+  summary?: DiagnosticSummary | null;
+};
+
+// Error responses carry the same reminder shape as success responses, which is
+// what lets a failed action explain itself instead of showing a bare code.
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(
     path,
@@ -51,8 +74,18 @@ async function api<T>(path: string, body?: unknown): Promise<T> {
         },
   );
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error ?? "REQUEST_FAILED");
+  if (!response.ok) {
+    const failure = new Error(result.error ?? "REQUEST_FAILED") as Error & {
+      reminders?: ReminderPayload;
+    };
+    failure.reminders = result;
+    throw failure;
+  }
   return result as T;
+}
+
+function remindersOf(payload: ReminderPayload | undefined): Reminder[] {
+  return payload?.diagnostics ?? [];
 }
 
 function shortAddress(value: string) {
@@ -83,6 +116,9 @@ export function GroupWorkspace({
   const [correction, setCorrection] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [reminderSummary, setReminderSummary] =
+    useState<DiagnosticSummary | null>(null);
   const [revising, setRevising] = useState(false);
   const [groupLocked, setGroupLocked] = useState(false);
 
@@ -90,9 +126,12 @@ export function GroupWorkspace({
     const base = `/api/groups/${encodeURIComponent(id)}`;
     try {
       const [progress, own] = await Promise.all([
-        api<{ participants: Participant[]; group: { locked: boolean } }>(
-          `${base}/overview`,
-        ),
+        api<
+          ReminderPayload & {
+            participants: Participant[];
+            group: { locked: boolean };
+          }
+        >(`${base}/overview`),
         api<{ preference: Preference | null }>(`${base}/preferences`),
       ]);
       setParticipants(progress.participants);
@@ -108,8 +147,34 @@ export function GroupWorkspace({
       setNotice(
         error instanceof Error ? error.message : "Could not load group",
       );
+      setReminders(
+        remindersOf((error as { reminders?: ReminderPayload }).reminders),
+      );
     }
   }, []);
+
+  // The progress poll refreshes the group's blockers on its own, so a stalled
+  // group surfaces a reminder without anyone having to act.
+  useEffect(() => {
+    if (!wallet || !groupId) return;
+    let active = true;
+    const poll = () =>
+      void api<ReminderPayload & { participants: Participant[] }>(
+        `/api/groups/${encodeURIComponent(groupId)}/progress`,
+      )
+        .then((result) => {
+          if (!active) return;
+          setReminders(remindersOf(result));
+          setReminderSummary(result.summary ?? null);
+        })
+        .catch(() => {});
+    poll();
+    const timer = window.setInterval(poll, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [wallet, groupId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -153,6 +218,13 @@ export function GroupWorkspace({
       await work();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Request failed");
+      // A failed action replaces the standing reminders with the reason it
+      // failed; a stale "waiting for others" note would contradict the error.
+      const payload = (error as { reminders?: ReminderPayload }).reminders;
+      if (payload) {
+        setReminders(remindersOf(payload));
+        setReminderSummary(payload.summary ?? null);
+      }
     } finally {
       setBusy(false);
     }
@@ -365,6 +437,18 @@ export function GroupWorkspace({
             <div className="notice" role="status">
               {notice}
             </div>
+          )}
+          {wallet && groupId && reminders.length > 0 && (
+            <DiagnosticList
+              diagnostics={reminders}
+              summary={reminderSummary}
+              onRetry={() => void refresh(groupId)}
+              onDismiss={() => {
+                setReminders([]);
+                setReminderSummary(null);
+              }}
+              isBusy={busy}
+            />
           )}
           {!wallet && (
             <div className="empty-state">
@@ -667,6 +751,10 @@ export function GroupWorkspace({
                     {participants.filter((person) => person.confirmed).length}{" "}
                     confirmed
                   </p>
+                  <DiagnosticBadge
+                    diagnostics={reminders}
+                    summary={reminderSummary}
+                  />
                   <div className="participant-list">
                     {participants.map((person) => (
                       <div className="participant" key={person.walletAddress}>

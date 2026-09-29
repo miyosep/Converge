@@ -1,0 +1,937 @@
+{
+  "purpose": "Credential-free diagnostics evidence. Synthetic inputs, no database, no RPC, no provider key.",
+  "generator": "scripts/demo-diagnostics.ts",
+  "synthetic": true,
+  "note": "The reservation timestamp in this record is explicitly synthetic, not a real booking or policy expiry. This record does not establish application or contract acceptance; see docs/DIAGNOSTICS.md.",
+  "registry": {
+    "codeCount": 71,
+    "stageCount": 9,
+    "observedStageCount": 3
+  },
+  "coverage": {
+    "emittedCodeCount": 13,
+    "severityTotals": {
+      "info": 15,
+      "warning": 5,
+      "error": 10
+    },
+    "scenarios": 11
+  },
+  "privacy": {
+    "checked": "no non-shareable code appears in a shared projection",
+    "leaks": []
+  },
+  "scenarios": [
+    {
+      "name": "baseline_clean_proposal",
+      "expectation": "A clean proposal reports no blocking reminder and no error severity.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "PROPOSAL_READY",
+      "winnerId": "A",
+      "ranking": [
+        "A",
+        "B",
+        "D"
+      ],
+      "summary": {
+        "worst": "info",
+        "blocking": false,
+        "bySeverity": {
+          "info": 1,
+          "warning": 0,
+          "error": 0
+        },
+        "byStage": {
+          "eligibility": 1
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    },
+    {
+      "name": "lower_budget_no_match",
+      "expectation": "A budget that excludes every candidate names the blocker.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NO_MATCH",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "error",
+        "blocking": true,
+        "bySeverity": {
+          "info": 1,
+          "warning": 0,
+          "error": 2
+        },
+        "byStage": {
+          "eligibility": 3
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5"
+          }
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": null
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate meets every requirement",
+          "guidance": "Every candidate failed at least one mandatory condition or was excluded. No match is a valid outcome; relax a requirement or widen the merchant allowlist, then evaluate again."
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Voting is one-sided",
+          "guidance": "Every candidate was rejected by the same participants and no candidate was acceptable to all. Treat this as a constraint conflict, not a catalog problem."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    },
+    {
+      "name": "excluded_merchant",
+      "expectation": "An empty allowlist is reported at the merchant, not generically.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NO_MATCH",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "error",
+        "blocking": true,
+        "bySeverity": {
+          "info": 1,
+          "warning": 1,
+          "error": 2
+        },
+        "byStage": {
+          "eligibility": 4
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5"
+          }
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": null
+        },
+        {
+          "code": "DEC_MERCHANT_NOT_PERMITTED",
+          "severity": "warning",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate meets every requirement",
+          "guidance": "Every candidate failed at least one mandatory condition or was excluded. No match is a valid outcome; relax a requirement or widen the merchant allowlist, then evaluate again."
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Voting is one-sided",
+          "guidance": "Every candidate was rejected by the same participants and no candidate was acceptable to all. Treat this as a constraint conflict, not a catalog problem."
+        },
+        {
+          "code": "DEC_MERCHANT_NOT_PERMITTED",
+          "severity": "warning",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Merchant not in the allowlist",
+          "guidance": "Candidates were excluded because their merchant is not on the approved list. Update the allowlist through the group flow if this is intentional."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    },
+    {
+      "name": "unaffordable_deposit",
+      "expectation": "A deposit cap below every deposit is called out separately.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NO_MATCH",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "error",
+        "blocking": true,
+        "bySeverity": {
+          "info": 1,
+          "warning": 1,
+          "error": 2
+        },
+        "byStage": {
+          "eligibility": 4
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5"
+          }
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": null
+        },
+        {
+          "code": "DEC_DEPOSIT_UNAFFORDABLE",
+          "severity": "warning",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "4",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate meets every requirement",
+          "guidance": "Every candidate failed at least one mandatory condition or was excluded. No match is a valid outcome; relax a requirement or widen the merchant allowlist, then evaluate again."
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Voting is one-sided",
+          "guidance": "Every candidate was rejected by the same participants and no candidate was acceptable to all. Treat this as a constraint conflict, not a catalog problem."
+        },
+        {
+          "code": "DEC_DEPOSIT_UNAFFORDABLE",
+          "severity": "warning",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Deposit exceeds the approved cap",
+          "guidance": "Candidates were excluded because their deposit exceeds the approved deposit or spending cap. Raise the cap deliberately or choose another candidate."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    },
+    {
+      "name": "missing_safety_metadata",
+      "expectation": "Unsupported non-negotiable metadata is reported as a catalog gap, not a user error.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NO_MATCH",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "error",
+        "blocking": true,
+        "bySeverity": {
+          "info": 1,
+          "warning": 1,
+          "error": 2
+        },
+        "byStage": {
+          "eligibility": 4
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_NONNEGOTIABLE_UNKNOWN",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "operator",
+          "attributed": false,
+          "field": "wheelchair_accessible",
+          "detail": {
+            "requirements": "wheelchair_accessible"
+          }
+        },
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5"
+          }
+        },
+        {
+          "code": "DEC_CONSTRAINT_UNSATISFIED",
+          "severity": "warning",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "user",
+          "attributed": true,
+          "field": "wheelchair_accessible",
+          "detail": {
+            "candidates": "5",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_NONNEGOTIABLE_UNKNOWN",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Safety metadata missing",
+          "guidance": "A non-negotiable requirement failed because the catalog reports unknown metadata. Do not treat unknown as support; the catalog needs an explicit value."
+        },
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate meets every requirement",
+          "guidance": "Every candidate failed at least one mandatory condition or was excluded. No match is a valid outcome; relax a requirement or widen the merchant allowlist, then evaluate again."
+        },
+        {
+          "code": "SHR_ELIGIBILITY_BLOCKED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate satisfies every requirement",
+          "guidance": "The group's requirements cannot all be met at once. Revisit the mandatory conditions and relax one."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    },
+    {
+      "name": "open_clarification",
+      "expectation": "An open clarification blocks evaluation and suppresses eligibility noise.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NEEDS_CLARIFICATION",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "warning",
+        "blocking": false,
+        "bySeverity": {
+          "info": 0,
+          "warning": 1,
+          "error": 0
+        },
+        "byStage": {
+          "preference": 1
+        }
+      },
+      "internal": [
+        {
+          "code": "PRF_UNRESOLVED_CLARIFICATION",
+          "severity": "warning",
+          "stage": "preference",
+          "retryable": true,
+          "remedy": "user",
+          "attributed": true,
+          "field": null,
+          "detail": {
+            "count": "1"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "SHR_PREFERENCE_UNRESOLVED",
+          "severity": "warning",
+          "stage": "preference",
+          "retryable": true,
+          "title": "A preference is still open",
+          "guidance": "At least one member's preference is not ready to use. Whoever has an open item can resolve it in their own view."
+        }
+      ]
+    },
+    {
+      "name": "unconfirmed_revision",
+      "expectation": "A single unconfirmed member is attributed and reported once.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "AWAITING_CONFIRMATION",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "warning",
+        "blocking": false,
+        "bySeverity": {
+          "info": 0,
+          "warning": 1,
+          "error": 0
+        },
+        "byStage": {
+          "preference": 1
+        }
+      },
+      "internal": [
+        {
+          "code": "PRF_AWAITING_CONFIRMATION",
+          "severity": "warning",
+          "stage": "preference",
+          "retryable": true,
+          "remedy": "user",
+          "attributed": true,
+          "field": null,
+          "detail": null
+        }
+      ],
+      "shared": [
+        {
+          "code": "SHR_PREFERENCE_UNRESOLVED",
+          "severity": "warning",
+          "stage": "preference",
+          "retryable": true,
+          "title": "A preference is still open",
+          "guidance": "At least one member's preference is not ready to use. Whoever has an open item can resolve it in their own view."
+        }
+      ]
+    },
+    {
+      "name": "zero_soft_weights",
+      "expectation": "Zero soft weights are an informational note, never a blocker.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "PROPOSAL_READY",
+      "winnerId": "B",
+      "ranking": [
+        "B",
+        "D",
+        "A"
+      ],
+      "summary": {
+        "worst": "info",
+        "blocking": false,
+        "bySeverity": {
+          "info": 4,
+          "warning": 0,
+          "error": 0
+        },
+        "byStage": {
+          "preference": 1,
+          "eligibility": 1,
+          "ranking": 2
+        }
+      },
+      "internal": [
+        {
+          "code": "PRF_ZERO_WEIGHT_TOTAL",
+          "severity": "info",
+          "stage": "preference",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": null
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_SCORE_TIE",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "A,B",
+            "scoreMicros": "0"
+          }
+        },
+        {
+          "code": "DEC_WINNER_BY_TIEBREAK",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "A,B,D",
+            "winner": "B"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "SHR_PREFERENCE_UNRESOLVED",
+          "severity": "warning",
+          "stage": "preference",
+          "retryable": true,
+          "title": "A preference is still open",
+          "guidance": "At least one member's preference is not ready to use. Whoever has an open item can resolve it in their own view."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        },
+        {
+          "code": "DEC_SCORE_TIE",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "title": "Scores tied",
+          "guidance": "Two or more eligible candidates scored identically. Ranking uses lower meal price, then ordinal candidate ID, so the result is deterministic."
+        },
+        {
+          "code": "DEC_WINNER_BY_TIEBREAK",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "title": "Winner decided by tie-break",
+          "guidance": "The winner did not lead on score alone and was chosen by the documented tie-breakers. This is expected behaviour, not an error."
+        }
+      ]
+    },
+    {
+      "name": "narrow_margin",
+      "expectation": "A near-tie between the top two candidates is disclosed.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "PROPOSAL_READY",
+      "winnerId": "A",
+      "ranking": [
+        "A",
+        "B",
+        "D"
+      ],
+      "summary": {
+        "worst": "info",
+        "blocking": false,
+        "bySeverity": {
+          "info": 2,
+          "warning": 0,
+          "error": 0
+        },
+        "byStage": {
+          "eligibility": 1,
+          "ranking": 1
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_NARROW_MARGIN",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "A,B",
+            "marginMicros": "3333"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        },
+        {
+          "code": "DEC_NARROW_MARGIN",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "title": "Narrow winning margin",
+          "guidance": "The top two candidates are within a small margin. Mention this to the group so the proposal is not presented as a clear preference."
+        }
+      ]
+    },
+    {
+      "name": "identical_scores",
+      "expectation": "Identical scores produce a tie and a tie-break reminder.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "PROPOSAL_READY",
+      "winnerId": "B",
+      "ranking": [
+        "B",
+        "A",
+        "D"
+      ],
+      "summary": {
+        "worst": "info",
+        "blocking": false,
+        "bySeverity": {
+          "info": 3,
+          "warning": 0,
+          "error": 0
+        },
+        "byStage": {
+          "eligibility": 1,
+          "ranking": 2
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "2",
+            "total": "5"
+          }
+        },
+        {
+          "code": "DEC_SCORE_TIE",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "A,B",
+            "scoreMicros": "900000"
+          }
+        },
+        {
+          "code": "DEC_WINNER_BY_TIEBREAK",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "A,B",
+            "winner": "B"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        },
+        {
+          "code": "DEC_SCORE_TIE",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "title": "Scores tied",
+          "guidance": "Two or more eligible candidates scored identically. Ranking uses lower meal price, then ordinal candidate ID, so the result is deterministic."
+        },
+        {
+          "code": "DEC_WINNER_BY_TIEBREAK",
+          "severity": "info",
+          "stage": "ranking",
+          "retryable": false,
+          "title": "Winner decided by tie-break",
+          "guidance": "The winner did not lead on score alone and was chosen by the documented tie-breakers. This is expected behaviour, not an error."
+        }
+      ]
+    },
+    {
+      "name": "all_unavailable",
+      "expectation": "A fully unavailable catalog reports the exclusion counts.",
+      "synthetic": true,
+      "engineVersion": "decision-v1",
+      "fixtureVersion": "restaurants-v2",
+      "status": "NO_MATCH",
+      "winnerId": null,
+      "ranking": [],
+      "summary": {
+        "worst": "error",
+        "blocking": true,
+        "bySeverity": {
+          "info": 1,
+          "warning": 0,
+          "error": 2
+        },
+        "byStage": {
+          "eligibility": 3
+        }
+      },
+      "internal": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5"
+          }
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "remedy": "group",
+          "attributed": false,
+          "field": null,
+          "detail": null
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "remedy": "none",
+          "attributed": false,
+          "field": null,
+          "detail": {
+            "candidates": "5",
+            "total": "5"
+          }
+        }
+      ],
+      "shared": [
+        {
+          "code": "DEC_NO_ELIGIBLE_CANDIDATE",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "No candidate meets every requirement",
+          "guidance": "Every candidate failed at least one mandatory condition or was excluded. No match is a valid outcome; relax a requirement or widen the merchant allowlist, then evaluate again."
+        },
+        {
+          "code": "DEC_PARTICIPANT_ONESIDED",
+          "severity": "error",
+          "stage": "eligibility",
+          "retryable": true,
+          "title": "Voting is one-sided",
+          "guidance": "Every candidate was rejected by the same participants and no candidate was acceptable to all. Treat this as a constraint conflict, not a catalog problem."
+        },
+        {
+          "code": "DEC_CANDIDATE_UNAVAILABLE",
+          "severity": "info",
+          "stage": "eligibility",
+          "retryable": false,
+          "title": "Candidate marked unavailable",
+          "guidance": "Some candidates are flagged unavailable in the catalog and were skipped before ranking."
+        }
+      ]
+    }
+  ]
+}

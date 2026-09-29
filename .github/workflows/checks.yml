@@ -24,6 +24,11 @@ jobs:
         run: node -p "JSON.stringify({platform:process.platform,arch:process.arch,node:process.version})"
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      # Regenerates the diagnostics fixtures. The generator exits non-zero if any
+      # shareable projection leaks a private condition, and the diff guard below
+      # catches a registry change that was not re-exported into the evidence.
+      - run: pnpm demo:diagnostics
+      - run: git diff --exit-code -- docs/evidence/diagnostics-fixtures.json
   contracts:
     name: Contracts (${{ matrix.os }})
     strategy:
