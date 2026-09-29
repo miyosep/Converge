@@ -483,9 +483,9 @@ export default function ExploreDemo() {
                   Take a seat, <em>see it come together</em>
                 </h2>
                 <p>
-                  {wallet
-                    ? "Share your dinner preferences. Five automated participants will join you through the decision and test payment."
-                    : "Bring your preferences. Five automated participants join you to find a place and try a shared payment."}
+                  Try Converge on your own. Five automated participants join you
+                  to find a place, agree together, and try a shared test
+                  payment.
                 </p>
                 {!state && view?.accessCodeRequired && (
                   <label>
