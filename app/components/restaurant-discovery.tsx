@@ -2,6 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  BedDouble,
+  Building2,
+  MapPin,
+  Palette,
+  Search,
+  Trophy,
+  Utensils,
+} from "lucide-react";
 import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
 import {
   connectWalletAccount,
@@ -19,6 +29,14 @@ import type {
   DiscoveredPlace,
   DiscoveryResult,
 } from "../../src/lib/discovery/types";
+
+const categoryIcons = {
+  restaurant: Utensils,
+  stay: BedDouble,
+  space: Building2,
+  sport: Trophy,
+  class: Palette,
+};
 
 export function DiscoveryCard({
   place,
@@ -261,143 +279,179 @@ export function RestaurantDiscovery({
       (place) => !comparing || selected.includes(place.id),
     ) ?? [];
   return (
-    <section className="discovery">
+    <section className="discovery discovery-redesign">
       <div className="discovery-intro">
-        <span className="eyebrow">REAL PLACES · AI SEARCH</span>
         {explore ? (
           <h2>Dinner around Gangnam Station</h2>
         ) : (
-          <h1>A place that fits your people.</h1>
+          <h1>
+            Find your <em>next place</em>
+          </h1>
         )}
         <p>
           {explore
-            ? "The area is set. Tell us what matters for dinner. Search real restaurants,"
-            : "Tell us where you want to meet and what matters. Search real places,"}
-          inspect the evidence and compare up to five candidates together.
+            ? "Tell us what would make a good dinner."
+            : "Somewhere that feels right for everyone."}
         </p>
       </div>
-      <form
-        className="discovery-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void search();
-        }}
-      >
-        {!explore && (
-          <>
-            <label htmlFor="discovery-category">What are you planning?</label>
-            <select
-              id="discovery-category"
-              value={category}
+      <div className="discovery-workbench">
+        <form
+          className="discovery-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void search();
+          }}
+        >
+          {!explore && (
+            <fieldset className="discovery-categories">
+              <legend>What brings you together?</legend>
+              <div>
+                {Object.entries(discoveryCategories).map(([value, item]) => {
+                  const Icon = categoryIcons[value as DiscoveryCategory];
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={category === value}
+                      disabled={
+                        source !== "xAPI (Google Maps)" &&
+                        value !== "restaurant"
+                      }
+                      onClick={() => {
+                        if (category === value) return;
+                        invalidate();
+                        setCategory(value as DiscoveryCategory);
+                        setText("");
+                      }}
+                    >
+                      <Icon size={19} strokeWidth={1.6} aria-hidden="true" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+          <div className="discovery-field">
+            <label htmlFor="discovery-location">Where shall we meet?</label>
+            <div className="discovery-location-wrap">
+              <MapPin size={18} aria-hidden="true" />
+              <input
+                id="discovery-location"
+                value={location}
+                readOnly={explore}
+                required
+                minLength={2}
+                maxLength={160}
+                placeholder="City, neighborhood or landmark"
+                onChange={(event) => {
+                  invalidate();
+                  setLocation(event.target.value);
+                }}
+              />
+            </div>
+            {explore && (
+              <p>
+                This demo searches around Gangnam Station. Check walking
+                distances on the map.
+              </p>
+            )}
+          </div>
+          <div className="discovery-field">
+            <label htmlFor="discovery-request">
+              What would make it a good fit?
+            </label>
+            <textarea
+              id="discovery-request"
+              value={text}
+              required
+              minLength={3}
+              maxLength={2000}
+              rows={3}
+              aria-describedby="discovery-help"
+              placeholder={discoveryCategories[category].example}
               onChange={(event) => {
                 invalidate();
-                setCategory(event.target.value as DiscoveryCategory);
-                setText("");
+                setText(event.target.value);
               }}
-            >
-              {Object.entries(discoveryCategories).map(([value, item]) => (
-                <option
-                  key={value}
-                  value={value}
-                  disabled={
-                    source !== "xAPI (Google Maps)" && value !== "restaurant"
-                  }
-                >
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-        <label htmlFor="discovery-location">
-          City, neighborhood or landmark
-        </label>
-        <input
-          id="discovery-location"
-          value={location}
-          readOnly={explore}
-          required
-          minLength={2}
-          maxLength={160}
-          onChange={(event) => {
-            invalidate();
-            setLocation(event.target.value);
-          }}
-        />
-        {explore && (
-          <p>
-            The area is fixed for this demo. Describe cuisine, budget or
-            atmosphere below. Check candidate addresses on the map; walking
-            distance is not guaranteed.
-          </p>
-        )}
-        <label htmlFor="discovery-request">What does your group need?</label>
-        <textarea
-          id="discovery-request"
-          value={text}
-          required
-          minLength={3}
-          maxLength={2000}
-          rows={4}
-          aria-describedby="discovery-help"
-          placeholder={discoveryCategories[category].example}
-          onChange={(event) => {
-            invalidate();
-            setText(event.target.value);
-          }}
-        />
-        {explore && (
-          <div className="discovery-links" aria-label="Example requests">
-            {[
-              "Japanese food for six people.",
-              "A quiet Italian restaurant under KRW 30,000 per person.",
-              "Korean barbecue with parking.",
-            ].map((example) => (
-              <button
-                key={example}
-                type="button"
-                className="secondary"
-                onClick={() => {
-                  invalidate();
-                  setText(example);
-                }}
-              >
-                {example}
-              </button>
-            ))}
+            />
+            <p id="discovery-help" className="discovery-hint">
+              Write in English. Include your group size, must-haves and budget
+              with currency.
+            </p>
           </div>
-        )}
-        <p id="discovery-help">
-          Describe your needs in English. If you have a budget, state the
-          currency and whether it is per person, per night, per hour or a total.
-          Prices and facilities may need confirmation with the venue.
-        </p>
-        <p className="flow-note">
-          Hackathon assumption: search results can be reserved with USDC.
-          Booking availability is not checked.
-        </p>
-        {!configured && (
-          <p className="notice" role="status">
-            Live search is not connected yet. You can explore the planning demo
-            while the search service is being configured.{" "}
-            <Link href="/demo/catalog">Open planning demo</Link>
+          {explore && (
+            <div className="discovery-links" aria-label="Example requests">
+              {[
+                "Japanese food for six people.",
+                "A quiet Italian restaurant under KRW 30,000 per person.",
+                "Korean barbecue with parking.",
+              ].map((example) => (
+                <button
+                  key={example}
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    invalidate();
+                    setText(example);
+                  }}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          )}
+          {!configured && (
+            <p className="notice" role="status">
+              Live search is not connected yet. You can explore the planning
+              demo while the search service is being configured.{" "}
+              <Link href="/demo/catalog">Open planning demo</Link>
+            </p>
+          )}
+          <button
+            type="submit"
+            className="primary"
+            disabled={
+              !configured ||
+              busy ||
+              location.trim().length < 2 ||
+              text.trim().length < 3
+            }
+          >
+            <Search size={18} aria-hidden="true" />
+            {busy
+              ? "Finding your places…"
+              : `Find ${discoveryCategories[category].label.toLowerCase()}`}
+            {!busy && <ArrowRight size={18} aria-hidden="true" />}
+          </button>
+          <p className="discovery-form-note">
+            Compare up to five places before making a plan.
           </p>
-        )}
-        <button
-          type="submit"
-          className="primary"
-          disabled={
-            !configured ||
-            busy ||
-            location.trim().length < 2 ||
-            text.trim().length < 3
-          }
+        </form>
+        <aside
+          className="discovery-mood"
+          aria-label="A little inspiration for your next gathering"
         >
-          {busy
-            ? "Interpreting and searching…"
-            : `Find ${discoveryCategories[category].label.toLowerCase()}`}
-        </button>
-      </form>
+          <img
+            src="/images/converge-together.webp"
+            alt="Friends sharing a meal at a sunny outdoor table"
+            width={1536}
+            height={1024}
+          />
+          <div className="discovery-mood-copy">
+            <span>GOOD COMPANY. THE RIGHT PLACE.</span>
+            <p>
+              A little closer
+              <br />
+              to <em>getting together.</em>
+            </p>
+          </div>
+        </aside>
+      </div>
+      <p className="discovery-booking-note">
+        Confirm prices and facilities with the venue. Booking availability is
+        not checked. Demo bookings assume USDC support.
+      </p>
       <div role="status" aria-live="polite" aria-busy={busy}>
         {busy && (
           <p>
@@ -422,7 +476,10 @@ export function RestaurantDiscovery({
       )}
       {result && (
         <>
-          <section className="flow-note" aria-label="Search interpretation">
+          <section
+            className="flow-note discovery-summary"
+            aria-label="Search interpretation"
+          >
             <h2>What we searched</h2>
             <p>
               {result.intent.area}
@@ -527,10 +584,6 @@ export function RestaurantDiscovery({
           )}
         </>
       )}
-      <p className="discovery-attribution">
-        Looking for the fictional examples?{" "}
-        <Link href="/demo/catalog">Open archived planning demo</Link>.
-      </p>
       <SignInDialog
         open={signInOpen}
         busy={signingIn}

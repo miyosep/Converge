@@ -15,9 +15,9 @@ export default function DiscoverPage() {
           : false),
   );
   return (
-    <div className="shell">
+    <div className="shell plans-shell discover-shell">
       <AppHeader active="discover" />
-      <main id="main-content" className="flow-content" tabIndex={-1}>
+      <main id="main-content" className="discover-main" tabIndex={-1}>
         <RestaurantDiscovery
           configured={configured}
           source={

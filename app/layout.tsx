@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import "./styles.css";
 import "./components/plans-overview.css";
+import "./components/restaurant-discovery.css";
 import "./components/scroll-story.css";
 import "./components/planning-problems.css";
 
