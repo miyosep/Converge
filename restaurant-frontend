@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAGAMI 鏡 — Japanese Restaurant</title>
+<meta name="description" content="Kagami — a modern Japanese restaurant. Sushi, sashimi, ramen and seasonal omakase, crafted daily.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Inter:wght@300;400;500;600&family=Noto+Serif+JP:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#top" class="brand">
+      <span class="brand__mark">鏡</span>
+      <span class="brand__text">
+        <span class="brand__name">KAGAMI</span>
+        <span class="brand__sub">Japanese Restaurant</span>
+      </span>
+    </a>
+
+    <nav class="nav__links" id="navLinks">
+      <a href="#menu" class="nav__link">Menu</a>
+      <a href="#omakase" class="nav__link">Omakase</a>
+      <a href="#about" class="nav__link">Our Story</a>
+      <a href="#hours" class="nav__link">Visit</a>
+      <a href="#reserve" class="nav__link nav__link--cta">Reserve</a>
+    </nav>
+
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero__glow"></div>
+  <div class="hero__lines"></div>
+
+  <div class="hero__content">
+    <p class="hero__eyebrow"><span class="rule"></span>Est. 2014 · Kyoto &amp; Tokyo trained<span class="rule"></span></p>
+    <h1 class="hero__title">
+      <span class="jp">鏡</span>
+      <span class="en">KAGAMI</span>
+    </h1>
+    <p class="hero__tagline">
+      A quiet room, a warm counter, and fish chosen at dawn.
+      We cook the way the seasons ask us to.
+    </p>
+    <div class="hero__actions">
+      <a href="#menu" class="btn btn--solid">View the Menu</a>
+      <a href="#reserve" class="btn btn--ghost">Book a Table</a>
+    </div>
+  </div>
+
+  <div class="hero__scroll">
+    <span>Scroll</span>
+    <i></i>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <span>Omakase</span><b>·</b><span>鮨 Sushi</span><b>·</b><span>刺身 Sashimi</span><b>·</b>
+    <span>炉端 Robata</span><b>·</b><span>らーめん Ramen</span><b>·</b><span>天ぷら Tempura</span><b>·</b>
+    <span>Omakase</span><b>·</b><span>鮨 Sushi</span><b>·</b><span>刺身 Sashimi</span><b>·</b>
+    <span>炉端 Robata</span><b>·</b><span>らーめん Ramen</span><b>·</b><span>天ぷら Tempura</span><b>·</b>
+  </div>
+</div>
+
+<!-- ============ MENU ============ -->
+<main>
+<section class="section" id="menu">
+  <div class="wrap">
+    <header class="section__head">
+      <p class="section__eyebrow">お品書き</p>
+      <h2 class="section__title">The Menu</h2>
+      <p class="section__lede">
+        Prices in USD. Seasonal items rotate with the market —
+        ask your server what came in this morning.
+      </p>
+    </header>
+
+    <div class="filters" id="filters" role="tablist" aria-label="Menu categories">
+      <button class="filter is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+      <button class="filter" data-filter="small" role="tab" aria-selected="false">Small Plates</button>
+      <button class="filter" data-filter="sushi" role="tab" aria-selected="false">Sushi &amp; Sashimi</button>
+      <button class="filter" data-filter="hot" role="tab" aria-selected="false">Hot Dishes</button>
+      <button class="filter" data-filter="ramen" role="tab" aria-selected="false">Ramen &amp; Rice</button>
+      <button class="filter" data-filter="dessert" role="tab" aria-selected="false">Dessert &amp; Tea</button>
+    </div>
+
+    <div class="menu" id="menuGrid">
+      <!-- populated by JS -->
+    </div>
+
+    <p class="menu__note">
+      <span class="dot"></span>
+      Consuming raw or undercooked seafood may increase your risk of foodborne illness.
+      Please inform us of any allergies.
+    </p>
+  </div>
+</section>
+
+<!-- ============ OMAKASE ============ -->
+<section class="omakase" id="omakase">
+  <div class="wrap omakase__grid">
+    <div class="omakase__text">
+      <p class="section__eyebrow">おまかせ</p>
+      <h2 class="section__title section__title--left">Chef's Omakase</h2>
+      <p>
+        Eighteen courses, served one at a time across two hours at the eight-seat counter.
+        The chef decides what you eat — you decide how much to trust him.
+      </p>
+      <ul class="omakase__list">
+        <li><span>Courses</span><b>18</b></li>
+        <li><span>Seats</span><b>8 per night</b></li>
+        <li><span>Duration</span><b>≈ 2 hours</b></li>
+        <li><span>Price</span><b>$148 / guest</b></li>
+      </ul>
+      <a href="#reserve" class="btn btn--solid">Reserve the Counter</a>
+    </div>
+
+    <div class="omakase__card">
+      <div class="omakase__card-inner">
+        <p class="omakase__card-jp">旬</p>
+        <h3>Tonight's Opening</h3>
+        <p class="omakase__card-sub">A sample of what the season is doing</p>
+        <ol class="course">
+          <li><em>01</em><span>Hokkaido scallop, yuzu kosho</span></li>
+          <li><em>02</em><span>Chawanmushi, snow crab, dashi ankake</span></li>
+          <li><em>03</em><span>Kinmedai, three days aged, shio</span></li>
+          <li><em>04</em><span>Otoro nigiri, brushed nikiri</span></li>
+          <li><em>05</em><span>Uni &amp; ikura don, warm rice</span></li>
+          <li><em>06</em><span>Matcha warabi mochi</span></li>
+        </ol>
+        <p class="course__more">+ 12 more courses</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="section section--tight" id="about">
+  <div class="wrap">
+    <div class="about">
+      <div class="about__col">
+        <p class="section__eyebrow">私たちについて</p>
+        <h2 class="section__title section__title--left">Our Story</h2>
+        <p>
+          Kagami means <em>mirror</em> — the polished steel of an old kitchen, the still surface
+          of a bowl of clear soup. We opened in 2014 with fourteen seats and a single
+          refrigerator, and we have resisted growing ever since.
+        </p>
+        <p>
+          Head chef <strong>Rina Matsuda</strong> trained in Kyoto for six years and in Tsukiji
+          for four. She buys whole fish, breaks them down herself, and refuses to serve
+          anything she would not hand to her own mother.
+        </p>
+        <p>
+          Nothing here is complicated. It is simply done properly, every night, without exception.
+        </p>
+      </div>
+
+      <div class="about__stats">
+        <div class="stat">
+          <b>12</b><span>Years at the counter</span>
+        </div>
+        <div class="stat">
+          <b>14</b><span>Seats total</span>
+        </div>
+        <div class="stat">
+          <b>6</b><span>Buyers at the market</span>
+        </div>
+        <div class="stat">
+          <b>1</b><span>Chef owner</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VOICES ============ -->
+<section class="voices">
+  <div class="wrap">
+    <div class="voices__grid">
+      <figure class="voice">
+        <blockquote>“The otoro arrived at the exact temperature of a closed hand. I have thought about it since.”</blockquote>
+        <figcaption>— The Dining Journal</figcaption>
+      </figure>
+      <figure class="voice">
+        <blockquote>“Fourteen seats, no music louder than the rice cooker. This is what restraint tastes like.”</blockquote>
+        <figcaption>— East Bay Review</figcaption>
+      </figure>
+      <figure class="voice">
+        <blockquote>“We booked six weeks out. Worth every day of the wait, and then some.”</blockquote>
+        <figcaption>— A regular since 2017</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOURS / VISIT ============ -->
+<section class="section" id="hours">
+  <div class="wrap visit">
+    <div class="visit__panel">
+      <p class="section__eyebrow">ご案内</p>
+      <h2 class="section__title section__title--left">Visit</h2>
+
+      <div class="visit__block">
+        <h3>Hours</h3>
+        <dl class="hours">
+          <div><dt>Monday</dt><dd class="closed">Closed</dd></div>
+          <div><dt>Tuesday – Thursday</dt><dd>17:30 – 22:00</dd></div>
+          <div><dt>Friday – Saturday</dt><dd>17:00 – 23:00</dd></div>
+          <div><dt>Sunday</dt><dd>17:00 – 21:00</dd></div>
+        </dl>
+      </div>
+
+      <div class="visit__block">
+        <h3>Find us</h3>
+        <address class="address">
+          218 Blossom Street, Suite 3<br>
+          Riverside District, CA 94107<br>
+          <a href="tel:+14155550188">+1 (415) 555-0188</a><br>
+          <a href="mailto:hello@kagami.example">hello@kagami.example</a>
+        </address>
+      </div>
+
+      <div class="visit__block">
+        <h3>Good to know</h3>
+        <ul class="notes">
+          <li>Counter seating is reserved for omakase only.</li>
+          <li>Smart casual. No strong fragrance, please — the room is small.</li>
+          <li>Children over 10 welcome at tables.</li>
+          <li>Corkage $30 per bottle, two bottles maximum.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="visit__map" aria-label="Map">
+      <div class="visit__map-grid"></div>
+      <div class="pin">
+        <span class="pin__pulse"></span>
+        <span class="pin__dot"></span>
+      </div>
+      <p class="visit__map-label">Blossom St × 3rd Ave</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESERVE ============ -->
+<section class="reserve" id="reserve">
+  <div class="wrap reserve__inner">
+    <p class="section__eyebrow">ご予約</p>
+    <h2 class="reserve__title">Reserve a Table</h2>
+    <p class="reserve__lede">
+      Tables open 30 days ahead. Counter seats open 60 days ahead and go quickly.
+    </p>
+
+    <form class="form" id="reserveForm" novalidate>
+      <div class="form__row">
+        <label class="field">
+          <span class="field__label">Name</span>
+          <input type="text" name="name" placeholder="Your full name" required>
+        </label>
+        <label class="field">
+          <span class="field__label">Email</span>
+          <input type="email" name="email" placeholder="you@example.com" required>
+        </label>
+      </div>
+
+      <div class="form__row">
+        <label class="field">
+          <span class="field__label">Date</span>
+          <input type="date" name="date" required>
+        </label>
+        <label class="field">
+          <span class="field__label">Time</span>
+          <select name="time" required>
+            <option value="">Select…</option>
+            <option>17:00</option>
+            <option>17:30</option>
+            <option>18:00</option>
+            <option>19:00</option>
+            <option>20:00</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Guests</span>
+          <select name="guests" required>
+            <option>1</option><option>2</option><option>3</option>
+            <option>4</option><option>5</option><option>6</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field__label">Allergies or notes <em>(optional)</em></span>
+        <textarea name="notes" rows="3" placeholder="Anything the kitchen should know?"></textarea>
+      </label>
+
+      <button type="submit" class="btn btn--solid btn--wide">Request Reservation</button>
+      <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div class="footer__brand">
+      <span class="brand__mark">鏡</span>
+      <div>
+        <p class="footer__name">KAGAMI</p>
+        <p class="footer__sub">Japanese Restaurant · Est. 2014</p>
+      </div>
+    </div>
+
+    <div class="footer__col">
+      <h4>Explore</h4>
+      <a href="#menu">Menu</a>
+      <a href="#omakase">Omakase</a>
+      <a href="#about">Our Story</a>
+      <a href="#reserve">Reserve</a>
+    </div>
+
+    <div class="footer__col">
+      <h4>Contact</h4>
+      <a href="tel:+14155550188">+1 (415) 555-0188</a>
+      <a href="mailto:hello@kagami.example">hello@kagami.example</a>
+      <p class="footer__addr">218 Blossom Street, Suite 3<br>Riverside District, CA 94107</p>
+    </div>
+
+    <div class="footer__col">
+      <h4>Follow</h4>
+      <a href="#">Instagram</a>
+      <a href="#">Newsletter</a>
+      <a href="#">Gift Cards</a>
+      <a href="#">Private Events</a>
+    </div>
+  </div>
+
+  <div class="wrap footer__bottom">
+    <p>© 2026 Kagami Restaurant. All rights reserved.</p>
+    <p>A fictional restaurant — built as a front-end demo.</p>
+  </div>
+</footer>
+
+<button class="totop" id="toTop" aria-label="Back to top">↑</button>
+
+<script src="app.js"></script>
+</body>
+</html>
