@@ -5,7 +5,15 @@ import { groupDiagnostics } from "../../src/lib/diagnostics/group";
 import { diagnosticMessage } from "../../src/lib/diagnostics/errors";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, LockKeyhole, RefreshCw, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  MapPin,
+  ArrowRight,
+  LockKeyhole,
+  RefreshCw,
+  Users,
+} from "lucide-react";
 import { formatUnits } from "viem";
 import { scorePercent, type GroupOverview } from "../../src/lib/group-view";
 import { GroupPolicyPanel } from "./group-policy-panel";
@@ -458,27 +466,53 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
     return () => controller.abort();
   }, [id, revision]);
   return (
-    <WorkspaceFrame>
-      <div className="heading">
+    <WorkspaceFrame gathering>
+      <Link className="gathering-back" href="/plans">
+        <ArrowLeft size={15} aria-hidden="true" /> My plans
+      </Link>
+      <div className="gathering-heading">
         <div>
-          <div className="eyebrow">GROUP WORKSPACE</div>
-          <h1>{titles[stage]}</h1>
-          <p className="flow-muted">
-            {overview
-              ? `${overview.group.name} · ${new Date(overview.group.startsAt).toLocaleString("en-US", { timeZone: overview.group.timeZone })} · ${overview.group.timeZone}`
-              : "A shared decision with independently controlled wallets."}
-          </p>
+          <h1>{overview?.livePlan ? overview.group.name : titles[stage]}</h1>
+          {overview && (
+            <div className="gathering-meta">
+              <span>
+                <CalendarDays size={15} aria-hidden="true" />{" "}
+                {new Date(overview.group.startsAt).toLocaleString("en-US", {
+                  timeZone: overview.group.timeZone,
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}{" "}
+                · {overview.group.timeZone}
+              </span>
+              {overview.livePlan && (
+                <span>
+                  <MapPin size={15} aria-hidden="true" />{" "}
+                  {overview.livePlan.intent.area}
+                </span>
+              )}
+            </div>
+          )}
         </div>
-        <button
-          className="icon-button"
-          aria-label="Refresh group"
-          disabled={loading || busy}
-          onClick={() => setRevision((value) => value + 1)}
-        >
-          <RefreshCw size={18} />
-        </button>
+        <div className="gathering-heading-aside">
+          <p>
+            A little closer to
+            <br /> getting together.
+          </p>
+          <button
+            className="icon-button"
+            aria-label="Refresh group"
+            disabled={loading || busy}
+            onClick={() => setRevision((value) => value + 1)}
+          >
+            <RefreshCw size={18} aria-hidden="true" />
+          </button>
+        </div>
       </div>
-      {!overview?.livePlan && <GroupNavigation id={id} active={stage} />}
+      {overview && !overview.livePlan && (
+        <GroupNavigation id={id} active={stage} />
+      )}
       {overview && !overview.livePlan && !loading && !error && (
         <DiagnosticsList diagnostics={groupDiagnostics(overview).diagnostics} />
       )}
@@ -512,7 +546,7 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
             className="primary flow-link"
             href={`/?group=${encodeURIComponent(id)}`}
           >
-            Open wallet workspace
+            Sign in to your group
           </Link>
         </section>
       ) : (

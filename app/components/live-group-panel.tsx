@@ -1,4 +1,13 @@
 "use client";
+import {
+  ArrowRight,
+  Check,
+  Copy,
+  Link2,
+  LockKeyhole,
+  Search,
+  Users,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { LivePreference } from "../../src/lib/discovery/group-preferences";
 import type { GroupOverview } from "../../src/lib/group-view";
@@ -40,6 +49,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [invite, setInvite] = useState("");
+  const [copied, setCopied] = useState(false);
   const refreshing = useRef(false);
   const refreshVersion = useRef(0);
   const base = `/api/groups/${encodeURIComponent(initial.group.id)}`;
@@ -117,6 +127,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
         url.searchParams.set("group", overview.group.id);
         url.searchParams.set("invite", data.token);
         setInvite(url.toString());
+        setCopied(false);
       } else if (name === "live-preferences" || name === "live-confirm") {
         setPreference(data.preference);
         setNotice(
@@ -149,311 +160,447 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
     overview.participants.map((member) => member.walletAddress),
     overview.group.targetMemberCount,
   );
+  const confirmed = overview.participants.filter(
+    (member) => member.confirmed,
+  ).length;
+  const target = overview.group.targetMemberCount;
+  const ready = overview.participants.length === target && confirmed === target;
+  const currentStep = agreed
+    ? 3
+    : plan.recommendationReady || ready
+      ? 2
+      : overview.participants.length === target
+        ? 1
+        : 0;
   return (
-    <>
-      <section className="flow-panel">
-        <h2>Choose a place together</h2>
-        <p>
-          {overview.participants.length} of {overview.group.targetMemberCount}{" "}
-          members joined. Choose a place together, then confirm its booking
-          terms and each person’s share.
-        </p>
-
-        <p>
-          Everyone submits their own preferences privately. After every member
-          confirms their interpretation, we search for places using the whole
-          group's requirements. Search listings may still leave conditions
-          unverified.
-        </p>
-        {!overview.group.locked && (
-          <button
-            className="secondary"
-            disabled={busy}
-            onClick={() => void action("invite")}
+    <div className="gathering-workspace">
+      <ol className="gathering-steps" aria-label="Plan progress">
+        {[
+          "Gather your people",
+          "Share preferences",
+          "Choose together",
+          "Confirm details",
+        ].map((label, index) => (
+          <li
+            key={label}
+            className={
+              index === currentStep
+                ? "is-current"
+                : index < currentStep
+                  ? "is-done"
+                  : ""
+            }
+            aria-current={index === currentStep ? "step" : undefined}
           >
-            Create invitation link
-          </button>
-        )}
-        {invite && (
-          <label>
-            Share this private invitation
-            <input
-              readOnly
-              value={invite}
-              onFocus={(event) => event.currentTarget.select()}
-            />
-          </label>
-        )}
-        <ul>
-          {overview.participants.map((member) => (
-            <li key={member.walletAddress}>
-              {member.displayName} —{" "}
-              {member.confirmed
-                ? "Preferences confirmed"
-                : member.submitted
-                  ? "Reviewing preferences"
-                  : "Waiting for preferences"}{" "}
-              ·{" "}
-              {plan.places.find(
-                (place) =>
-                  place.id === plan.votes[member.walletAddress.toLowerCase()],
-              )?.name ?? "Has not chosen yet"}
-            </li>
-          ))}
-        </ul>
-        {notice && <p role="status">{notice}</p>}
-      </section>
-      {!overview.signingPolicy && (
-        <section className="flow-panel">
-          <h2>Your private preferences</h2>
-          <p>
-            Tell us what you need and what you would enjoy. Your text and
-            interpretation are visible only to you; the group sees your
-            confirmation status.
-          </p>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void action("live-preferences", {
-                text,
-                expectedRevisionId: preference?.revisionId ?? null,
-              });
-            }}
-          >
-            <label>
-              What matters to you?
-              <textarea
-                required
-                maxLength={2000}
-                rows={4}
-                disabled={busy}
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                placeholder="I need vegetarian options, under KRW 30,000 per person. I would prefer somewhere quiet."
-              />
-            </label>
-            <button
-              className="primary"
-              disabled={busy || !ownLoaded || !text.trim()}
-            >
-              Interpret my preferences
-            </button>
-          </form>
-          {preference?.status === "failed" && (
-            <p role="status">
-              Interpretation failed. Your text is saved; submit again to retry.
-            </p>
-          )}
-          {preference?.status === "draft" && (
-            <p role="status">
-              Your private note was saved when you created the group. Review it
-              above, then interpret and confirm your preferences.
-            </p>
-          )}
-          {preference?.status === "extracting" && (
-            <p role="status">
-              Interpretation is pending. If it was interrupted, submit your text
-              again.
-            </p>
-          )}
-          {preference?.extraction && (
-            <>
-              <h3>Review your interpretation</h3>
-              <ul>
-                {preference.extraction.requirements.map((item, index) => (
-                  <li key={index}>
-                    <strong>
-                      {item.importance === "required"
-                        ? "Required"
-                        : "Preferred"}
-                      :
-                    </strong>{" "}
-                    {item.text}
-                  </li>
-                ))}
-              </ul>
-              {!preference.extraction.requirements.length && (
-                <p>
-                  No specific requirements recorded. Confirm only if that is
-                  correct.
+            <span>
+              {index < currentStep ? (
+                <Check size={15} aria-hidden="true" />
+              ) : (
+                `0${index + 1}`
+              )}
+            </span>
+            {label}
+          </li>
+        ))}
+      </ol>
+      {notice && (
+        <p className="gathering-notice" role="status">
+          {notice}
+        </p>
+      )}
+      <div className="gathering-layout">
+        <div className="gathering-primary">
+          {!overview.signingPolicy && (
+            <section className="gathering-card gathering-preferences">
+              <div className="gathering-card-heading">
+                <span className="gathering-kicker">A PLAN THAT FITS YOU</span>
+                <span className="gathering-private">
+                  <LockKeyhole size={13} aria-hidden="true" /> Only you
+                </span>
+              </div>
+              <h2>
+                What would make it <em>your kind of place?</em>
+              </h2>
+              <p className="gathering-muted">
+                The food, the budget, the atmosphere. Tell us what matters.
+              </p>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void action("live-preferences", {
+                    text,
+                    expectedRevisionId: preference?.revisionId ?? null,
+                  });
+                }}
+              >
+                <label>
+                  Your preferences
+                  <textarea
+                    required
+                    maxLength={2000}
+                    rows={5}
+                    disabled={busy}
+                    value={text}
+                    onChange={(event) => setText(event.target.value)}
+                    placeholder="I need vegetarian options, under KRW 30,000 per person. I would prefer somewhere quiet."
+                  />
+                </label>
+                <button
+                  className="primary"
+                  disabled={busy || !ownLoaded || !text.trim()}
+                >
+                  {busy
+                    ? "Working…"
+                    : preference?.extraction
+                      ? "Update my preferences"
+                      : "Review my preferences"}{" "}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </form>
+              {preference?.status === "failed" && (
+                <p role="status">
+                  Interpretation failed. Your text is saved; submit again to
+                  retry.
                 </p>
               )}
-              {preference.extraction.clarifications.map((question) => (
-                <p key={question} role="status">
-                  {question}
+              {preference?.status === "draft" && (
+                <p role="status">
+                  Your earlier note is saved here. Review it when you’re ready.
                 </p>
-              ))}
-              <button
-                className="secondary"
-                disabled={
-                  busy ||
-                  preference.confirmed ||
-                  !!preference.extraction.clarifications.length ||
-                  text.trim() !== preference.rawText
-                }
-                onClick={() =>
-                  void action("live-confirm", {
-                    revisionId: preference.revisionId,
-                  })
-                }
-              >
-                {preference.confirmed
-                  ? "Preferences confirmed"
-                  : "Confirm this interpretation"}
-              </button>
-              <p>
-                To correct an interpretation, edit your text and submit again.
-                Changes require a new group search and fresh place agreements.
-              </p>
-            </>
-          )}
-          <h3>Find a place for everyone</h3>
-          <p>
-            {overview.participants.filter((member) => member.confirmed).length}{" "}
-            of {overview.group.targetMemberCount} members confirmed.
-          </p>
-          <button
-            className="primary"
-            disabled={
-              busy ||
-              overview.participants.length !==
-                overview.group.targetMemberCount ||
-              overview.participants.some((member) => !member.confirmed)
-            }
-            onClick={() => void action("recommend")}
-          >
-            {busy
-              ? "Working…"
-              : plan.recommendationReady
-                ? "Search again for the group"
-                : "Find places for our group"}
-          </button>
-          {plan.conflicts?.map((message) => (
-            <p key={message} role="status">
-              {message}
-            </p>
-          ))}
-          {!plan.recommendationReady &&
-            plan.recommendationRevision &&
-            !plan.conflicts?.length && (
-              <p>
-                No candidates are ready. Review your requirements and search
-                again.
-              </p>
-            )}
-        </section>
-      )}
-      {!overview.signingPolicy && plan.recommendationReady && (
-        <form
-          className="flow-panel"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void action("vote", {
-              placeId: choice,
-              recommendationRevision: plan.recommendationRevision,
-              acknowledgeChoice: accepted,
-            });
-          }}
-        >
-          <fieldset disabled={busy || overview.group.locked}>
-            <legend>Your preferred place</legend>
-            {plan.places.map((place) => (
-              <article className="discovery-card" key={place.id}>
-                <label>
-                  <input
-                    type="radio"
-                    name="live-place"
-                    value={place.id}
-                    checked={choice === place.id}
-                    onChange={() => {
-                      setChoice(place.id);
-                      setAccepted(false);
-                    }}
-                    required
-                  />
-                  {place.name}
-                </label>
-                <p>{place.address}</p>
-                <p>{place.price ?? "Price not provided"}</p>
-                <ul>
-                  {place.evidence.map((fact, index) => (
-                    <li key={index}>
-                      {fact.condition}:{" "}
-                      {fact.status === "reported"
-                        ? "Provider reported"
-                        : fact.status === "conflict"
-                          ? "Does not meet"
-                          : "Needs confirmation"}
-                      . {fact.detail}
-                    </li>
+              )}
+              {preference?.status === "extracting" && (
+                <p role="status">
+                  Interpretation is pending. If it was interrupted, submit your
+                  text again.
+                </p>
+              )}
+              {preference?.extraction && (
+                <div className="gathering-review">
+                  <h3>Here’s what we understood</h3>
+                  <ul>
+                    {preference.extraction.requirements.map((item, index) => (
+                      <li key={index}>
+                        <strong>
+                          {item.importance === "required"
+                            ? "Required"
+                            : "Preferred"}
+                          :
+                        </strong>{" "}
+                        {item.text}
+                      </li>
+                    ))}
+                  </ul>
+                  {!preference.extraction.requirements.length && (
+                    <p>
+                      No specific requirements recorded. Confirm only if that is
+                      correct.
+                    </p>
+                  )}
+                  {preference.extraction.clarifications.map((question) => (
+                    <p key={question} role="status">
+                      {question}
+                    </p>
                   ))}
-                </ul>
-                <a
-                  href={place.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View source and location
-                </a>
-              </article>
-            ))}
-            <label>
-              <input
-                type="checkbox"
-                required
-                checked={accepted}
-                onChange={(event) => setAccepted(event.target.checked)}
-              />{" "}
-              I agree to this place. Any payment requires a confirmed amount and
-              my separate approval.
-            </label>
-            <button className="primary" disabled={busy || !choice || !accepted}>
-              Save my choice
-            </button>
-          </fieldset>
-          <p>
-            {agreed
-              ? `Everyone chose ${agreed.name}. Confirm the booking terms with the venue next.`
-              : "Everyone must choose the same place. You can change your choice while planning."}
-          </p>
-          {agreed && (
-            <section aria-labelledby="booking-terms-title">
-              <h3 id="booking-terms-title">Booking details</h3>
-              <p>Group deposit: not confirmed</p>
-              <p>Your share: available once the deposit is confirmed</p>
-              <p>
-                Reservation prices and availability are not connected yet.
-                Contact the venue to confirm the terms. Payments are not
-                available for this plan.
-              </p>
-              <a
-                href={agreed.websiteUrl ?? agreed.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View venue details
-              </a>
+                  <button
+                    className="secondary"
+                    disabled={
+                      busy ||
+                      preference.confirmed ||
+                      !!preference.extraction.clarifications.length ||
+                      text.trim() !== preference.rawText
+                    }
+                    onClick={() =>
+                      void action("live-confirm", {
+                        revisionId: preference.revisionId,
+                      })
+                    }
+                  >
+                    {preference.confirmed
+                      ? "Preferences confirmed"
+                      : "Confirm this interpretation"}
+                  </button>
+                  <p>
+                    Something missing? Edit your note above and review it again.
+                  </p>
+                </div>
+              )}
             </section>
           )}
-        </form>
-      )}
-      <section className="flow-panel">
-        <h2>Membership</h2>
-        <LeaveGroupButton
-          groupId={overview.group.id}
-          locked={overview.group.locked}
-        />
-      </section>
-      {overview.signingPolicy && (
-        <>
-          <GroupPolicyPanel overview={overview} busy={busy} />
-          <GroupExecutionPanel
-            groupId={overview.group.id}
-            saved={overview.signingPolicy}
-            showChain={false}
-          />
-        </>
-      )}
-    </>
+          {!overview.signingPolicy && plan.recommendationReady && (
+            <form
+              className="gathering-card gathering-candidates"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void action("vote", {
+                  placeId: choice,
+                  recommendationRevision: plan.recommendationRevision,
+                  acknowledgeChoice: accepted,
+                });
+              }}
+            >
+              <fieldset disabled={busy || overview.group.locked}>
+                <legend>Find your shared favorite</legend>
+                <p className="gathering-muted">
+                  Places chosen around everyone’s preferences.
+                </p>
+                {plan.places.map((place) => (
+                  <article className="discovery-card" key={place.id}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="live-place"
+                        value={place.id}
+                        checked={choice === place.id}
+                        onChange={() => {
+                          setChoice(place.id);
+                          setAccepted(false);
+                        }}
+                        required
+                      />
+                      {place.name}
+                    </label>
+                    <p>{place.address}</p>
+                    <p>{place.price ?? "Price not provided"}</p>
+                    <details className="gathering-evidence">
+                      <summary>How it fits your group</summary>
+                      <ul>
+                        {place.evidence.map((fact, index) => (
+                          <li key={index}>
+                            {fact.condition}:{" "}
+                            {fact.status === "reported"
+                              ? "Provider reported"
+                              : fact.status === "conflict"
+                                ? "Does not meet"
+                                : "Needs confirmation"}
+                            . {fact.detail}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                    <a
+                      href={place.mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View source and location
+                    </a>
+                  </article>
+                ))}
+                <label className="gathering-choice-consent">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={accepted}
+                    onChange={(event) => setAccepted(event.target.checked)}
+                  />{" "}
+                  I agree to this place. Any payment requires a confirmed amount
+                  and my separate approval.
+                </label>
+                <button
+                  className="primary"
+                  disabled={busy || !choice || !accepted}
+                >
+                  Save my choice
+                </button>
+              </fieldset>
+              <p>
+                {agreed
+                  ? `Everyone chose ${agreed.name}. Confirm the booking terms with the venue next.`
+                  : "Everyone must choose the same place. You can change your choice while planning."}
+              </p>
+              {agreed && (
+                <section aria-labelledby="booking-terms-title">
+                  <h3 id="booking-terms-title">Booking details</h3>
+                  <p>Group deposit: not confirmed</p>
+                  <p>Your share: available once the deposit is confirmed</p>
+                  <p>
+                    Reservation prices and availability are not connected yet.
+                    Contact the venue to confirm the terms. Payments are not
+                    available for this plan.
+                  </p>
+                  <a
+                    href={agreed.websiteUrl ?? agreed.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View venue details
+                  </a>
+                </section>
+              )}
+            </form>
+          )}
+          {overview.signingPolicy && (
+            <>
+              <GroupPolicyPanel overview={overview} busy={busy} />
+              <GroupExecutionPanel
+                groupId={overview.group.id}
+                saved={overview.signingPolicy}
+                showChain={false}
+              />
+            </>
+          )}
+        </div>
+        <aside className="gathering-people">
+          <section className="gathering-card">
+            <div className="gathering-card-heading">
+              <h2>Your people</h2>
+              <span className="gathering-count">
+                <Users size={14} aria-hidden="true" />{" "}
+                {overview.participants.length}/{target}
+              </span>
+            </div>
+            <p className="gathering-muted">Good plans start with everyone.</p>
+            <ul className="gathering-members">
+              {overview.participants.map((member) => (
+                <li key={member.walletAddress}>
+                  <span className="gathering-avatar" aria-hidden="true">
+                    {member.displayName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div>
+                    <strong>{member.displayName}</strong>
+                    <small>
+                      {member.confirmed
+                        ? "Preferences confirmed"
+                        : member.submitted
+                          ? "Reviewing preferences"
+                          : "Yet to share preferences"}
+                    </small>
+                    {plan.recommendationReady &&
+                      plan.votes[member.walletAddress.toLowerCase()] && (
+                        <small className="gathering-vote">
+                          Chose{" "}
+                          {
+                            plan.places.find(
+                              (place) =>
+                                place.id ===
+                                plan.votes[member.walletAddress.toLowerCase()],
+                            )?.name
+                          }
+                        </small>
+                      )}
+                  </div>
+                  {member.confirmed && (
+                    <Check size={16} aria-label="Confirmed" />
+                  )}
+                </li>
+              ))}
+            </ul>
+            {overview.participants.length < target && (
+              <p className="gathering-spots">
+                {target - overview.participants.length} more{" "}
+                {target - overview.participants.length === 1
+                  ? "friend"
+                  : "friends"}{" "}
+                to join
+              </p>
+            )}
+            {!overview.group.locked && (
+              <button
+                type="button"
+                className="secondary gathering-invite"
+                disabled={busy}
+                onClick={() => void action("invite")}
+              >
+                <Link2 size={16} aria-hidden="true" />{" "}
+                {invite ? "Refresh invitation" : "Invite friends"}
+              </button>
+            )}
+            {invite && (
+              <div className="gathering-invite-link">
+                <label htmlFor="gathering-invitation">Invitation link</label>
+                <div>
+                  <input
+                    id="gathering-invitation"
+                    readOnly
+                    value={invite}
+                    onFocus={(event) => event.currentTarget.select()}
+                  />
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={
+                      copied ? "Invitation copied" : "Copy invitation link"
+                    }
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(invite);
+                        setCopied(true);
+                      } catch {
+                        setNotice(
+                          "Select the invitation link and copy it to share.",
+                        );
+                      }
+                    }}
+                  >
+                    {copied ? <Check size={17} /> : <Copy size={17} />}
+                  </button>
+                </div>
+                <span role="status">
+                  {copied ? "Copied — ready to share" : ""}
+                </span>
+              </div>
+            )}
+          </section>
+          <section className="gathering-card gathering-progress-card">
+            <span className="gathering-kicker">NEXT, TOGETHER</span>
+            <h2>
+              {agreed
+                ? "You found your place"
+                : ready
+                  ? "Everyone’s in"
+                  : "A little more to go"}
+            </h2>
+            <p>
+              {confirmed} of {target} preferences confirmed
+            </p>
+            <progress
+              value={confirmed}
+              max={target}
+              aria-label="Preferences confirmed"
+            />
+            <p className="gathering-muted">
+              {agreed
+                ? "Confirm the booking details with your venue."
+                : ready
+                  ? "You’re ready to find a place for everyone."
+                  : "We’ll search once everyone has shared and confirmed."}
+            </p>
+            {!overview.signingPolicy && (
+              <button
+                type="button"
+                className="primary"
+                disabled={busy || !ready}
+                onClick={() => void action("recommend")}
+              >
+                <Search size={16} aria-hidden="true" />{" "}
+                {busy
+                  ? "Working…"
+                  : plan.recommendationReady
+                    ? "Search again"
+                    : "Find our place"}
+              </button>
+            )}
+            {plan.conflicts?.map((message) => (
+              <p key={message} role="status">
+                {message}
+              </p>
+            ))}
+            {!plan.recommendationReady &&
+              plan.recommendationRevision &&
+              !plan.conflicts?.length && (
+                <p role="status">
+                  No places found yet. Review your preferences and try again.
+                </p>
+              )}
+          </section>
+          <div className="gathering-leave">
+            <LeaveGroupButton
+              groupId={overview.group.id}
+              locked={overview.group.locked}
+            />
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }

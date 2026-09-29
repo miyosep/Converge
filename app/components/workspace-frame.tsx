@@ -38,14 +38,20 @@ export function GroupNavigation({
 export function WorkspaceFrame({
   children,
   active = "workspace",
+  gathering = false,
 }: {
   children: ReactNode;
   active?: "workspace" | "evidence";
+  gathering?: boolean;
 }) {
   return (
-    <div className="shell">
+    <div className={gathering ? "shell plans-shell gathering-shell" : "shell"}>
       <AppHeader active={active} />
-      <main className="flow-content" id="main-content" tabIndex={-1}>
+      <main
+        className={gathering ? "gathering-main" : "flow-content"}
+        id="main-content"
+        tabIndex={-1}
+      >
         {children}
       </main>
     </div>
