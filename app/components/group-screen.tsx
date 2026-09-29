@@ -1,5 +1,8 @@
 "use client";
 
+import { DiagnosticsList } from "./diagnostics";
+import { groupDiagnostics } from "../../src/lib/diagnostics/group";
+import { diagnosticMessage } from "../../src/lib/diagnostics/errors";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, LockKeyhole, RefreshCw, Users } from "lucide-react";
@@ -416,7 +419,8 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
           "The reservation is too close or has passed. Create a new group with a future reservation.",
       };
       setActionNotice(
-        messages[code] ??
+        diagnosticMessage(code) ??
+          messages[code] ??
           "The request could not be completed. Refresh to check its saved status before retrying.",
       );
     } finally {
@@ -471,6 +475,9 @@ export function GroupScreen({ id, stage }: { id: string; stage: GroupStage }) {
         </button>
       </div>
       <GroupNavigation id={id} active={stage} />
+      {overview && !loading && !error && (
+        <DiagnosticsList diagnostics={groupDiagnostics(overview).diagnostics} />
+      )}
       {actionNotice && (
         <p className="flow-note" role="status">
           {actionNotice}

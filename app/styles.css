@@ -1530,3 +1530,45 @@ details[open] summary {
   outline: 2px solid var(--accent, #37644d);
   outline-offset: 2px;
 }
+
+.group-diagnostics {
+  margin: 16px 0;
+}
+.group-diagnostics ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.group-diagnostic {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #334155;
+}
+.group-diagnostic > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.group-diagnostic strong {
+  font-size: 14px;
+}
+.group-diagnostic p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.group-diagnostic-warning {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #854d0e;
+}
+.group-diagnostic-error {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #9f1239;
+}

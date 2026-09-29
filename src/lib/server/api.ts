@@ -1,3 +1,4 @@
+import { errorDiagnostics } from "../diagnostics/errors.js";
 import { Pool } from "pg";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
@@ -113,16 +114,25 @@ export function clearSessionCookie(response: NextResponse) {
   });
 }
 
+export function apiFailure(status: number, code: string) {
+  return NextResponse.json(
+    { error: code, ...errorDiagnostics(code) },
+    {
+      status,
+      headers: { "Cache-Control": "no-store" },
+    },
+  );
+}
+
 export async function api(work: () => Promise<NextResponse>) {
   try {
     const result = await work();
     result.headers.set("Cache-Control", "no-store");
     return result;
   } catch (error) {
-    if (error instanceof ApiError)
-      return NextResponse.json({ error: error.code }, { status: error.status });
+    if (error instanceof ApiError) return apiFailure(error.status, error.code);
     if (error instanceof ZodError || error instanceof SyntaxError)
-      return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
+      return apiFailure(400, "INVALID_INPUT");
     if (error instanceof WalletAuthError) {
       const status = [
         "INVALID_SIGNATURE",
@@ -133,15 +143,13 @@ export async function api(work: () => Promise<NextResponse>) {
         : error.code === "NOT_CREATOR"
           ? 403
           : 409;
-      return NextResponse.json({ error: error.code }, { status });
+      return apiFailure(status, error.code);
     }
     if (error instanceof PreferenceRepositoryError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
-    if (error instanceof PreferenceError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
-    if (error instanceof GroupPolicyError)
-      return NextResponse.json({ error: error.code }, { status: 409 });
+      return apiFailure(409, error.code);
+    if (error instanceof PreferenceError) return apiFailure(409, error.code);
+    if (error instanceof GroupPolicyError) return apiFailure(409, error.code);
     console.error("API request failed", error);
-    return NextResponse.json({ error: "INTERNAL_ERROR" }, { status: 500 });
+    return apiFailure(500, "INTERNAL_ERROR");
   }
 }

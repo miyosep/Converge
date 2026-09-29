@@ -12,7 +12,11 @@ import {
   signWalletLogin,
   walletConnectionError,
 } from "../../src/lib/wallet-connection";
-import type { GroupSummary } from "../../src/lib/group-view";
+import { DiagnosticsList } from "./diagnostics";
+import { groupDiagnostics } from "../../src/lib/diagnostics/group";
+import { diagnosticMessage } from "../../src/lib/diagnostics/errors";
+import type { PublicDiagnostic } from "../../src/lib/diagnostics/types";
+import type { GroupOverview, GroupSummary } from "../../src/lib/group-view";
 import { RESTAURANT_IDS } from "../../src/lib/group-conditions";
 import { RestaurantPicker } from "./restaurant-picker";
 import {
@@ -83,6 +87,7 @@ export function GroupWorkspace({
   const [groupsRevision, setGroupsRevision] = useState(0);
   const [inviteToken, setInviteToken] = useState("");
   const [inviteLink, setInviteLink] = useState("");
+  const [diagnostics, setDiagnostics] = useState<PublicDiagnostic[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [preference, setPreference] = useState<Preference | null>(null);
   const [name, setName] = useState("");
@@ -107,12 +112,10 @@ export function GroupWorkspace({
     const base = `/api/groups/${encodeURIComponent(id)}`;
     try {
       const [progress, own] = await Promise.all([
-        api<{
-          participants: Participant[];
-          group: { locked: boolean; targetMemberCount: number };
-        }>(`${base}/overview`),
+        api<GroupOverview>(`${base}/overview`),
         api<{ preference: Preference | null }>(`${base}/preferences`),
       ]);
+      setDiagnostics(groupDiagnostics(progress).diagnostics);
       setParticipants(progress.participants);
       setGroupLocked(progress.group.locked);
       setTargetMemberCount(progress.group.targetMemberCount);
@@ -124,8 +127,12 @@ export function GroupWorkspace({
           : "",
       );
     } catch (error) {
+      setDiagnostics([]);
       setNotice(
-        error instanceof Error ? error.message : "Could not load group",
+        error instanceof Error
+          ? (diagnosticMessage(error.message) ??
+              "Could not load group. Refresh to try again.")
+          : "Could not load group",
       );
     }
   }, []);
@@ -172,7 +179,10 @@ export function GroupWorkspace({
     try {
       await work();
     } catch (error) {
-      setNotice(walletConnectionError(error));
+      setNotice(
+        (error instanceof Error ? diagnosticMessage(error.message) : null) ??
+          walletConnectionError(error),
+      );
     } finally {
       setBusy(false);
     }
@@ -406,6 +416,9 @@ export function GroupWorkspace({
             </>
           )}
           {groupId && <GroupNavigation id={groupId} active="preferences" />}
+          {wallet && groupId && participants.length > 0 && (
+            <DiagnosticsList diagnostics={diagnostics} />
+          )}
           {notice && (
             <div className="notice" role="status">
               {notice}

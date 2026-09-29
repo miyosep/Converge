@@ -12,6 +12,7 @@ import {
 } from "../../../../../src/lib/server/group-config.js";
 import {
   api,
+  apiFailure,
   recordKilnAttempt,
   services,
   sessionWallet,
@@ -34,13 +35,8 @@ export async function GET(request: NextRequest, context: Context) {
     }
     if (action === "chain") {
       const overview = await services().preferences.getOverview(groupId, actor);
-      if (!overview.signingPolicy)
-        return NextResponse.json({ error: "NO_POLICY" }, { status: 409 });
-      if (!process.env.RPC_URL)
-        return NextResponse.json(
-          { error: "CHAIN_UNAVAILABLE" },
-          { status: 503 },
-        );
+      if (!overview.signingPolicy) return apiFailure(409, "NO_POLICY");
+      if (!process.env.RPC_URL) return apiFailure(503, "CHAIN_UNAVAILABLE");
       try {
         const client = createPublicClient({
           chain: sepolia,
@@ -59,10 +55,7 @@ export async function GET(request: NextRequest, context: Context) {
         );
       } catch {
         // RPC errors can contain credentials. Never return or log provider text.
-        return NextResponse.json(
-          { error: "CHAIN_VERIFICATION_FAILED" },
-          { status: 503 },
-        );
+        return apiFailure(503, "CHAIN_VERIFICATION_FAILED");
       }
     }
     if (action === "overview")
@@ -77,7 +70,7 @@ export async function GET(request: NextRequest, context: Context) {
       return NextResponse.json({
         preference: await services().preferences.getOwn(groupId, actor),
       });
-    return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+    return apiFailure(404, "NOT_FOUND");
   });
 }
 
@@ -97,10 +90,7 @@ export async function POST(request: NextRequest, context: Context) {
       const repository = services().preferences;
       const overview = await repository.getOverview(groupId, actor);
       if (Date.parse(overview.group.startsAt) <= Date.now())
-        return NextResponse.json(
-          { error: "RESERVATION_PASSED" },
-          { status: 409 },
-        );
+        return apiFailure(409, "RESERVATION_PASSED");
       await repository.evaluateAndFreeze(
         groupId,
         actor,
@@ -147,11 +137,7 @@ export async function POST(request: NextRequest, context: Context) {
         })
         .parse(await request.json());
       const key = process.env.KILN_API_KEY;
-      if (!key)
-        return NextResponse.json(
-          { error: "KILN_NOT_CONFIGURED" },
-          { status: 503 },
-        );
+      if (!key) return apiFailure(503, "KILN_NOT_CONFIGURED");
       const preference = await services().preferences.submit(
         groupId,
         actor,
@@ -176,10 +162,7 @@ export async function POST(request: NextRequest, context: Context) {
           preference.revisionId,
         );
         console.error("Preference extraction failed", error);
-        return NextResponse.json(
-          { error: "EXTRACTION_FAILED" },
-          { status: 502 },
-        );
+        return apiFailure(502, "EXTRACTION_FAILED");
       }
       const parsed = await services().preferences.completeExtraction(
         groupId,
@@ -215,6 +198,6 @@ export async function POST(request: NextRequest, context: Context) {
       );
       return NextResponse.json({ preference });
     }
-    return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+    return apiFailure(404, "NOT_FOUND");
   });
 }
