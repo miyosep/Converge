@@ -13,7 +13,7 @@ There is no `.demo` read/write on the hosted execution path.
 - Vercel hosts Next.js, authenticated APIs and `/api/inngest`.
 - Inngest calls bounded job steps, retries failures and sleeps between checks.
   SDK checkpoint batching is disabled so each step has its own Vercel invocation.
-- Neon is the durable source of truth. Events carry only opaque run/group IDs;
+- Neon is the durable source of truth. Events carry opaque run/group IDs and a dispatch timestamp;
   preference text, signing keys and signed payloads do not enter event payloads
   or step results.
 - Kiln and Sepolia remain the existing remote dependencies. User-owned wallet
@@ -42,6 +42,9 @@ node --env-file=.env.inngest-test --import tsx scripts/explore-local-rehearsal.t
 ```
 
 The test branch was created from `dev-preferences`; production was not migrated.
+Apply all migrations through `0015_job_wakeup_acknowledgements.sql` before enabling
+this version of either processor. Pending wakeups now remain durable until an
+acknowledgement matches their dispatch timestamp, without resetting the cooldown.
 The DB rehearsal creates and removes only synthetic records and sends no blockchain
 transactions, AI requests or calendar messages. The Explore rehearsal uses those
 same DB adapters with disposable Anvil accounts and contracts, and reloads journals

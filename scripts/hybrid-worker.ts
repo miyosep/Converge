@@ -26,6 +26,9 @@ async function main() {
   try {
     await pool.query("SELECT 1 FROM converge_job_transactions LIMIT 1");
     await pool.query("SELECT 1 FROM converge_explore_runs LIMIT 1");
+    await pool.query(
+      "SELECT acknowledged_at FROM converge_job_wakeups LIMIT 1",
+    );
     if (process.argv.includes("--check")) {
       console.log(
         "Hybrid database connection and migrations verified. No jobs executed.",

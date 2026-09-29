@@ -12,6 +12,26 @@ import {
   serverlessJobs,
 } from "../src/lib/jobs/config.js";
 import { hybridCycle } from "../src/lib/jobs/hybrid.js";
+import { hybridEnvironment } from "../scripts/lib/hybrid-environment.js";
+
+test("PC configuration overrides stale shell variables and clears omitted app secrets", () => {
+  const env = hybridEnvironment(
+    {
+      PATH: "node-path",
+      DATABASE_URL: "wrong-database",
+      BACKGROUND_DRIVER: "inngest",
+      AGENT_EXECUTOR_PRIVATE_KEY: "old-key",
+      HYBRID_WORKER_PROCESS: "true",
+    },
+    "DATABASE_URL=\nBACKGROUND_DRIVER=local\nAGENT_EXECUTOR_PRIVATE_KEY=\n",
+    "DATABASE_URL=selected-database\nBACKGROUND_DRIVER=hybrid\n",
+  );
+  assert.equal(env.DATABASE_URL, "selected-database");
+  assert.equal(env.BACKGROUND_DRIVER, "hybrid");
+  assert.equal(env.AGENT_EXECUTOR_PRIVATE_KEY, undefined);
+  assert.equal(env.HYBRID_WORKER_PROCESS, undefined);
+  assert.equal(env.PATH, "node-path");
+});
 
 test("PC lock refuses a live legacy signer and releases its own lock", async () => {
   const root = await mkdtemp(join(tmpdir(), "converge-hybrid-lock-"));

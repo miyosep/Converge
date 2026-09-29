@@ -3,7 +3,11 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { databasePool } from "../src/lib/db/pool.js";
 import { DatabaseExploreStore } from "../src/lib/explore/database-store.js";
 import { inngest, notifyJob } from "../src/lib/jobs/client.js";
-import { scanJobs, jobHeartbeat } from "../src/lib/jobs/scan.js";
+import {
+  scanJobs,
+  jobHeartbeat,
+  acknowledgeJob,
+} from "../src/lib/jobs/scan.js";
 import { hybridCycle } from "../src/lib/jobs/hybrid.js";
 
 async function main() {
@@ -35,6 +39,31 @@ async function main() {
     assert.equal(
       (await scanJobs(pool)).some((j) => j.id === run.id),
       true,
+    );
+    // Offline longer than the former one-minute expiry must not drop the request.
+    await pool.query(
+      "UPDATE converge_job_wakeups SET dispatched_at=now()-interval '2 days' WHERE name=$1",
+      [`explore:${run.id}`],
+    );
+    const oldRequest = (await scanJobs(pool)).find((j) => j.id === run.id)!;
+    assert.ok(oldRequest.wakeup);
+    await notifyJob({ kind: "explore", id: run.id });
+    await acknowledgeJob(pool, oldRequest.key, oldRequest.wakeup);
+    assert.ok(
+      (await scanJobs(pool)).some((j) => j.id === run.id),
+      "A stale completion cannot remove a newer request",
+    );
+    const currentRequest = (await scanJobs(pool)).find((j) => j.id === run.id)!;
+    await acknowledgeJob(pool, currentRequest.key, currentRequest.wakeup);
+    assert.equal(
+      (await scanJobs(pool)).some((j) => j.id === run.id),
+      false,
+    );
+    await notifyJob({ kind: "explore", id: run.id });
+    assert.equal(
+      (await scanJobs(pool)).some((j) => j.id === run.id),
+      false,
+      "Acknowledgement preserves the ten-second dispatch cooldown",
     );
     await store.queue(wallet, { action: "extract", text: "quiet dinner" });
     await pool.query(

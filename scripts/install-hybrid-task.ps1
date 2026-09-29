@@ -7,7 +7,7 @@ $nodePath = (Get-Command node -ErrorAction Stop).Source
 # This preflight reads the database only. Never start an unconfigured signer.
 Push-Location $projectRoot
 try {
-  & $nodePath "--env-file=$envFile" --import tsx scripts/hybrid-worker.ts --check
+  & $nodePath --import tsx scripts/hybrid-service.ts --check
   if ($LASTEXITCODE -ne 0) { throw 'Hybrid preflight failed.' }
 } finally { Pop-Location }
 $runnerPath = Join-Path $projectRoot 'scripts\run-hybrid-task.ps1'

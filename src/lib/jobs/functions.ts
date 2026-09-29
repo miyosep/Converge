@@ -1,6 +1,6 @@
 import { inngest, jobSchema } from "./client.js";
 import { inngestJobsEnabled } from "./config.js";
-import { scanJobs } from "./scan.js";
+import { scanJobs, acknowledgeJob } from "./scan.js";
 import { runJob } from "./run.js";
 import { databasePool } from "../db/pool.js";
 import { syncCalendars } from "../calendar/worker.js";
@@ -24,7 +24,17 @@ export const processJob = inngest.createFunction(
           name: "converge/calendar.requested",
           data: {},
         });
-      if (!more) return;
+      if (!more) {
+        if (typeof event.data.wakeup === "string")
+          await step.run("acknowledge", () =>
+            acknowledgeJob(
+              databasePool(),
+              `${job.kind}:${job.id}`,
+              event.data.wakeup,
+            ),
+          );
+        return;
+      }
       if (i < 29) await step.sleep(`confirmations-${i}`, "10s");
     }
   },

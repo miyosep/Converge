@@ -8,8 +8,9 @@ browser does not stop processing; losing power, sleep or internet pauses it.
 
 ## Configure the shared database and web
 
-Use the same pooled `DATABASE_URL` on the PC and Vercel. Apply migration `0013`
-and any subsequent checked-in migrations before switching. Use the direct URL
+Use the same pooled `DATABASE_URL` on the PC and Vercel. Apply all checked-in
+migrations through `0015_job_wakeup_acknowledgements.sql` before starting the updated
+processor. The preflight checks the new acknowledgement column. Use the direct URL
 with the migration runner. Test in a Neon branch first.
 
 Set these on the Vercel production deployment:
@@ -36,7 +37,9 @@ with a preview intended to be isolated from execution.
    `pnpm install --frozen-lockfile`.
 2. Copy `docs/hybrid.env.example` to `.env.hybrid`. It is ignored by Git. Populate
    the same database URL and the existing test-only RPC, Kiln and operator keys.
-   The service loads **only this file**, not `.env.development` or `.env`.
+   The service loads **only this file**, not `.env.development` or `.env`. Application
+   settings in the parent terminal cannot override it; omitted application settings
+   listed in `.env.example` are cleared from the child environment.
 3. Stop the old Explore/group/calendar workers and disable hosted Inngest jobs
    using these same signers. To preserve existing file-based Explore sessions,
    stop the source web app and use `scripts/import-explore-state.ts` as documented
@@ -86,6 +89,9 @@ this Windows account. Power/sleep settings are not changed by the installer.
 ## Recovery and availability
 
 Commands, signed transactions, gas budgets and run state live in Neon. A failed
+notification remains pending until acknowledged; it does not expire while the PC
+is offline. A completion acknowledges only the dispatch version it processed,
+leaving newer requests queued and preserving the ten-second dispatch cooldown. A failed
 job does not stop other jobs in the scan. Connection failures retry; a stalled
 process is restarted by the supervisor. The next scan resumes saved work using
 the same transaction journal. Group history is checkpointed in bounded batches.
@@ -112,3 +118,12 @@ service must be completed together before a live demonstration.
   seconds. The production HTTP app then read `workerOnline=true` from Neon.
 - Windows task scripts passed PowerShell syntax checks. The persistent Windows
   task has not been registered and live processing has not been enabled.
+
+Release review against `origin/main` (`8f5ede4`) used a clean isolated checkout:
+138 tests, the hybrid production build, ordinary-group and Explore Anvil payment,
+cancellation, expiry and refund rehearsals all passed. Additional Neon checks cover
+two-day-old notifications, concurrent newer wakeups and preserved dispatch throttling.
+The PC preflight passed despite deliberately incorrect inherited driver/DB values.
+The migration runner now accepts legacy LF/CRLF checksum differences while still
+rejecting SQL content changes. Migration `0015` was applied only to the isolated
+test branch; deploying this release still requires applying it to the chosen live DB.

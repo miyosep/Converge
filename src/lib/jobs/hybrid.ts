@@ -1,6 +1,6 @@
 import type { Pool } from "pg";
 import type { Job } from "./client.js";
-import { scanJobs, jobHeartbeat } from "./scan.js";
+import { scanJobs, jobHeartbeat, acknowledgeJob } from "./scan.js";
 
 export async function hybridCycle(
   pool: Pool,
@@ -18,7 +18,8 @@ export async function hybridCycle(
     for (const job of jobs) {
       if (stopping()) return count;
       try {
-        await execute(job);
+        const more = await execute(job);
+        if (!more) await acknowledgeJob(pool, job.key, job.wakeup);
         // Consume a fresh chain snapshot before the next group delays it.
         if (job.kind === "group") await calendar();
       } catch {
