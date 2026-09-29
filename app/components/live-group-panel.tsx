@@ -67,13 +67,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
     return () => clearInterval(timer);
   }, [base]);
   async function action(
-    name:
-      | "vote"
-      | "decisions"
-      | "invite"
-      | "live-preferences"
-      | "live-confirm"
-      | "recommend",
+    name: "vote" | "invite" | "live-preferences" | "live-confirm" | "recommend",
     body: unknown = {},
   ) {
     setBusy(true);
@@ -103,6 +97,8 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
             "The group search failed. Your confirmed requirements are saved; try again.",
           EXTRACTION_FAILED:
             "Your text was saved, but interpretation failed. Try submitting again.",
+          BOOKING_QUOTE_UNAVAILABLE:
+            "The venue’s booking amount has not been confirmed. Payment is unavailable.",
           NOT_CREATOR: "Only the group organizer can create an invitation.",
           GROUP_FULL: "Everyone has joined. You can now agree on a place.",
           GROUP_LOCKED: "The policy is already fixed. Refresh to review it.",
@@ -136,9 +132,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
             ? data.livePlan?.recommendationReady
               ? "Candidates found using every member’s confirmed requirements. Review before agreeing."
               : "No candidates are ready. Review the group search result below."
-            : name === "vote"
-              ? "Your choice is saved. No payment has been approved."
-              : "The policy is fixed. Each person must still approve and contribute from their wallet.",
+            : "Your choice is saved. No payment has been approved.",
         );
       }
     } catch (error) {
@@ -158,17 +152,13 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
   return (
     <>
       <section className="flow-panel">
-        <h2>Choose together, then approve separately</h2>
+        <h2>Choose a place together</h2>
         <p>
           {overview.participants.length} of {overview.group.targetMemberCount}{" "}
-          members joined. Each person contributes 10 MockUSDC; the exact group
-          deposit is {plan.depositUsdc} MockUSDC.
+          members joined. Choose a place together, then confirm its booking
+          terms and each person’s share.
         </p>
-        <p>
-          This is a test booking. Availability and USDC acceptance are demo
-          assumptions. The recipient is a demo booking wallet:{" "}
-          <span className="address-value">{plan.merchant}</span>.
-        </p>
+
         <p>
           Everyone submits their own preferences privately. After every member
           confirms their interpretation, we search for places using the whole
@@ -361,7 +351,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
             void action("vote", {
               placeId: choice,
               recommendationRevision: plan.recommendationRevision,
-              acknowledgeDemo: accepted,
+              acknowledgeChoice: accepted,
             });
           }}
         >
@@ -414,9 +404,8 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
                 checked={accepted}
                 onChange={(event) => setAccepted(event.target.checked)}
               />{" "}
-              I agree to this candidate, the {plan.depositUsdc} MockUSDC group
-              deposit and my 10 MockUSDC contribution under the demo assumptions
-              above. My wallet approval happens separately.
+              I agree to this place. Any payment requires a confirmed amount and
+              my separate approval.
             </label>
             <button className="primary" disabled={busy || !choice || !accepted}>
               Save my choice
@@ -424,17 +413,28 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
           </fieldset>
           <p>
             {agreed
-              ? `Everyone chose ${agreed.name}. You can now prepare the shared payment policy.`
-              : "Everyone must choose the same place. Members can change their choice until the policy is prepared."}
+              ? `Everyone chose ${agreed.name}. Confirm the booking terms with the venue next.`
+              : "Everyone must choose the same place. You can change your choice while planning."}
           </p>
-          <button
-            type="button"
-            className="secondary"
-            disabled={busy || !agreed}
-            onClick={() => void action("decisions")}
-          >
-            Prepare agreed payment policy
-          </button>
+          {agreed && (
+            <section aria-labelledby="booking-terms-title">
+              <h3 id="booking-terms-title">Booking details</h3>
+              <p>Group deposit: not confirmed</p>
+              <p>Your share: available once the deposit is confirmed</p>
+              <p>
+                Reservation prices and availability are not connected yet.
+                Contact the venue to confirm the terms. Payments are not
+                available for this plan.
+              </p>
+              <a
+                href={agreed.websiteUrl ?? agreed.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View venue details
+              </a>
+            </section>
+          )}
         </form>
       )}
       <section className="flow-panel">

@@ -61,10 +61,12 @@ export function AppHeader({
           </Link>
         </nav>
         <div className="top-actions">
-          <span className="network">
-            <span className="network-dot" />
-            Sepolia testnet
-          </span>
+          {(active === "demo" || active === "evidence") && (
+            <span className="network">
+              <span className="network-dot" />
+              Sepolia testnet
+            </span>
+          )}
           {action}
         </div>
       </header>

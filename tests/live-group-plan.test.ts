@@ -3,14 +3,11 @@ import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import {
-  buildLiveGroupPolicy,
   unanimousPlace,
   livePlanRequestSchema,
   type LivePlan,
 } from "../src/lib/discovery/live-plan.js";
-import { currentGroupPolicyConfig } from "../src/lib/server/group-config.js";
 import { LiveGroupPanel } from "../app/components/live-group-panel.js";
-import { calendarEvent } from "../src/lib/calendar/google.js";
 import { GroupFirstForm } from "../app/components/group-first-form.js";
 
 const members = [
@@ -62,57 +59,17 @@ const slot = {
     .replace(/\.\d{3}Z$/, "Z"),
   timeZone: "Asia/Seoul",
 };
-const input = {
-  groupId: "test-group",
-  plan,
-  members,
-  target: 2,
-  slot,
-  config: currentGroupPolicyConfig(),
-  nowSeconds: now,
-};
-
-test("live group policy needs every current member's same choice and binds venue, conditions and exact deposit", () => {
-  const saved = buildLiveGroupPolicy(input);
-  assert.equal(saved.policy.policyVersion, 2);
-  assert.equal(saved.policy.approvalThreshold, 2);
-  assert.equal(saved.policy.paymentAmount, "15000000");
-  assert.equal(saved.policy.contributionPerParticipant, "10000000");
-  assert.equal(saved.policy.maxTotalSpend, "15000000");
+test("place choice requires all members and does not imply a payment amount", () => {
+  assert.equal(unanimousPlace(plan, members, 2)?.id, "venue-1");
   assert.equal(unanimousPlace(plan, members, 3), undefined);
-  assert.throws(
-    () =>
-      buildLiveGroupPolicy({
-        ...input,
-        plan: { ...plan, votes: { [members[0]!]: "venue-1" } },
-      }),
-    /UNANIMOUS/,
+  assert.equal(
+    unanimousPlace(
+      { ...plan, votes: { [members[0]!]: "venue-1" } },
+      members,
+      2,
+    ),
+    undefined,
   );
-  assert.throws(
-    () =>
-      buildLiveGroupPolicy({
-        ...input,
-        plan: { ...plan, votes: { ...plan.votes, [members[1]!]: "other" } },
-      }),
-    /UNANIMOUS/,
-  );
-  assert.throws(
-    () =>
-      buildLiveGroupPolicy({
-        ...input,
-        slot: { ...slot, startsAt: new Date(now * 1000).toISOString() },
-      }),
-    /RESERVATION_PASSED/,
-  );
-  for (const changed of [
-    { ...plan, depositUsdc: 16 },
-    { ...plan, places: [{ ...plan.places[0]!, name: "Different venue" }] },
-    { ...plan, intent: { ...plan.intent, otherRequirements: ["quiet"] } },
-  ])
-    assert.notEqual(
-      buildLiveGroupPolicy({ ...input, plan: changed }).policyHash,
-      saved.policyHash,
-    );
 });
 
 test("live plan requests reject arbitrary recipients and deposits exceeding contributions", () => {
@@ -173,14 +130,12 @@ test("friends review unverified venue conditions and separate place choice from 
   );
   assert.match(html, /Save my choice/);
   assert.match(html, /Needs confirmation/);
-  assert.match(html, /wallet approval happens separately/);
-  const event = calendarEvent(
-    { ...overview, signingPolicy: buildLiveGroupPolicy(input) },
-    60,
-    "id",
+  assert.match(html, /Group deposit: not confirmed/);
+  assert.match(html, /Payments are not available for this plan/);
+  assert.doesNotMatch(
+    html,
+    /10 MockUSDC|15 MockUSDC|demo booking wallet|Prepare agreed payment/,
   );
-  assert.equal(event.location, "Saved real candidate — Seoul");
-  assert.match(event.description, /NOT a real venue reservation/);
 });
 
 test("a new group accepts private draft preferences without a prior search or shortlist", () => {
@@ -192,9 +147,7 @@ test("a new group accepts private draft preferences without a prior search or sh
     name: "Friday",
     displayName: "Alice",
     targetMemberCount: 2,
-    depositUsdc: 15,
     slot,
-    acknowledgeDemo: true,
   };
   assert.ok(livePlanRequestSchema.safeParse(request).success);
   assert.equal(
@@ -225,4 +178,5 @@ test("a new group accepts private draft preferences without a prior search or sh
   assert.match(html, /Save group &amp; invite friends/);
   assert.doesNotMatch(html, /Find restaurants|Compare selected/);
   assert.match(html, /Saved privately/);
+  assert.doesNotMatch(html, /MockUSDC|test booking|demo booking|Sepolia/);
 });

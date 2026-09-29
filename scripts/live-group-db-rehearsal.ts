@@ -279,31 +279,22 @@ async function main() {
     await repo.vote(id, bob!, "two", refreshed.token);
     await assert.rejects(
       repo.prepare(id, alice!, currentGroupPolicyConfig()),
-      /UNANIMOUS/,
+      /BOOKING_QUOTE_UNAVAILABLE/,
     );
     await repo.vote(id, bob!, "one", refreshed.token);
-    const policies = await Promise.all([
-      repo.prepare(id, alice!, currentGroupPolicyConfig()),
-      repo.prepare(id, bob!, currentGroupPolicyConfig()),
-    ]);
-    assert.equal(policies[0]!.policyHash, policies[1]!.policyHash);
-    assert.equal(policies[0]!.policy.approvalThreshold, 2);
-    assert.equal(policies[0]!.policy.paymentAmount, "15000000");
-    await assert.rejects(
-      repo.submitPreference(id, alice!, "change", next.revisionId),
-      /GROUP_LOCKED/,
-    );
-    await assert.rejects(
-      repo.vote(id, bob!, "two", refreshed.token),
-      /GROUP_LOCKED/,
-    );
-    await assert.rejects(groups.leaveGroup(id, bob!), /GROUP_LOCKED/);
-    assert.equal(
-      (await groups.getOverview(id, bob!)).signingPolicy?.policyHash,
-      policies[0]!.policyHash,
-    );
+    for (const member of [alice!, bob!]) {
+      await assert.rejects(
+        repo.prepare(id, member, currentGroupPolicyConfig()),
+        /BOOKING_QUOTE_UNAVAILABLE/,
+      );
+    }
+    const unpaid = await groups.getOverview(id, bob!);
+    assert.equal(unpaid.signingPolicy, null);
+    assert.equal(unpaid.group.locked, false);
+    assert.equal(unpaid.livePlan?.depositUsdc, null);
+    assert.equal(unpaid.livePlan?.merchant, null);
     console.log(
-      "Friends DB flow: saved search, invitations, private confirmed preferences, stale-result rejection, all-member recommendation, unanimous selection and immutable policy passed.",
+      "Friends DB flow: saved search, invitations, private confirmed preferences, stale-result rejection, all-member recommendation, unanimous selection and rejection of unquoted payments passed.",
     );
   } finally {
     for (const id of groupIds) {

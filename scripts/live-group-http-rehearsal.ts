@@ -119,8 +119,6 @@ async function main() {
         name: "Friends live integration rehearsal",
         displayName: "Alice",
         targetMemberCount: 2,
-        depositUsdc: 15,
-        acknowledgeDemo: true,
         slot: {
           startsAt: new Date(Date.now() + 7200000)
             .toISOString()
@@ -190,21 +188,19 @@ async function main() {
     const vote = {
       placeId: result.livePlan.places[0].id,
       recommendationRevision: result.livePlan.recommendationRevision,
-      acknowledgeDemo: true,
+      acknowledgeChoice: true,
     };
     await request(`${base}/vote`, vote);
     await request(`${base}/decisions`, {}, 0, 409);
     await request(`${base}/vote`, vote, 1);
-    const { data: policy } = await request(`${base}/decisions`, {});
-    assert.equal(policy.signingPolicy.policy.approvalThreshold, 2);
-    assert.equal(policy.signingPolicy.policy.paymentAmount, "15000000");
+    const { data: blocked } = await request(`${base}/decisions`, {}, 0, 409);
+    assert.equal(blocked.error, "BOOKING_QUOTE_UNAVAILABLE");
     const { data: guest } = await request(`${base}/overview`, undefined, 1);
-    assert.equal(
-      guest.signingPolicy.policyHash,
-      policy.signingPolicy.policyHash,
-    );
+    assert.equal(guest.signingPolicy, null);
+    assert.equal(guest.livePlan.depositUsdc, null);
+    assert.equal(guest.livePlan.merchant, null);
     console.log(
-      `PASS live HTTP: two SIWE sessions, group created before any search, private draft, invitation, two confirmed Kiln preferences, ${result.livePlan.places.length} group candidates, unanimous choice and one immutable shared policy. No chain transactions.`,
+      `PASS live HTTP: two SIWE sessions, group created before any search, private draft, invitation, two confirmed Kiln preferences, ${result.livePlan.places.length} group candidates, unanimous choice and blocked payment without verified booking terms. No chain transactions.`,
     );
     if (preview) {
       console.log(

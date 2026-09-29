@@ -514,7 +514,7 @@ export function RestaurantDiscovery({
       </div>
       <p className="discovery-booking-note">
         Confirm prices and facilities with the venue. Booking availability is
-        not checked. Demo bookings assume USDC support.
+        not checked.{!standalone && " Demo bookings assume USDC support."}
       </p>
       <div role="status" aria-live="polite" aria-busy={busy}>
         {busy && !standalone && (

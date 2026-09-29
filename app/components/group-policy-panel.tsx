@@ -29,7 +29,7 @@ export function GroupPolicyPanel({
     ? {
         ...livePlace,
         merchant: overview.livePlan!.merchant,
-        depositBaseUnits: String(overview.livePlan!.depositUsdc * 1_000_000),
+        depositBaseUnits: signingPolicy?.policy.paymentAmount ?? "0",
       }
     : evaluation?.catalog.find(
         (candidate) => candidate.id === evaluation.winnerId,

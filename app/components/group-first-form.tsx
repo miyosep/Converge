@@ -45,7 +45,6 @@ export function GroupFirstForm({
   const [count, setCount] = useState(4);
   const [when, setWhen] = useState("");
   const [text, setText] = useState("");
-  const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -59,14 +58,12 @@ export function GroupFirstForm({
       setInvite("");
       setText("");
       setDisplayName("");
-      setAccepted(false);
       setError("");
       setCopied(false);
       requestId.current = "";
     }
     previousWallet.current = wallet;
   }, [wallet]);
-  const deposit = Math.min(30, count * 10);
 
   async function createInvite(id: string) {
     const response = await fetch(
@@ -112,13 +109,11 @@ export function GroupFirstForm({
               `${discoveryCategories[category].label} with friends`,
             displayName,
             targetMemberCount: count,
-            depositUsdc: deposit,
             slot: {
               startsAt: new Date(when).toISOString().replace(/\.\d{3}Z$/, "Z"),
               timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             },
             initialPreferences: text,
-            acknowledgeDemo: accepted,
           }),
         });
         const data = await response.json();
@@ -328,19 +323,6 @@ export function GroupFirstForm({
             add their own.
           </p>
         </div>
-        <label className="group-demo-consent">
-          <input
-            type="checkbox"
-            required
-            checked={accepted}
-            onChange={(event) => setAccepted(event.target.checked)}
-          />
-          <span>
-            I understand this is a test booking: a {deposit} MockUSDC group
-            deposit and 10 MockUSDC per person on Sepolia. Everyone approves
-            separately later. No payment now.
-          </span>
-        </label>
       </fieldset>
       <button
         type="submit"

@@ -211,7 +211,7 @@ export async function POST(request: NextRequest, context: Context) {
       const body = z
         .strictObject({
           placeId: z.string().min(1).max(100),
-          acknowledgeDemo: z.literal(true),
+          acknowledgeChoice: z.literal(true),
           recommendationRevision: z.string().min(1),
         })
         .parse(await request.json());

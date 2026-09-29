@@ -7,7 +7,6 @@ import {
   type DiscoveryResult,
 } from "../discovery/types.js";
 import {
-  buildLiveGroupPolicy,
   livePlanRequestSchema,
   type LivePlan,
 } from "../discovery/live-plan.js";
@@ -104,7 +103,7 @@ export class LivePlanRepository {
       [searchId, wallet(actor), JSON.stringify(placeIds)],
     );
   }
-  async create(actor: string, raw: unknown, merchant: `0x${string}`) {
+  async create(actor: string, raw: unknown, _legacyMerchant?: `0x${string}`) {
     const input = livePlanRequestSchema.parse(raw);
     const creator = wallet(actor);
     if (Date.parse(input.slot.startsAt) <= Date.now() + 60_000)
@@ -151,8 +150,8 @@ export class LivePlanRepository {
           intent: result.intent,
           source: result.source,
           searchedAt: result.searchedAt,
-          depositUsdc: input.depositUsdc,
-          merchant,
+          depositUsdc: null,
+          merchant: null,
         };
       } else {
         snapshot = {
@@ -171,8 +170,8 @@ export class LivePlanRepository {
           },
           source: "xAPI (Google Maps)",
           searchedAt: "",
-          depositUsdc: input.depositUsdc,
-          merchant,
+          depositUsdc: null,
+          merchant: null,
         };
       }
       const groupId = input.requestId;
@@ -461,9 +460,9 @@ export class LivePlanRepository {
       );
     });
   }
-  async prepare(groupId: string, actor: string, config: GroupPolicyConfig) {
+  async prepare(groupId: string, actor: string, _config: GroupPolicyConfig) {
     return transaction(this.pool, async (db) => {
-      const row = await this.lock(db, groupId, actor);
+      await this.lock(db, groupId, actor);
       const existing = (
         await db.query(
           "SELECT policy,policy_hash,created_at FROM converge_group_policies WHERE group_id=$1",
@@ -480,60 +479,9 @@ export class LivePlanRepository {
           createdAt: existing.created_at.toISOString(),
         };
       }
-      const members = (
-        await db.query<{ wallet_address: string }>(
-          "SELECT wallet_address FROM converge_participants WHERE group_id=$1 ORDER BY wallet_address",
-          [groupId],
-        )
-      ).rows.map((member) => member.wallet_address);
-      const confirmed = await this.confirmedPreferences(
-        db,
-        groupId,
-        row.target_member_count,
-      );
-      if (confirmed.revision !== row.snapshot.preferenceRevision)
-        throw new LivePlanError("STALE_RECOMMENDATION");
-      let saved;
-      try {
-        saved = buildLiveGroupPolicy({
-          groupId,
-          plan: { ...row.snapshot, votes: row.votes },
-          members,
-          target: row.target_member_count,
-          slot: {
-            startsAt: row.reservation_starts_at.toISOString(),
-            timeZone: row.reservation_time_zone,
-          },
-          config,
-          nowSeconds: Math.floor(Date.now() / 1000),
-        });
-      } catch (error) {
-        if (
-          error instanceof Error &&
-          [
-            "UNANIMOUS_CHOICE_REQUIRED",
-            "RESERVATION_PASSED",
-            "PREFERENCES_NOT_CONFIRMED",
-          ].includes(error.message)
-        )
-          throw new LivePlanError(error.message);
-        throw error;
-      }
-      await db.query(
-        "INSERT INTO converge_group_policies(decision_id,group_id,evaluation_id,policy,policy_hash,created_at) VALUES($1,$2,NULL,$3::jsonb,$4,$5)",
-        [
-          saved.policy.decisionId,
-          groupId,
-          JSON.stringify(saved.policy),
-          saved.policyHash,
-          saved.createdAt,
-        ],
-      );
-      await db.query(
-        "UPDATE converge_groups SET preferences_locked=true WHERE id=$1",
-        [groupId],
-      );
-      return saved;
+      // Search listings do not provide verified booking terms or a payable venue recipient.
+      // Never turn a planning choice into a fabricated testnet payment.
+      throw new LivePlanError("BOOKING_QUOTE_UNAVAILABLE");
     });
   }
 }

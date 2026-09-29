@@ -1,4 +1,4 @@
-import { buildLiveGroupPolicy } from "../src/lib/discovery/live-plan.js";
+import { buildRehearsalPolicy } from "./lib/rehearsal-payment-policy.js";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
@@ -214,7 +214,7 @@ async function main() {
     });
     if (livePlace) {
       const addresses = members.map((member) => member.address);
-      policy = buildLiveGroupPolicy({
+      policy = buildRehearsalPolicy({
         groupId: "live-group-rehearsal",
         config,
         members: addresses,
