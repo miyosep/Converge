@@ -3,7 +3,7 @@ import { z } from "zod";
 import { scorePercent, type SavedEvaluation } from "./group-view.js";
 import type { KilnClient } from "./kiln/client.js";
 
-export const EXPLANATION_PROMPT_VERSION = "public-explanation-v4";
+export const EXPLANATION_PROMPT_VERSION = "public-explanation-v5";
 const reasonSchema = z.enum(["ranking", "price", "deposit", "comparison"]);
 export type ExplanationReason = z.infer<typeof reasonSchema>;
 export const explanationSelectionSchema = z.strictObject({
@@ -34,8 +34,8 @@ export function publicExplanationFacts(evaluation: SavedEvaluation) {
   )?.scoreMicros;
   if (winnerScore === undefined || winnerScore === null) return null;
   const facts: Record<ExplanationReason, string> = {
-    ranking: `${winner.name} ranks first among eligible candidates with a public score of ${scorePercent(winnerScore)}/100. Ties use lower meal price, then candidate ID.`,
-    price: `The synthetic catalog estimates $${(winner.mealPricePerPersonCents / 100).toFixed(2)} per person.`,
+    ranking: `${winner.name} ranks first among eligible candidates with a public score of ${scorePercent(winnerScore)}/100. Ties use lower per-person price, then candidate ID.`,
+    price: `The synthetic catalog estimates $${(winner.mealPricePerPersonCents / 100).toFixed(2)} per ${winner.priceUnit ?? "person"}.`,
     deposit: `Its group reservation deposit is ${formatUnits(BigInt(winner.depositBaseUnits), 6)} MockUSDC.`,
     comparison: `${eligible} of ${evaluation.candidates.length} sample candidates met the group's confirmed requirements.`,
   };
@@ -68,11 +68,11 @@ export async function explainPublicEvaluation(
       {
         role: "system",
         content: [
-          "Select one to three fact IDs that best explain the public restaurant result.",
-          "Always include ranking so the explanation identifies the selected restaurant.",
+          "Select one to three fact IDs that best explain the public booking result.",
+          "Always include ranking so the explanation identifies the selected candidate.",
           'Return only a JSON object with exactly one key, for example {"reasonIds":["ranking","price"]}.',
           "Allowed IDs: ranking, price, deposit, comparison. Do not repeat an ID or add prose, markdown, or other keys.",
-          "Do not infer private preferences, identities, rejection reasons, allergies, or restaurant facts.",
+          "Do not infer private preferences, identities, rejection reasons, allergies, or venue facts.",
           "The application renders approved fact sentences; you cannot write new claims.",
         ].join(" "),
       },

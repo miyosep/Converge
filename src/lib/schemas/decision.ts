@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { extractionSchema } from "./constraints.js";
+import { CATEGORY_IDS, FACILITIES } from "../catalog-options.js";
 import {
   addressSchema,
   centsSchema,
@@ -20,6 +21,11 @@ export const reservationSlotSchema = z.strictObject({
 });
 const safety = z.enum(["supported", "unsupported", "unknown"]);
 export const restaurantSchema = z.strictObject({
+  category: z.enum(CATEGORY_IDS).optional(),
+  priceUnit: z.string().min(1).max(80).optional(),
+  capacity: z.number().int().min(1).max(100).optional(),
+  beds: z.number().int().min(1).max(100).optional(),
+  facilities: z.array(z.enum(FACILITIES)).optional(),
   id: idSchema,
   name: z.string().min(1).max(80),
   cuisine: z.string().min(1).max(80).optional(),
@@ -53,6 +59,7 @@ export const restaurantCatalogSchema = z
       "restaurants-v1",
       "restaurants-v2",
       "restaurants-v3",
+      "venues-v1",
     ]),
     synthetic: z.literal(true),
     restaurants: z.array(restaurantSchema).min(1).max(100),

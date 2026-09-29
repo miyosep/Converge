@@ -1,5 +1,13 @@
 # First Web Workflow
 
+## Multi-industry examples
+
+Ordinary groups now offer 100 fictional examples: 20 each for restaurants, stays,
+spaces, sports and classes. Apply migration `0011_multi_industry_catalog.sql`.
+See [multi-industry behavior and verification](MULTI_INDUSTRY.md). The restaurant
+and payment workflows described below remain compatible.
+
+
 ## Flexible group formation
 
 New ordinary groups accept `targetMemberCount` from 2 to 100, including the

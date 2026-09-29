@@ -38,9 +38,11 @@ export function Brand() {
 export function AppHeader({
   active = "workspace",
   action,
+  publicView = false,
 }: {
   active?: "workspace" | "demo" | "evidence";
   action?: ReactNode;
+  publicView?: boolean;
 }) {
   return (
     <>
@@ -51,10 +53,12 @@ export function AppHeader({
         <Brand />
         <nav className="main-nav" aria-label="Main navigation">
           <Link
-            href="/"
-            aria-current={active === "workspace" ? "page" : undefined}
+            href={publicView ? "#how-it-works" : "/"}
+            aria-current={
+              !publicView && active === "workspace" ? "page" : undefined
+            }
           >
-            Workspace
+            {publicView ? "How it works" : "Workspace"}
           </Link>
           <Link
             href="/demo"
@@ -129,46 +133,86 @@ export function GatheringIllustration() {
 
 export function WelcomeWorkspace({
   busy,
+  loading = false,
+  notice = "",
+  invited = false,
   onConnect,
 }: {
   busy: boolean;
+  loading?: boolean;
+  notice?: string;
+  invited?: boolean;
   onConnect: () => void;
 }) {
   return (
     <div className="welcome">
-      <section className="welcome-hero">
-        <div className="welcome-copy">
-          <p className="eyebrow">
-            <span className="accent-dot" />
-            LESS COORDINATING. MORE CONNECTING.
+      <section className="landing-hero" aria-labelledby="welcome-title">
+        <img
+          className="landing-visual"
+          src="/images/converge-orbit.webp"
+          alt=""
+          fetchPriority="high"
+          width={1672}
+          height={941}
+        />
+        <div className="landing-shade" aria-hidden="true" />
+        <div className="landing-copy">
+          <p className="landing-eyebrow">
+            <span className="accent-dot" /> DIFFERENT PEOPLE. SHARED
+            POSSIBILITIES.
           </p>
-          <h1>
-            Different tastes.
+          <h1 id="welcome-title">
+            Every voice.
             <br />
-            One <em>good plan.</em>
+            <em>One shared plan.</em>
           </h1>
-          <p className="hero-description">
-            Find a dinner everyone can agree on. Share your preferences
-            privately, decide together, and approve exactly what gets spent.
+          <p className="landing-description">
+            Bring your people together. Converge turns private preferences into
+            a plan everyone can approve — from dinner and weekend stays to
+            spaces, sports and new experiences.
           </p>
-          <div className="hero-actions">
-            <button className="primary" disabled={busy} onClick={onConnect}>
-              {busy ? "Connecting…" : "Open your workspace"}
-              <ArrowRight size={18} />
+          <div className="landing-actions">
+            <button
+              className="primary"
+              disabled={busy || loading}
+              onClick={onConnect}
+            >
+              <Wallet size={18} aria-hidden="true" />
+              {loading
+                ? "Checking your session…"
+                : busy
+                  ? "Connecting…"
+                  : "Connect wallet"}
+              <ArrowRight size={18} aria-hidden="true" />
             </button>
-            <Link className="secondary" href="/demo">
-              Explore the demo
-              <ArrowUpRight size={17} />
-            </Link>
+            <a className="landing-secondary" href="#how-it-works">
+              Discover Converge <ArrowUpRight size={18} aria-hidden="true" />
+            </a>
           </div>
-          <p className="wallet-hint">
-            <Wallet size={15} />
-            Connect a browser wallet. Sign in with a message, free of charge.
+          <p className="landing-login-hint">
+            Your wallet is your sign-in. A message signature, no payment.
           </p>
+          {invited && (
+            <p className="landing-invitation">
+              Your group is waiting. Sign in to continue with your invitation.
+            </p>
+          )}
+          <div className="landing-status" role="status" aria-live="polite">
+            {notice}
+          </div>
         </div>
-        <GatheringIllustration />
+        <div className="landing-bottom">
+          <span>AI proposes. Humans approve.</span>
+          <a href="#how-it-works">
+            A better way to decide <span aria-hidden="true">↓</span>
+          </a>
+        </div>
       </section>
-      <section className="how-it-works" aria-labelledby="how-it-works-title">
+      <section
+        id="how-it-works"
+        className="how-it-works"
+        aria-labelledby="how-it-works-title"
+      >
         <div className="section-intro">
           <p className="eyebrow">
             A LITTLE STRUCTURE. A LOT LESS BACK-AND-FORTH.
@@ -198,7 +242,7 @@ export function WelcomeWorkspace({
               Icon: Users,
               title: "Find your common ground",
               description:
-                "Review your interpreted preferences, then compare restaurants that fit the group's confirmed requirements.",
+                "Review your interpreted preferences, then compare places and experiences that fit the group's confirmed requirements.",
             },
             {
               number: "03",
@@ -224,7 +268,7 @@ export function WelcomeWorkspace({
           <span className="network-dot" />A working prototype on Ethereum
           Sepolia
         </span>
-        <span>Test tokens · Sample restaurants · No real reservations</span>
+        <span>Test tokens · Sample venues · No real reservations</span>
       </div>
     </div>
   );

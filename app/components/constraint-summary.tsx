@@ -4,6 +4,8 @@ import {
 } from "../../src/lib/schemas/constraints";
 
 function valueLabel(condition: Constraint) {
+  if (condition.field === "minimum_beds")
+    return `At least ${condition.value} beds`;
   if (condition.type === "soft") return `Weight ${condition.weight}`;
   if (condition.field === "budget_per_person_cents")
     return `At most $${(condition.value / 100).toFixed(2)} per person`;

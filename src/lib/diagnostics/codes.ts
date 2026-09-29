@@ -89,7 +89,7 @@ export const DIAGNOSTIC_CODES = {
     remedy: "group",
     retryable: false,
     shareable: true,
-    title: "Ready to compare restaurants",
+    title: "Ready to compare candidates",
     guidance:
       "Everyone has confirmed. Open Results and evaluate the group to find a match.",
   },
@@ -101,7 +101,7 @@ export const DIAGNOSTIC_CODES = {
     shareable: true,
     title: "No candidate meets every requirement",
     guidance:
-      "Members can review their private requirements, confirm any changes, and evaluate again. A different restaurant shortlist requires a new group.",
+      "Members can review their private requirements, confirm any changes, and evaluate again. A different candidate shortlist requires a new group.",
   },
   DEC_SCORE_TIE: {
     stage: "evaluation",
@@ -111,7 +111,7 @@ export const DIAGNOSTIC_CODES = {
     shareable: true,
     title: "Top candidates have the same score",
     guidance:
-      "The saved recommendation uses meal price, then candidate ID, to break the tie.",
+      "The saved recommendation uses per-person price, then candidate ID, to break the tie.",
   },
   PLN_POLICY_PENDING: {
     stage: "policy",

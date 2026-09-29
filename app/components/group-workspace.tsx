@@ -20,6 +20,11 @@ import type { GroupOverview, GroupSummary } from "../../src/lib/group-view";
 import { RESTAURANT_IDS } from "../../src/lib/group-conditions";
 import { RestaurantPicker } from "./restaurant-picker";
 import {
+  categories,
+  optionsForCategory,
+  type Category,
+} from "../../src/lib/catalog-options";
+import {
   groupSizeSchema,
   MIN_GROUP_MEMBERS,
   MAX_GROUP_MEMBERS,
@@ -101,6 +106,7 @@ export function GroupWorkspace({
   const [permittedRestaurantIds, setPermittedRestaurantIds] = useState<
     string[]
   >([...RESTAURANT_IDS]);
+  const [category, setCategory] = useState<Category>("restaurant");
   const [text, setText] = useState("");
   const [correction, setCorrection] = useState("");
   const [busy, setBusy] = useState(false);
@@ -118,6 +124,7 @@ export function GroupWorkspace({
       setDiagnostics(groupDiagnostics(progress).diagnostics);
       setParticipants(progress.participants);
       setGroupLocked(progress.group.locked);
+      setCategory(progress.group.category ?? "restaurant");
       setTargetMemberCount(progress.group.targetMemberCount);
       setPreference(own.preference);
       setText(own.preference?.rawText ?? "");
@@ -212,6 +219,7 @@ export function GroupWorkspace({
       });
       setWallet(session.walletAddress);
       setNotice("");
+      if (mode === "home" && !groupId) window.location.assign("/group/new");
     });
   }
 
@@ -311,10 +319,37 @@ export function GroupWorkspace({
     });
   }
 
-  const welcome = !wallet && !groupId && mode === "home";
   const hasUnsavedCorrection =
     !!preference?.extraction &&
     correction !== JSON.stringify(preference.extraction, null, 2);
+  if (!wallet)
+    return (
+      <div className="shell landing-shell">
+        <AppHeader
+          publicView
+          action={
+            <button
+              className="wallet-button"
+              type="button"
+              onClick={() => void connect()}
+              disabled={busy || sessionLoading}
+            >
+              <Wallet size={16} aria-hidden="true" />{" "}
+              {busy ? "Connecting…" : "Connect wallet"}
+            </button>
+          }
+        />
+        <main id="main-content" tabIndex={-1}>
+          <WelcomeWorkspace
+            busy={busy}
+            loading={sessionLoading}
+            notice={notice}
+            invited={!!inviteToken}
+            onConnect={() => void connect()}
+          />
+        </main>
+      </div>
+    );
   return (
     <div className="shell">
       <AppHeader
@@ -350,8 +385,8 @@ export function GroupWorkspace({
           )
         }
       />
-      <div className={`workspace ${welcome ? "welcome-workspace" : ""}`}>
-        {!welcome && (
+      <div className="workspace">
+        {wallet && (
           <aside className="sidebar">
             <div className="sidebar-label">YOUR SPACE</div>
             <nav aria-label="Workspace navigation">
@@ -382,7 +417,7 @@ export function GroupWorkspace({
           </aside>
         )}
         <main className="content" id="main-content" tabIndex={-1}>
-          {!welcome && (
+          {wallet && (
             <>
               <div className="heading">
                 <div>
@@ -423,36 +458,6 @@ export function GroupWorkspace({
             <div className="notice" role="status">
               {notice}
             </div>
-          )}
-          {sessionLoading ? (
-            <div className="session-loading" role="status">
-              Opening your workspace…
-            </div>
-          ) : welcome ? (
-            <WelcomeWorkspace busy={busy} onConnect={() => void connect()} />
-          ) : (
-            !wallet && (
-              <div className="empty-state">
-                <Wallet size={27} />
-                <h2>
-                  {groupId
-                    ? "Your group is waiting"
-                    : "Let's get your group together"}
-                </h2>
-                <p>
-                  Sign a message to access your private group workspace. No
-                  transaction is required to sign in.
-                </p>
-                <button
-                  className="primary"
-                  onClick={() => void connect()}
-                  disabled={busy}
-                >
-                  {busy ? "Connecting…" : "Connect wallet to continue"}{" "}
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            )
           )}
           {wallet && groupId && inviteToken && participants.length === 0 && (
             <div className="section-block">
@@ -527,6 +532,7 @@ export function GroupWorkspace({
                             : "Collecting preferences"}
                       </span>
                       <h3>{group.name}</h3>
+                      <p>{categories[group.category ?? "restaurant"].label}</p>
                       <p>
                         {new Date(group.startsAt).toLocaleString("en-US", {
                           timeZone: group.timeZone,
@@ -558,7 +564,7 @@ export function GroupWorkspace({
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Saturday dinner"
+                      placeholder={categories[category].groupName}
                       maxLength={100}
                     />
                   </label>
@@ -600,10 +606,17 @@ export function GroupWorkspace({
                 </div>
                 <p className="flow-note">
                   Groups of {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} can collect
-                  preferences, compare restaurants and approve a shared test
-                  payment. The Explore demo uses six participants.
+                  preferences, compare places and experiences and approve a
+                  shared test payment. The Explore demo uses six participants.
                 </p>
                 <RestaurantPicker
+                  category={category}
+                  onCategoryChange={(next) => {
+                    setCategory(next);
+                    setPermittedRestaurantIds(
+                      optionsForCategory(next).map((option) => option.id),
+                    );
+                  }}
                   selected={permittedRestaurantIds}
                   onChange={setPermittedRestaurantIds}
                 />
@@ -612,6 +625,7 @@ export function GroupWorkspace({
                   onClick={() => void createGroup()}
                   disabled={
                     busy ||
+                    !wallet ||
                     !name.trim() ||
                     !displayName.trim() ||
                     !when ||
@@ -652,13 +666,13 @@ export function GroupWorkspace({
                     </span>
                   </div>
                   <label>
-                    Your requirements
+                    Your requirements · {categories[category].label}
                     <textarea
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       rows={5}
                       maxLength={4000}
-                      placeholder="Under $35 per person, quiet, near a subway station..."
+                      placeholder={categories[category].example}
                       disabled={
                         groupLocked ||
                         (preference?.status === "CONFIRMED" && !revising)

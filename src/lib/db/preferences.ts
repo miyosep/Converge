@@ -1,3 +1,4 @@
+import { categoryForIds } from "../catalog-options.js";
 import { randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import { z } from "zod";
@@ -195,9 +196,10 @@ export class PreferenceRepository {
       member_count: number;
       target_member_count: number;
       confirmed_count: number;
+      permitted_restaurant_ids: string[];
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
-        g.preferences_locked, g.target_member_count, count(p.wallet_address)::int AS member_count,
+        g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, count(p.wallet_address)::int AS member_count,
         count(*) FILTER (WHERE r.status = 'CONFIRMED')::int AS confirmed_count
        FROM converge_groups g
        JOIN converge_participants mine ON mine.group_id = g.id AND mine.wallet_address = $1
@@ -208,6 +210,7 @@ export class PreferenceRepository {
       [wallet(actor)],
     );
     return result.rows.map((row) => ({
+      category: categoryForIds(row.permitted_restaurant_ids),
       id: row.id,
       name: row.name,
       startsAt: timestamp(row.reservation_starts_at)!,
@@ -275,6 +278,7 @@ export class PreferenceRepository {
       throw new Error("Stored policy hash mismatch");
     return {
       group: {
+        category: categoryForIds(row.permitted_restaurant_ids),
         permittedRestaurantIds: permittedRestaurantIdsSchema.parse(
           row.permitted_restaurant_ids,
         ),

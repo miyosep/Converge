@@ -2,7 +2,8 @@ import deployment from "../../../contracts/deployments/11155111.json";
 import deploymentV2 from "../../../contracts/deployments/11155111-v2.json";
 import publicRoles from "../../../contracts/deployments/demo-roles.11155111.json";
 import { demoRolesSchema } from "../demo-roles.js";
-import { createOrdinaryRestaurantCatalog } from "../fixtures/ordinary-restaurants.js";
+import { createOrdinaryCatalog } from "../fixtures/ordinary-catalog.js";
+import type { Category } from "../catalog-options.js";
 import type { GroupPolicyConfig } from "../group-policy.js";
 import { GroupPolicyError } from "../group-policy.js";
 import type { Policy } from "../signing-policy.js";
@@ -43,8 +44,11 @@ export function groupPolicyConfigFor(
     : currentGroupPolicyConfig();
 }
 
-export function groupEvaluationOptions(startsAt: string) {
-  const catalog = createOrdinaryRestaurantCatalog(roles, [startsAt]);
+export function groupEvaluationOptions(
+  startsAt: string,
+  category: Category = "restaurant",
+) {
+  const catalog = createOrdinaryCatalog(roles, [startsAt], category);
   return {
     catalog,
     permittedMerchants: catalog.restaurants.map(

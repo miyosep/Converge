@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FACILITIES } from "../catalog-options.js";
 import { CONSTRAINT_SCHEMA_VERSION } from "../constants.js";
 import {
   centsSchema,
@@ -7,6 +8,17 @@ import {
 } from "./primitives.js";
 
 export const constraintSchema = z.union([
+  z.strictObject({
+    type: z.literal("hard"),
+    field: z.literal("minimum_beds"),
+    operator: z.literal("gte"),
+    value: z.number().int().min(1).max(100),
+  }),
+  z.strictObject({
+    type: z.literal("non_negotiable"),
+    field: z.literal("facility_requirement"),
+    value: z.enum(FACILITIES),
+  }),
   z.strictObject({
     type: z.literal("hard"),
     field: z.literal("budget_per_person_cents"),
@@ -56,7 +68,8 @@ export const extractionSchema = z
     const keys = new Set<string>();
     value.constraints.forEach((constraint, index) => {
       const key =
-        constraint.field === "dietary_requirement"
+        constraint.field === "dietary_requirement" ||
+        constraint.field === "facility_requirement"
           ? `${constraint.field}:${constraint.value}`
           : constraint.field;
       if (keys.has(key)) {

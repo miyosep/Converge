@@ -2,8 +2,10 @@ import type { Evaluation } from "./decision-engine.js";
 import { publicEvaluation } from "./decision-engine.js";
 import type { RestaurantCatalog } from "./schemas/decision.js";
 import type { SigningPolicy } from "./group-policy.js";
+import type { Category } from "./catalog-options.js";
 
 export type GroupSummary = {
+  category?: Category;
   permittedRestaurantIds?: string[];
   id: string;
   name: string;
@@ -33,6 +35,8 @@ export function savedEvaluationView(input: {
     catalog: input.catalog.restaurants.map((restaurant) => ({
       id: restaurant.id,
       name: restaurant.name,
+      ...(restaurant.category ? { category: restaurant.category } : {}),
+      ...(restaurant.priceUnit ? { priceUnit: restaurant.priceUnit } : {}),
       cuisine: restaurant.cuisine,
       area: restaurant.area,
       merchant: restaurant.merchant,

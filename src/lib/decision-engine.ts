@@ -24,7 +24,8 @@ type CandidateResult = {
 };
 export type Evaluation = {
   engineVersion: "decision-v1";
-  fixtureVersion: "restaurants-v1" | "restaurants-v2" | "restaurants-v3";
+  fixtureVersion:
+    "restaurants-v1" | "restaurants-v2" | "restaurants-v3" | "venues-v1";
   status: EvaluationStatus;
   winnerId: string | null;
   ranking: string[];
@@ -39,6 +40,10 @@ function passes(
 ): boolean {
   if (constraint.type === "soft") return true;
   switch (constraint.field) {
+    case "minimum_beds":
+      return candidate.beds !== undefined && candidate.beds >= constraint.value;
+    case "facility_requirement":
+      return candidate.facilities?.includes(constraint.value) === true;
     case "budget_per_person_cents":
       return candidate.mealPricePerPersonCents <= constraint.value;
     case "subway_distance_meters":
@@ -137,6 +142,11 @@ export function evaluateDecision(value: unknown): Evaluation {
         field: null,
       });
     if (!candidate.available) general("UNAVAILABLE");
+    if (
+      candidate.capacity !== undefined &&
+      candidate.capacity < input.members.length
+    )
+      general("INSUFFICIENT_CAPACITY");
     if (!permitted.has(candidate.merchant.toLowerCase()))
       general("MERCHANT_NOT_PERMITTED");
     if (!candidate.reservationSlots.includes(input.slot.startsAt))

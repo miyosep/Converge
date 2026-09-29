@@ -12,7 +12,7 @@ import { GroupPolicyPanel } from "./group-policy-panel";
 import { GroupInsightsPanel } from "./group-insights-panel";
 import { GroupExecutionPanel } from "./group-execution-panel";
 import { LeaveGroupButton } from "./leave-group-button";
-import { restaurantLabel } from "../../src/lib/restaurant-options";
+import { candidateLabel, categories } from "../../src/lib/catalog-options";
 import {
   GroupNavigation,
   WorkspaceFrame,
@@ -62,9 +62,9 @@ export function GroupStageContent({
             Everyone reviews and confirms their own private requirements.
           </p>
           <p>
-            Permitted restaurants:{" "}
+            {categories[group.category ?? "restaurant"].label} shortlist:{" "}
             {(group.permittedRestaurantIds ?? ["A", "B", "C", "D", "E"])
-              .map(restaurantLabel)
+              .map(candidateLabel)
               .join(", ")}
           </p>
           <div className="flow-members">
@@ -142,9 +142,9 @@ export function GroupStageContent({
               <div>
                 <h2>Evaluate confirmed preferences</h2>
                 <p className="flow-muted">
-                  Uses every member's confirmed inputs and the synthetic
-                  restaurant catalog. A matching proposal locks the inputs; a
-                  no-match result leaves them editable.
+                  Uses every member's confirmed inputs and the synthetic booking
+                  catalog. A matching proposal locks the inputs; a no-match
+                  result leaves them editable.
                 </p>
               </div>
               <button
@@ -208,7 +208,7 @@ export function GroupStageContent({
                   <>
                     <span className="pill positive">
                       ${(selected.mealPricePerPersonCents / 100).toFixed(2)} /
-                      person
+                      {selected.priceUnit ?? "person / meal"}
                     </span>
                     <span className="pill">
                       {money(selected.depositBaseUnits)} deposit
@@ -231,7 +231,7 @@ export function GroupStageContent({
               </p>
               {evaluation.syntheticCatalog && (
                 <p className="flow-note">
-                  Sample restaurant catalog · availability is synthetic.
+                  Sample booking catalog · availability is synthetic.
                 </p>
               )}
               <div
@@ -244,7 +244,10 @@ export function GroupStageContent({
                   <thead>
                     <tr>
                       <th scope="col">Candidate</th>
-                      <th scope="col">Meal / person</th>
+                      <th scope="col">
+                        Price /{" "}
+                        {categories[group.category ?? "restaurant"].priceUnit}
+                      </th>
                       <th scope="col">Deposit</th>
                       <th scope="col">Score / 100</th>
                       <th scope="col">Outcome</th>

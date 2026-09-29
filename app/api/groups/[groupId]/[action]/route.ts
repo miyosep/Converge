@@ -94,7 +94,10 @@ export async function POST(request: NextRequest, context: Context) {
       await repository.evaluateAndFreeze(
         groupId,
         actor,
-        groupEvaluationOptions(overview.group.startsAt),
+        groupEvaluationOptions(
+          overview.group.startsAt,
+          overview.group.category,
+        ),
       );
       return NextResponse.json(await repository.getOverview(groupId, actor));
     }
@@ -138,6 +141,7 @@ export async function POST(request: NextRequest, context: Context) {
         .parse(await request.json());
       const key = process.env.KILN_API_KEY;
       if (!key) return apiFailure(503, "KILN_NOT_CONFIGURED");
+      const overview = await services().preferences.getOverview(groupId, actor);
       const preference = await services().preferences.submit(
         groupId,
         actor,
@@ -154,6 +158,7 @@ export async function POST(request: NextRequest, context: Context) {
         output = await extractPreferences(kiln, {
           runId: preference.revisionId,
           text: preference.rawText,
+          category: overview.group.category ?? "restaurant",
         });
       } catch (error) {
         await services().preferences.failExtraction(
