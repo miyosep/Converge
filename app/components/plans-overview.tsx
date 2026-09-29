@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -34,6 +35,56 @@ export function PlansOverview({
   onSignOut: () => void;
 }) {
   const empty = !loading && !error && groups.length === 0;
+  const cardFrame = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const frame = cardFrame.current;
+    const card = frame?.querySelector<HTMLElement>(".plans-first");
+    if (!frame || !card) return;
+    const motion = window.matchMedia(
+      "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+    );
+    let animation = 0;
+    const reset = () => {
+      cancelAnimationFrame(animation);
+      animation = 0;
+      card.removeAttribute("data-tilting");
+      card.style.removeProperty("--plan-rotate-x");
+      card.style.removeProperty("--plan-rotate-y");
+      card.style.removeProperty("--plan-shadow-x");
+    };
+    const move = (event: PointerEvent) => {
+      if (!motion.matches || event.pointerType !== "mouse") return;
+      cancelAnimationFrame(animation);
+      animation = requestAnimationFrame(() => {
+        const bounds = frame.getBoundingClientRect();
+        const x = Math.max(
+          -1,
+          Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1),
+        );
+        const y = Math.max(
+          -1,
+          Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1),
+        );
+        card.style.setProperty("--plan-rotate-x", `${-y * 1.4}deg`);
+        card.style.setProperty("--plan-rotate-y", `${x * 1.4}deg`);
+        card.style.setProperty("--plan-shadow-x", `${-x * 6}px`);
+        card.dataset.tilting = "true";
+      });
+    };
+    frame.addEventListener("pointermove", move);
+    frame.addEventListener("pointerleave", reset);
+    frame.addEventListener("pointercancel", reset);
+    window.addEventListener("blur", reset);
+    motion.addEventListener("change", reset);
+    return () => {
+      reset();
+      frame.removeEventListener("pointermove", move);
+      frame.removeEventListener("pointerleave", reset);
+      frame.removeEventListener("pointercancel", reset);
+      window.removeEventListener("blur", reset);
+      motion.removeEventListener("change", reset);
+    };
+  }, [empty]);
   const shortWallet = `${wallet.slice(0, 6)}…${wallet.slice(-4)}`;
   return (
     <div className="shell plans-shell">
@@ -85,32 +136,34 @@ export function PlansOverview({
             </button>
           </section>
         ) : empty ? (
-          <section className="plans-first" aria-labelledby="first-plan-title">
-            <div className="plans-first-copy">
-              <h2 id="first-plan-title">
-                Something good
-                <br />
-                starts with <em>a plan</em>
-              </h2>
-              <Link href="/group/new" className="primary plans-create">
-                Start a plan <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="plans-first-photo">
-              <img
-                src="/images/converge-together.webp"
-                alt="Friends spending time together around a table outdoors"
-                width={1536}
-                height={1024}
-              />
-              <div className="plans-photo-caption">
-                <span>FROM ‘WE SHOULD.’</span>
-                <strong>
-                  To <em>‘see you there.’</em>
-                </strong>
+          <div className="plans-first-frame" ref={cardFrame}>
+            <section className="plans-first" aria-labelledby="first-plan-title">
+              <div className="plans-first-copy">
+                <h2 id="first-plan-title">
+                  Something good
+                  <br />
+                  starts with <em>a plan</em>
+                </h2>
+                <Link href="/group/new" className="primary plans-create">
+                  Start a plan <ArrowRight size={18} aria-hidden="true" />
+                </Link>
               </div>
-            </div>
-          </section>
+              <div className="plans-first-photo">
+                <img
+                  src="/images/converge-together.webp"
+                  alt="Friends spending time together around a table outdoors"
+                  width={1536}
+                  height={1024}
+                />
+                <div className="plans-photo-caption">
+                  <span>FROM ‘WE SHOULD.’</span>
+                  <strong>
+                    To <em>‘see you there.’</em>
+                  </strong>
+                </div>
+              </div>
+            </section>
+          </div>
         ) : (
           <section
             className="plans-collection"
