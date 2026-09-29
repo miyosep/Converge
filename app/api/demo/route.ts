@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         .int()
         .min(1)
         .max(20)
-        .parse(process.env.EXPLORE_DEMO_MAX_RUNS || "5");
+        .parse(process.env.EXPLORE_DEMO_MAX_RUNS || "7");
       return NextResponse.json({ run: await store.create(actor, maxRuns) });
     }
     return NextResponse.json({ run: await store.queue(actor, body) });

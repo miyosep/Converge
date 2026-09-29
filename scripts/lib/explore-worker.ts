@@ -213,7 +213,7 @@ export class ExploreWorker {
           (sum, entry) => sum + BigInt(entry.reservedWei),
           0n,
         );
-        const cap = parseEther(process.env.EXPLORE_DEMO_MAX_ETH || "0.05");
+        const cap = parseEther(process.env.EXPLORE_DEMO_MAX_ETH || "0.06");
         if (alreadyReserved + BigInt(reservedWei) > cap)
           throw new Error("DEMO_ETH_BUDGET_EXCEEDED");
         return wallet.signTransaction(request);

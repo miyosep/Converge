@@ -432,7 +432,13 @@ export default function ExploreDemo() {
             {state.policy && (
               <section className="explore-section">
                 <h2>{state.restaurant}</h2>
-                <p>Eligible under the confirmed group conditions.</p>
+                <p>
+                  {state.phase === "proposal" || state.phase === "preparing"
+                    ? "AI recommendation based on confirmed preferences. The group policy and payment are not yet confirmed on-chain."
+                    : state.phase === "completed"
+                      ? "The approved group payment is confirmed on-chain."
+                      : "The group policy is on-chain; payment is not yet confirmed."}
+                </p>
                 {state.restaurant === "KAGAMI" && (
                   <p>
                     <a href="/restaurant">View the KAGAMI demo storefront</a>.
