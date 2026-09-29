@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createPublicClient, getAddress, http } from "viem";
+import { sepolia } from "viem/chains";
+import { readGroupChain } from "../../../../../src/lib/group-chain.js";
 import { createKilnClient } from "../../../../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
 import {
@@ -22,6 +25,45 @@ export async function GET(request: NextRequest, context: Context) {
   return api(async () => {
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "history") {
+      await services().preferences.getOverview(groupId, actor);
+      return NextResponse.json(
+        await services().execution.history(groupId, actor),
+      );
+    }
+    if (action === "chain") {
+      const overview = await services().preferences.getOverview(groupId, actor);
+      if (!overview.signingPolicy)
+        return NextResponse.json({ error: "NO_POLICY" }, { status: 409 });
+      if (!process.env.RPC_URL)
+        return NextResponse.json(
+          { error: "CHAIN_UNAVAILABLE" },
+          { status: 503 },
+        );
+      try {
+        const client = createPublicClient({
+          chain: sepolia,
+          transport: http(process.env.RPC_URL, {
+            timeout: 15000,
+            retryCount: 0,
+          }),
+        });
+        return NextResponse.json(
+          await readGroupChain(
+            client,
+            overview.signingPolicy,
+            groupPolicyConfig,
+            getAddress(actor),
+          ),
+        );
+      } catch {
+        // RPC errors can contain credentials. Never return or log provider text.
+        return NextResponse.json(
+          { error: "CHAIN_VERIFICATION_FAILED" },
+          { status: 503 },
+        );
+      }
+    }
     if (action === "overview")
       return NextResponse.json(
         await services().preferences.getOverview(groupId, actor),

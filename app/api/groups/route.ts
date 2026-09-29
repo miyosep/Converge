@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { reservationSlotSchema } from "../../../src/lib/schemas/decision.js";
+import { permittedRestaurantIdsSchema } from "../../../src/lib/group-conditions.js";
 import {
   api,
   services,
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
         name: z.string(),
         displayName: z.string(),
         slot: reservationSlotSchema,
+        permittedRestaurantIds: permittedRestaurantIdsSchema.optional(),
       })
       .parse(await request.json());
     const groupId = await services().preferences.createGroup({

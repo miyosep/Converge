@@ -4,6 +4,7 @@ import type { RestaurantCatalog } from "./schemas/decision.js";
 import type { SigningPolicy } from "./group-policy.js";
 
 export type GroupSummary = {
+  permittedRestaurantIds?: string[];
   id: string;
   name: string;
   startsAt: string;

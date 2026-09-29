@@ -119,6 +119,6 @@ test("saved policy UI shows full immutable identity without implying chain regis
   assert.ok(html.includes(signingPolicy.policyHash));
   assert.ok(html.includes(signingPolicy.policy.decisionId));
   assert.match(html, /not chain-verified/);
-  assert.match(html, /No wallet transaction is requested/);
-  assert.doesNotMatch(html, /<button/);
+  assert.match(html, /Waiting for verified chain state/);
+  assert.doesNotMatch(html, /Register policy on Sepolia<\/button>/);
 });

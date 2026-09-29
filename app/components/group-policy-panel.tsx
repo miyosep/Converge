@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatUnits } from "viem";
 import { ShieldCheck } from "lucide-react";
 import type { GroupOverview } from "../../src/lib/group-view";
+import { GroupChainPanel } from "./group-chain-panel";
 
 const money = (value: string) => `${formatUnits(BigInt(value), 6)} MockUSDC`;
 
@@ -142,7 +143,7 @@ export function GroupPolicyPanel({
           {expired
             ? "This policy has expired"
             : policy
-              ? "Policy prepared for review"
+              ? "Review and fund this policy"
               : selected
                 ? "Prepare your group's policy"
                 : "Approval is not available yet"}
@@ -151,7 +152,7 @@ export function GroupPolicyPanel({
           {expired
             ? "This saved policy cannot be renewed or reused. A new group decision with fresh approvals is required."
             : policy
-              ? "On-chain registration and contribution are not connected to this group yet. No wallet transaction is requested by this page."
+              ? "Register this saved policy, then each participant allows and contributes their exact share from their own wallet."
               : selected
                 ? "Preparation locks the merchant, amounts and six participant wallets into one policy. It expires in up to one hour, before the reservation begins. No transaction is sent."
                 : "First confirm all six participants' preferences and run the group evaluation."}
@@ -164,6 +165,13 @@ export function GroupPolicyPanel({
           >
             {busy ? "Preparing policy…" : "Prepare signing policy"}
           </button>
+        )}
+        {signingPolicy && (
+          <GroupChainPanel
+            key={signingPolicy.policyHash}
+            groupId={overview.group.id}
+            saved={signingPolicy}
+          />
         )}
         <ol className="approval-steps">
           <li>

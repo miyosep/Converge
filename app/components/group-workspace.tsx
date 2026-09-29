@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ConstraintSummary } from "./constraint-summary";
 import { GroupNavigation } from "./workspace-frame";
 import type { GroupSummary } from "../../src/lib/group-view";
+import { RESTAURANT_IDS } from "../../src/lib/group-conditions";
 import {
   ArrowRight,
   Check,
@@ -79,6 +80,9 @@ export function GroupWorkspace({
   const [name, setName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [when, setWhen] = useState("");
+  const [permittedRestaurantIds, setPermittedRestaurantIds] = useState<
+    string[]
+  >([...RESTAURANT_IDS]);
   const [text, setText] = useState("");
   const [correction, setCorrection] = useState("");
   const [busy, setBusy] = useState(false);
@@ -195,6 +199,7 @@ export function GroupWorkspace({
       const result = await api<{ groupId: string }>("/api/groups", {
         name,
         displayName,
+        permittedRestaurantIds,
         slot: {
           startsAt: timestamp.toISOString().replace(/\.\d{3}Z$/, "Z"),
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -509,11 +514,46 @@ export function GroupWorkspace({
                     />
                   </label>
                 </div>
+                <fieldset>
+                  <legend>Permitted restaurants</legend>
+                  <p>
+                    Choose the restaurants this group may pay. These choices are
+                    fixed when the group is created.
+                  </p>
+                  {RESTAURANT_IDS.map((id) => (
+                    <label
+                      key={id}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        marginRight: 16,
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={permittedRestaurantIds.includes(id)}
+                        onChange={(event) =>
+                          setPermittedRestaurantIds((current) =>
+                            event.target.checked
+                              ? [...current, id]
+                              : current.filter((value) => value !== id),
+                          )
+                        }
+                      />
+                      {id === "A" ? "KAGAMI (A)" : `Restaurant ${id}`}
+                    </label>
+                  ))}
+                </fieldset>
                 <button
                   className="primary"
                   onClick={() => void createGroup()}
                   disabled={
-                    busy || !name.trim() || !displayName.trim() || !when
+                    busy ||
+                    !name.trim() ||
+                    !displayName.trim() ||
+                    !when ||
+                    permittedRestaurantIds.length === 0
                   }
                 >
                   <Plus size={16} /> Create group

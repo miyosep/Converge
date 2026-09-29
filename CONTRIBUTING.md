@@ -15,7 +15,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-No API key, database, wallet, or RPC is required for these foundation checks. The web application is not scaffolded yet, so there is no `dev` command. Create a local `.env` from `.env.example` when implementing external integrations; never commit populated credentials.
+No API key, database, wallet, or RPC is required for these foundation checks. Start the Next.js application with `pnpm dev`; connected group workflows require the environment configuration documented in `docs/WEB_APP.md`. Create local environment files from `.env.example`; never commit populated credentials.
 
 ## Start a Branch
 
@@ -42,4 +42,4 @@ Push your branch and open a PR against `main`. Merge reviewed changes into `main
 
 ## Shared Changes
 
-Discuss modifications to monetary units, privacy boundaries, schema versions, approval semantics, and ABI field order before merging. Update affected consumers in the same change. In particular, the Solidity policy encoding is still T03 under Sage; TypeScript must not independently invent its own final policy hash.
+Discuss modifications to monetary units, privacy boundaries, schema versions, approval semantics, and ABI field order before merging. Update affected consumers in the same change. Solidity and TypeScript must preserve the shared policy encoding and hash; verify changes with the cross-language policy tests.

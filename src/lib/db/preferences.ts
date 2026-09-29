@@ -16,6 +16,11 @@ import {
 } from "../group-policy.js";
 import { hashPolicy, policySchema } from "../policy.js";
 import {
+  RESTAURANT_IDS,
+  permittedRestaurantIdsSchema,
+  permittedGroupMerchants,
+} from "../group-conditions.js";
+import {
   completePreferenceExtraction,
   confirmPreference,
   correctPreference,
@@ -44,6 +49,7 @@ export class PreferenceRepositoryError extends Error {
 }
 
 type GroupRow = {
+  permitted_restaurant_ids: string[];
   id: string;
   preferences_locked: boolean;
   reservation_starts_at: Date;
@@ -208,6 +214,7 @@ export class PreferenceRepository {
     const group = idSchema.parse(groupId);
     const participant = wallet(actor);
     const result = await this.pool.query<{
+      permitted_restaurant_ids: string[];
       id: string;
       name: string;
       reservation_starts_at: Date;
@@ -226,7 +233,7 @@ export class PreferenceRepository {
       policy_created_at: Date | null;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
-        g.preferences_locked, e.id AS evaluation_id, e.created_at AS evaluated_at,
+        g.preferences_locked, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
         e.internal_result, e.input_snapshot->'catalog' AS catalog,
         e.input_snapshot->>'contributionPerParticipant' AS contribution,
         e.input_snapshot->>'maxDeposit' AS max_deposit,
@@ -258,6 +265,9 @@ export class PreferenceRepository {
       throw new Error("Stored policy hash mismatch");
     return {
       group: {
+        permittedRestaurantIds: permittedRestaurantIdsSchema.parse(
+          row.permitted_restaurant_ids,
+        ),
         id: row.id,
         name: row.name,
         startsAt: timestamp(row.reservation_starts_at)!,
@@ -291,6 +301,7 @@ export class PreferenceRepository {
   }
 
   async createGroup(input: {
+    permittedRestaurantIds?: unknown;
     name: string;
     slot: unknown;
     creator: string;
@@ -305,13 +316,23 @@ export class PreferenceRepository {
       .parse(input.displayName);
     const slot = reservationSlotSchema.parse(input.slot);
     const creator = wallet(input.creator);
+    const permitted = permittedRestaurantIdsSchema.parse(
+      input.permittedRestaurantIds ?? [...RESTAURANT_IDS],
+    );
     const id = randomUUID();
     await transaction(this.pool, async (client) => {
       await client.query(
         `INSERT INTO converge_groups
-        (id, name, reservation_starts_at, reservation_time_zone, creator_wallet)
-        VALUES ($1, $2, $3, $4, $5)`,
-        [id, name, slot.startsAt, slot.timeZone, creator],
+        (id, name, reservation_starts_at, reservation_time_zone, creator_wallet, permitted_restaurant_ids)
+        VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
+        [
+          id,
+          name,
+          slot.startsAt,
+          slot.timeZone,
+          creator,
+          JSON.stringify(permitted),
+        ],
       );
       await client.query(
         `INSERT INTO converge_participants(group_id, wallet_address, display_name)
@@ -492,7 +513,7 @@ export class PreferenceRepository {
     const participant = wallet(actor);
     return transaction(this.pool, async (client) => {
       const groups = await client.query<GroupRow>(
-        "SELECT id, preferences_locked, reservation_starts_at, reservation_time_zone FROM converge_groups WHERE id = $1 FOR UPDATE",
+        "SELECT id, preferences_locked, reservation_starts_at, reservation_time_zone, permitted_restaurant_ids FROM converge_groups WHERE id = $1 FOR UPDATE",
         [group],
       );
       if (!groups.rows[0])
@@ -532,6 +553,11 @@ export class PreferenceRepository {
       );
       const evaluationInput = {
         ...options,
+        permittedMerchants: permittedGroupMerchants(
+          groups.rows[0].permitted_restaurant_ids,
+          options.catalog,
+          options.permittedMerchants,
+        ),
         members: rows.rows.map((row) =>
           addressSchema.parse(row.wallet_address),
         ),

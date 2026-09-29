@@ -58,8 +58,10 @@ still needs a verified invitation and wallet session. The stored private
 evaluation is never a group response; return its allowlisted public projection.
 The fixture catalog, caps, and merchant list passed to `evaluateAndFreeze` must
 come from trusted server configuration and authorized group state, not client
-JSON. Session expiry, CSRF protection, proposal policy construction, and
-execution reconciliation remain separate work.
+JSON. The web routes now provide expiring wallet sessions, same-origin POST
+checks, and immutable proposal policy construction. Execution reconciliation
+has an opt-in worker implementation; its full live ordinary-group run remains
+to be verified.
 
 ## Verification
 

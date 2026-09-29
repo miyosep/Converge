@@ -6,6 +6,8 @@ import { ArrowRight, LockKeyhole, RefreshCw, Users } from "lucide-react";
 import { formatUnits } from "viem";
 import { scorePercent, type GroupOverview } from "../../src/lib/group-view";
 import { GroupPolicyPanel } from "./group-policy-panel";
+import { GroupInsightsPanel } from "./group-insights-panel";
+import { GroupExecutionPanel } from "./group-execution-panel";
 import {
   GroupNavigation,
   WorkspaceFrame,
@@ -50,6 +52,12 @@ export function GroupStageContent({
           </div>
           <p className="flow-muted">
             Everyone reviews and confirms their own private requirements.
+          </p>
+          <p>
+            Permitted restaurants:{" "}
+            {(group.permittedRestaurantIds ?? ["A", "B", "C", "D", "E"])
+              .map((id) => (id === "A" ? "KAGAMI (A)" : `Restaurant ${id}`))
+              .join(", ")}
           </p>
           <div className="flow-members">
             {participants.map((person) => (
@@ -272,6 +280,7 @@ export function GroupStageContent({
                 {evaluation.engineVersion}
               </p>
             </section>
+            <GroupInsightsPanel groupId={group.id} evaluation={evaluation} />
           </>
         )}
       </>
@@ -282,6 +291,14 @@ export function GroupStageContent({
         overview={overview}
         busy={busy}
         onPrepare={onPreparePolicy}
+      />
+    );
+  if (overview.signingPolicy)
+    return (
+      <GroupExecutionPanel
+        key={overview.signingPolicy.policyHash}
+        groupId={group.id}
+        saved={overview.signingPolicy}
       />
     );
   return (

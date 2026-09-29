@@ -19,7 +19,7 @@ pnpm check
 
 An existing checkout should use `git pull --ff-only` from a clean main branch before installation. Reuse the same lockfile on all platforms. Never copy `node_modules`, Windows executables, or another machine's `.env` into the Mac checkout. pnpm installs the appropriate native dependency binaries on each machine.
 
-The offline foundation checks need no database, RPC, API key, Docker, wallet extension, or Foundry installation. The web workflow has `pnpm dev` and `pnpm build`; it requires Neon development credentials and a browser wallet for interactive testing. The separate wallet-connected [Explore Demo](EXPLORE_DEMO.md) adds a local worker for one judge and five automated participants. Follow its setup and run the web app and worker in two terminals on the same MacBook. The actual MacBook and live browser-wallet rehearsal remain pending. See also [the web setup](WEB_APP.md).
+The offline foundation checks need no database, RPC, API key, Docker, wallet extension, or Foundry installation. The web workflow has `pnpm dev` and `pnpm build`; it requires Neon development credentials and a browser wallet for interactive testing. The separate wallet-connected [Explore Demo](EXPLORE_DEMO.md) adds a local worker for one judge and five automated participants. A browser-wallet Explore walkthrough was verified on the development machine; the actual presentation MacBook rehearsal remains pending. Follow the setup and run the web app and worker in two terminals on that MacBook. See also [the web setup](WEB_APP.md).
 
 ## Install Foundry for Contract Work
 

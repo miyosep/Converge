@@ -1,0 +1,396 @@
+import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { createServer } from "node:net";
+import { setTimeout as sleep } from "node:timers/promises";
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  keccak256,
+  stringToHex,
+  type Abi,
+  type Hex,
+} from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { sepolia } from "viem/chains";
+import {
+  groupChainTransaction,
+  readGroupChain,
+  verifyGroupSigningPolicy,
+  type GroupChainAction,
+} from "../src/lib/group-chain.js";
+import { hashPolicy, policySchema } from "../src/lib/policy.js";
+import type { SigningPolicy } from "../src/lib/group-policy.js";
+import {
+  GroupExecutionWorker,
+  type ExecutionStore,
+} from "./lib/group-execution-worker.js";
+import type { JournalTransaction } from "./lib/transaction-journal.js";
+import type { GroupChainEvent } from "../src/lib/group-execution.js";
+
+class MemoryExecutionStore implements ExecutionStore {
+  journal: JournalTransaction | undefined;
+  saves = 0;
+  executionStatus = "";
+  events: GroupChainEvent[] = [];
+  cursor: { blockNumber: string; blockHash: Hex } | undefined;
+  async checkpoint() {
+    return this.cursor;
+  }
+  async record(
+    _id: string,
+    state: Awaited<ReturnType<typeof readGroupChain>>,
+    hash: Hex,
+    from: bigint,
+    events: GroupChainEvent[],
+  ) {
+    this.cursor = { blockNumber: state.blockNumber, blockHash: hash };
+    this.events = this.events
+      .filter((e) => BigInt(e.blockNumber) < from)
+      .concat(events);
+  }
+  async load() {
+    return this.journal;
+  }
+  async save(
+    _id: string,
+    entry: JournalTransaction,
+    reserved: bigint,
+    cap: bigint,
+  ) {
+    assert.ok(reserved <= cap);
+    this.saves++;
+    this.journal = structuredClone(entry);
+    this.executionStatus = "pending";
+  }
+  async pendingOther() {
+    return false;
+  }
+  async status(_id: string, status: string) {
+    this.executionStatus = status;
+  }
+}
+
+// Disposable local EVM only. No environment credentials or Sepolia writes.
+async function main() {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const port = (server.address() as { port: number }).port;
+  await new Promise<void>((resolve, reject) =>
+    server.close((e) => (e ? reject(e) : resolve())),
+  );
+  const child = spawn(
+    "anvil",
+    [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(port),
+      "--chain-id",
+      "11155111",
+      "--silent",
+    ],
+    { stdio: "ignore", windowsHide: true },
+  );
+  let spawnError: Error | undefined;
+  child.on("error", (error) => {
+    spawnError = error;
+  });
+  try {
+    const transport = http(`http://127.0.0.1:${port}`, {
+      retryCount: 0,
+      timeout: 2000,
+    });
+    const reader = createPublicClient({
+      chain: sepolia,
+      transport,
+      cacheTime: 0,
+    });
+    const rpc = async (method: string, params: unknown[] = []) => {
+      const response = await fetch(`http://127.0.0.1:${port}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+      const body = (await response.json()) as { error?: unknown };
+      if (body.error) throw new Error(JSON.stringify(body.error));
+    };
+    for (let retry = 0; ; retry++) {
+      if (spawnError) throw spawnError;
+      try {
+        await reader.getChainId();
+        break;
+      } catch {
+        if (retry === 30) throw new Error("Anvil did not start");
+        await sleep(100);
+      }
+    }
+    const accounts = Array.from({ length: 7 }, () =>
+      privateKeyToAccount(generatePrivateKey()),
+    );
+    const members = accounts.slice(0, 6);
+    for (const account of accounts)
+      await rpc("anvil_setBalance", [account.address, "0x8ac7230489e80000"]);
+    const wallet = (index: number) =>
+      createWalletClient({
+        account: accounts[index]!,
+        chain: sepolia,
+        transport,
+      });
+    const confirmed = async (hash: Hex) => {
+      const receipt = await reader.waitForTransactionReceipt({ hash });
+      assert.equal(receipt.status, "success");
+      await rpc("evm_mine");
+      return receipt;
+    };
+    const tokenArtifact = JSON.parse(
+      await readFile("contracts/out/MockUSDC.sol/MockUSDC.json", "utf8"),
+    ) as { abi: Abi; bytecode: { object: Hex } };
+    const escrowArtifact = JSON.parse(
+      await readFile(
+        "contracts/out/ConvergeGroupWallet.sol/ConvergeGroupWallet.json",
+        "utf8",
+      ),
+    ) as { abi: Abi; bytecode: { object: Hex } };
+    const token = (
+      await confirmed(
+        await wallet(0).deployContract({
+          abi: tokenArtifact.abi,
+          bytecode: tokenArtifact.bytecode.object,
+        }),
+      )
+    ).contractAddress!;
+    const escrow = (
+      await confirmed(
+        await wallet(0).deployContract({
+          abi: escrowArtifact.abi,
+          bytecode: escrowArtifact.bytecode.object,
+          args: [token],
+        }),
+      )
+    ).contractAddress!;
+    const config = {
+      chainId: 11155111,
+      verifyingContract: escrow,
+      token,
+      executor: accounts[6]!.address,
+    };
+    const now = Number((await reader.getBlock()).timestamp);
+    const policy = policySchema.parse({
+      ...config,
+      policyVersion: 1,
+      decisionId: keccak256(stringToHex("ordinary-group")),
+      merchant: privateKeyToAccount(generatePrivateKey()).address,
+      participants: members.map((a) => a.address),
+      approvalThreshold: 6,
+      contributionPerParticipant: "10000000",
+      paymentAmount: "45000000",
+      maxDeposit: "60000000",
+      maxTotalSpend: "60000000",
+      expiry: now + 3600,
+      reservationReference: keccak256(stringToHex("reservation")),
+    });
+    const saved: SigningPolicy = {
+      policy,
+      policyHash: hashPolicy(policy),
+      createdAt: new Date().toISOString(),
+    };
+    const state = (index = 0, input = saved) =>
+      readGroupChain(reader, input, config, accounts[index]!.address);
+    const send = async (
+      index: number,
+      action: GroupChainAction,
+      input = saved,
+    ) => {
+      const snapshot = await state(index, input);
+      const tx = groupChainTransaction(
+        input,
+        config,
+        accounts[index]!.address,
+        snapshot,
+        action,
+      );
+      await reader.call({ ...tx, account: accounts[index]!.address });
+      return confirmed(await wallet(index).sendTransaction(tx));
+    };
+    assert.equal((await state()).registered, false);
+    assert.throws(
+      () => verifyGroupSigningPolicy(saved, config, accounts[6]!.address),
+      /NOT_POLICY_PARTICIPANT/,
+    );
+    assert.throws(
+      () =>
+        verifyGroupSigningPolicy(
+          { ...saved, policy: { ...policy, paymentAmount: "44000000" } },
+          config,
+          members[0]!.address,
+        ),
+      /POLICY_HASH_MISMATCH/,
+    );
+    await send(0, "register");
+    assert.equal((await state()).registered, true);
+    await assert.rejects(send(1, "register"), /REGISTRATION_UNAVAILABLE/);
+    const changed = { ...policy, paymentAmount: "44000000" };
+    await assert.rejects(
+      state(0, { ...saved, policy: changed, policyHash: hashPolicy(changed) }),
+      /CHAIN_POLICY_MISMATCH/,
+    );
+    await assert.rejects(send(0, "allowance"), /INSUFFICIENT_MOCKUSDC/);
+    for (let index = 0; index < 6; index++) {
+      await confirmed(
+        await wallet(0).writeContract({
+          address: token,
+          abi: tokenArtifact.abi,
+          functionName: "mint",
+          args: [members[index]!.address, 20000000n],
+        }),
+      );
+      await assert.rejects(send(index, "contribute"), /ALLOWANCE_REQUIRED/);
+      await send(index, "allowance");
+      await send(index, "contribute");
+      await assert.rejects(
+        send(index, "contribute"),
+        /CONTRIBUTION_UNAVAILABLE/,
+      );
+    }
+    const active = await state();
+    assert.equal(active.status, 1);
+    assert.equal(active.approvals, 6);
+    assert.equal(active.contributed, "60000000");
+    assert.ok(
+      active.members.every((member) => member.contribution === "10000000"),
+    );
+    await send(2, "cancel");
+    for (let index = 0; index < 6; index++) {
+      assert.equal((await state(index)).refund, "10000000");
+      await send(index, "refund");
+      await assert.rejects(send(index, "refund"), /REFUND_UNAVAILABLE/);
+    }
+    assert.equal((await state()).refunded, "60000000");
+    const nextPolicy = {
+      ...policy,
+      decisionId: keccak256(stringToHex("expired-group")),
+    };
+    const next = {
+      ...saved,
+      policy: nextPolicy,
+      policyHash: hashPolicy(nextPolicy),
+    };
+    await send(0, "register", next);
+    await send(0, "allowance", next);
+    await send(0, "contribute", next);
+    await rpc("evm_increaseTime", [4000]);
+    await rpc("evm_mine");
+    await rpc("evm_mine");
+    await assert.rejects(
+      send(1, "allowance", next),
+      /CONTRIBUTION_UNAVAILABLE/,
+    );
+    await send(0, "refund", next);
+    assert.equal((await state(0, next)).refunded, "10000000");
+    const payPolicy = {
+      ...policy,
+      decisionId: keccak256(stringToHex("agent-payment")),
+      expiry: Number((await reader.getBlock()).timestamp) + 3600,
+    };
+    const pay = {
+      ...saved,
+      policy: payPolicy,
+      policyHash: hashPolicy(payPolicy),
+      groupId: "isolated-group",
+    };
+    const store = new MemoryExecutionStore();
+    const worker = new GroupExecutionWorker(
+      reader,
+      transport,
+      accounts[6]!,
+      config,
+      store,
+      0n,
+      10000000000000000n,
+    );
+    await send(0, "register", pay);
+    for (let index = 0; index < 6; index++) {
+      await send(index, "allowance", pay);
+      await send(index, "contribute", pay);
+      if (index === 4) {
+        await worker.tick(pay);
+        assert.equal(store.journal, undefined);
+      }
+    }
+    const interruptedClient = {
+      ...reader,
+      sendRawTransaction: async (
+        ...args: Parameters<typeof reader.sendRawTransaction>
+      ) => {
+        await reader.sendRawTransaction(...args);
+        throw new Error("Simulated lost broadcast response");
+      },
+    };
+    const interrupted = new GroupExecutionWorker(
+      interruptedClient,
+      transport,
+      accounts[6]!,
+      config,
+      store,
+      0n,
+      10000000000000000n,
+    );
+    await assert.rejects(
+      interrupted.tick(pay),
+      /Simulated lost broadcast response/,
+    );
+    assert.equal(store.saves, 1);
+    const originalHash = store.journal!.hash;
+    await rpc("evm_mine");
+    const resumed = new GroupExecutionWorker(
+      reader,
+      transport,
+      accounts[6]!,
+      config,
+      store,
+      0n,
+      10000000000000000n,
+    );
+    await resumed.tick(pay);
+    await resumed.tick(pay);
+    assert.equal(store.saves, 1);
+    assert.equal(store.journal!.hash, originalHash);
+    assert.equal(store.executionStatus, "confirmed");
+    assert.equal((await state(0, pay)).spent, "45000000");
+    assert.equal(
+      store.events.filter((e) => e.kind === "PaymentExecuted").length,
+      1,
+    );
+    for (let index = 0; index < 6; index++) await send(index, "refund", pay);
+    await resumed.tick(pay);
+    assert.equal((await state(0, pay)).refunded, "15000000");
+    assert.equal(
+      store.events.filter((e) => e.kind === "RefundClaimed").length,
+      6,
+    );
+    store.cursor!.blockHash = `0x${"0".repeat(64)}`;
+    await resumed.tick(pay);
+    assert.equal(
+      store.events.filter((e) => e.kind === "PaymentExecuted").length,
+      1,
+    );
+    assert.equal(
+      store.events.filter((e) => e.kind === "RefundClaimed").length,
+      6,
+    );
+    console.log(
+      "PASS: agent executes only after six contributions; lost broadcast response resumes the same signed hash; history replay is idempotent; all six refunds recorded.",
+    );
+    console.log(
+      "PASS: ordinary-group registration, exact allowances, six contributions, hash/member checks, duplicate prevention, cancellation, expiry and refunds on disposable Anvil.",
+    );
+  } finally {
+    child.kill();
+  }
+}
+main().catch(() => {
+  console.error("Group chain rehearsal failed.");
+  process.exitCode = 1;
+});

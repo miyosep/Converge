@@ -12,11 +12,11 @@ Task ownership: self-assigned. Sage has claimed the blockchain contract and depl
 
 This document turns the supplied Converge architecture into a concrete hackathon implementation guide. It defines the product scope, system boundaries, shared contracts, security rules, implementation sequence, acceptance tests, and evidence required for the final demo.
 
-The challenge brief in `hackathon_descrip.txt` is the source of truth for competition requirements. The supplied architecture is the starting design. Where that design is ambiguous or inconsistent, the decisions in this document explain the proposed resolution.
+The challenge brief in `hackathon_descrip.txt` records the original competition requirements. The project owner confirmed the later model update to Kiln `qwen3-32b`, superseding that brief's `gpt-oss-120b` model line. The supplied architecture is the starting design. Where that design is ambiguous or inconsistent, the decisions in this document explain the proposed resolution.
 
 At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, and a partial Next.js/Neon/Kiln group workflow through saved results and off-chain immutable policy preparation. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. Ordinary-group on-chain financial UI and full acceptance runs remain subsequent work.
+The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, an ordinary-group Next.js/Neon/Kiln workflow with browser-wallet registration, contributions and refunds, and an opt-in payment worker with persisted chain history. A privacy-safe explanation flow and per-flow usage API are implemented in the current worktree. See `docs/FOUNDATION.md`, `docs/BLOCKCHAIN.md`, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md`. The browser-wallet Explore baseline has verified Sepolia payment and refunds; ordinary-group full live acceptance and both changed-condition runs remain pending.
 
 ### 1.1 Required README Declaration
 
@@ -886,7 +886,7 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 
 ### 17.3 Command Contract to Implement
 
-Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm build`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, `pnpm demo:fund`, and the Explore Demo commands in `package.json`. `pnpm check` combines type checking, formatting checks, and application tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. The ordinary-group on-chain workflow and full acceptance runs remain pending.
+Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm build`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, `pnpm demo:fund`, the Explore Demo commands, and `pnpm groups:worker-check` / `pnpm groups:worker` in `package.json`. `pnpm check` combines type checking, formatting checks, and application tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. Ordinary-group wallet and worker code exists; a complete live acceptance run remains pending.
 
 The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
 
@@ -964,22 +964,22 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
 | T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Five versioned migrations include immutable group policies on the Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
+| T09 | Database and migrations | Eight versioned migrations cover policies, execution/history, explanation/usage, and group merchant conditions; development migration and persistence rehearsals have passed, while full acceptance remains | T02 | | | In progress |
 | T10 | Identity and privacy | EOA SIWE nonce/session and capped invites implemented; signed HTTP login, replay, Origin, and outsider access tested; contract-wallet and deployment hardening remain | T09 | | | In progress |
 | T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; live synthetic extractions passed and authenticated private submission is connected | T02 | | | In review |
-| T12 | Usage and efficiency | Per-attempt usage persisted for live web extraction; final per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
+| T12 | Usage and efficiency | Per-attempt extraction and explanation persistence, authorized per-flow usage/cache-hit API, and a live synthetic development rehearsal are implemented; three-run aggregation and efficiency comparison remain | T09, T11 | | | In progress |
 | T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
 | T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; ordinary-group evaluation API connected | T13 | | | In review |
 | T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; full live application run pending | T10, T11 | | | In progress |
-| T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
-| T17 | Proposal APIs | Frozen revision snapshot, public saved evaluation, and immutable off-chain policy rehearsed with synthetic inputs; on-chain registration remains separate | T03, T14, T15 | | | In progress |
+| T16 | Explanation flow | Privacy-safe reason selection, labeled deterministic fallback, persistence, and authenticated API are implemented; migration and live synthetic development rehearsal passed, full acceptance remains | T12, T14 | | | In progress |
+| T17 | Proposal APIs | Frozen revision snapshot, public saved evaluation, and immutable off-chain policy rehearsed with synthetic inputs; browser-wallet on-chain registration is connected | T03, T14, T15 | | | In progress |
 | T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
-| T19 | Results and policy UI | Saved candidate outcomes, no-match state, and complete off-chain policy review implemented; privacy-safe explanation and on-chain actions remain | T16, T17 | | | In progress |
+| T19 | Results and policy UI | Saved candidate outcomes, no-match state, policy review, browser-wallet actions, and privacy-safe explanation panel are implemented; full live acceptance remains | T16, T17 | | | In progress |
 | T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks | T08 | Sage | | In review |
-| T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
-| T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
-| T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
-| T24 | Execution and refund UI | Policy enforcement display, transaction history, claims and settlement | T07, T21-T23 | | | Unclaimed |
+| T21 | Wallet contribution UI | Ordinary-group registration, exact allowance, own-wallet contribution and canonical chain progress implemented; disposable Anvil rehearsal passed; six-user browser acceptance remains | T19, T20 | | | In progress |
+| T22 | Agent execution | Opt-in bounded payment worker and signed transaction journal implemented; full ordinary-group live execution and invalid-attempt evidence remain | T06, T12, T17, T20 | | | In progress |
+| T23 | Chain reconciliation | Worker receipt/event ingestion, canonical snapshots, and restart handling implemented; execution migration applied on dev, Anvil lost-broadcast recovery and Neon persistence/replay rehearsals passed; live ordinary-group acceptance remains | T09, T20 | | | In progress |
+| T24 | Execution and refund UI | Cancellation and contract-derived refunds on approval page; execution page displays stored snapshot, payment status, and events; full live flow remains | T07, T21-T23 | | | In progress |
 | T25 | Evidence view/export | Published evidence view separates blockchain baseline, live Kiln smoke, and deterministic fixtures; correlated full-run export remains | T12, T23, T24 | | | In progress |
 | T26 | Baseline demo script | Direct-contract payment/refund rehearsal verified in `docs/evidence/baseline-001.json`; real Kiln and full application workflow remain | T15, T17, T20, T22, T23 | | | Unclaimed |
 | T27 | Changed-condition scripts | Complete lower-budget and changed-merchant runs with comparison | T26 | | | Unclaimed |
@@ -1015,7 +1015,7 @@ Next integration step:
 
 ## 20. README and Submission Checklist
 
-The initial `README.md` is intentionally a draft. It describes planned behavior and now records verified deployment addresses and transaction hashes. Kiln usage, acceptance-run transactions, energy measurements, and final team contributions remain pending. Update the README throughout implementation and complete it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
+The `README.md` remains a draft. It records verified deployment addresses, live Kiln smoke usage, direct-contract baseline transactions, and a browser-wallet Explore baseline. Correlated three-scenario acceptance usage and transactions, energy measurements, and final team contributions remain pending. Update it after the three acceptance runs. Do not leave planned values presented as measured results. Keep its selected-function sentence unchanged unless the actual product function changes.
 
 The final README should contain:
 
@@ -1072,7 +1072,7 @@ These prerequisites are tracked separately from completed integration work. Reso
 | Prerequisite | Current status | Required resolution |
 | --- | --- | --- |
 | Kiln endpoint and authentication details | Official endpoint verified by two successful live extraction calls | Recheck credentials on the demo MacBook; see `docs/KILN.md` |
-| Kiln API key and model availability | `qwen3-32b` verified; project owner reported updated model announcement on September 29, 2026 (KST) | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
+| Kiln API key and model availability | `qwen3-32b` verified and confirmed by the project owner as the updated requirement on September 29, 2026 (KST) | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
 | Provider usage and NPU metrics | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable | Keep unknown energy null; do not claim measured NPU efficiency without evidence |
 | Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
 | Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |

@@ -9,6 +9,11 @@
     "pnpm": "11.19.0"
   },
   "scripts": {
+    "demo:groups-server": "node --import tsx scripts/group-acceptance-server.ts",
+    "demo:groups-acceptance": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-acceptance.ts",
+    "groups:worker": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-execution-worker.ts",
+    "groups:worker-check": "node --env-file=.env --env-file=.env.development --import tsx scripts/group-execution-worker.ts --check",
+    "demo:group-chain-test": "node --import tsx scripts/group-chain-rehearsal.ts",
     "demo:explore": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts",
     "demo:explore-check": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts --check",
     "demo:explore-prepare": "node --env-file=.env --env-file=.env.development --import tsx scripts/prepare-explore-bots.ts",
@@ -25,6 +30,7 @@
     "db:migrate:dev": "node --env-file=.env.development --import tsx scripts/db-migrate.ts dev-preferences",
     "db:rehearse:dev": "node --env-file=.env.development --import tsx scripts/db-preference-rehearsal.ts",
     "db:auth-rehearse:dev": "node --env-file=.env.development --import tsx scripts/db-auth-rehearsal.ts",
+    "db:group-execution-rehearse:dev": "node --env-file=.env.development --import tsx scripts/group-execution-db-rehearsal.ts",
     "http:rehearse:dev": "node --import tsx scripts/http-rehearsal.ts",
     "http:kiln-rehearse:dev": "node --env-file=.env.development --import tsx scripts/http-rehearsal.ts --kiln",
     "contracts:build": "forge build --root contracts",

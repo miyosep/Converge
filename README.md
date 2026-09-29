@@ -6,7 +6,7 @@ Converge helps a group choose a restaurant from private preferences, approve one
 
 In the current Explore Demo catalog, Restaurant A is presented as **KAGAMI**, a fictional storefront at `/restaurant`. Its table meal estimate is synthetic and separate from the $148 omakase shown on the concept page. Its shellfish-safety metadata is unknown. The storefront displays a simulator-only booking state after a matching Sepolia test payment; it does not accept a real reservation.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented on Ethereum Sepolia. Ordinary groups can save candidate results and prepare an immutable off-chain signing policy; their on-chain approval, contribution, execution, and refund flow remains pending. The direct-contract baseline and a wallet-connected Explore rehearsal each completed six contributions, one bounded payment, and six refunds. The Explore rehearsal used live Kiln extraction and a dedicated script-controlled judge test wallet; its [Sepolia evidence](docs/evidence/explore-live-c1564c0c4a4c.json) includes verified receipts and events. A real judge's browser-wallet walkthrough and the MacBook rehearsal remain pending. This README remains a draft.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented on Ethereum Sepolia. Ordinary groups have private preference submission, saved results, immutable policies, browser-wallet registration, contributions, cancellation, and refund claims. An opt-in executor worker, receipt-backed history, and a privacy-safe explanation flow are implemented in the current worktree; their full ordinary-group live run remains unverified. The direct-contract baseline and [browser-wallet Explore rehearsal](docs/evidence/explore-live-7bc7204c7911.json) each completed six contributions, one bounded payment, and six refunds. Explore used live Kiln extraction, one user-controlled browser wallet, and five automated participants. The lower-budget and changed-merchant full runs, six independently controlled wallets, and presentation MacBook rehearsal remain pending. This README remains a draft.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -84,11 +84,11 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 ## Kiln Integration
 
-**Selected model:** `qwen3-32b` through Kiln, following the organizer update reported by the project owner on September 29, 2026 (KST). The server-side adapter has passed two live synthetic extraction checks with schema validation and provider usage records. Participant confirmation and the web workflow remain pending. NPU execution and energy are not independently attested by these responses.
+**Selected model:** `qwen3-32b` through Kiln. The project owner confirmed that the updated competition requirement supersedes the older `gpt-oss-120b` wording in `hackathon_descrip.txt`. The server-side adapter passed two live synthetic extraction checks with schema validation and provider usage records. Authenticated web submission, correction, and participant confirmation are implemented. NPU execution and energy are not independently attested by these responses.
 
 The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
 
-Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. The first [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, and per-attempt usage storage. Proposal and payment routes are not connected yet.
+Preference revision transitions enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. The [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, per-attempt usage storage, proposal and policy routes, and browser-wallet chain actions. The opt-in ordinary-group payment worker and history are implemented but have not completed a full live acceptance run.
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |
@@ -110,7 +110,7 @@ Earlier synthetic Kiln smoke checks and one live web extraction have succeeded. 
 | `clarification` | Pending | Pending | Pending | Pending | Pending |
 | `candidate_analysis` | Pending | Pending | Pending | Pending | Pending |
 
-The `/evidence` page is planned to show per-flow usage and each run's completeness. Request IDs, timestamps, model, flow, retries, and cache hits will be recorded without publishing private prompts or secrets.
+The `/evidence` page publishes allowlisted, separate evidence artifacts. The ordinary-group insights API reports per-flow usage and cache hits to authorized members; final acceptance-run aggregates and correlated exports remain pending. Private prompts and secrets are excluded from published evidence.
 
 ## Inference / Energy Efficiency
 
@@ -212,7 +212,7 @@ run ID creates a fresh decision and spends another allocation of mock funds.
 
 ## Pre-built vs Hackathon-built Work
 
-The initial README contained only design documentation. Subsequent work added repository tooling, TypeScript schemas, checks, collaboration instructions, Solidity contracts with local tests, and the verified Sepolia deployment. No complete application has been produced yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
+The initial README contained only design documentation. Subsequent work added repository tooling, TypeScript schemas, checks, collaboration instructions, the Next.js group and Explore flows, Solidity contracts with local tests, and the verified Sepolia deployment. The complete three-scenario acceptance demonstration has not been produced yet. Dependencies are listed in `package.json` and pinned in `pnpm-lock.yaml`. The team must confirm the event's actual start time before categorizing work as hackathon-built, and disclose any pre-existing code or templates based on records rather than assumptions.
 
 ## Team
 
@@ -220,4 +220,4 @@ Engineering responsibilities were not preassigned in the initial plan. Sage has 
 
 ## README Update Plan
 
-This first version establishes the selected function, intended workflow, architecture, and acceptance evidence. After implementation, update it with the actual stack, working setup commands, verified Kiln usage by flow, measured efficiency data, deployment addresses, transaction receipts, experiment outcomes, tests run, known limitations, and an accurate team contribution record. Remove `Pending` only when the corresponding evidence exists.
+This draft records the selected function, implemented architecture, verified deployment and rehearsal evidence, and current limitations. After the three full acceptance runs, add their correlated Kiln usage by flow, transaction receipts, condition-change results, tested MacBook setup, and accurate team contributions. Remove `Pending` only when the corresponding evidence exists.
