@@ -28,7 +28,7 @@ Six friends want dinner together. Their budgets differ, some preferences are pri
 | **Task fit · 25** | Private requirements lead to a jointly approved policy and a bounded deposit payment. | [User flow](#how-it-works) · [Verification scope](#verification-and-evidence) |
 | **Innovation · 20** | The agent coordinates interpretation, search and execution around versioned group agreement and a fixed spending authority. | [AI, code and contract responsibilities](#what-the-agent-does) · [Changed conditions](#when-conditions-change) |
 | **Usability · 15** | A shared planning workflow for friends, plus a guided demo that one reviewer can try. | [Live demo](https://converge-iota-seven.vercel.app/demo) · [Friends planning](docs/LIVE_GROUP_PLANS.md) |
-| **Presentation · 10** | A running app, an explorable evidence page and per-flow receipts linked to Kiln records. | [Public evidence](https://converge-iota-seven.vercel.app/evidence) · [Submission status](#submission-status) |
+| **Presentation · 10** | A running app, an explorable evidence page and per-flow receipts linked to Kiln records. | [Public evidence](https://converge-iota-seven.vercel.app/evidence) · [Demo walkthrough](#try-the-demo) |
 
 ## Try the Demo
 
@@ -242,10 +242,6 @@ This reads existing evidence and chain records; it needs no participant keys, da
 **Built during the event:** the Converge web interface and demo assets, private preference and agreement workflows, Kiln/xAPI integrations, group-wallet contracts, payment/refund processing, verification scripts and documentation.
 
 **External components:** Next.js, React, viem, OpenZeppelin and other dependencies are existing third-party software, listed in `package.json` and pinned in `pnpm-lock.yaml`. Kiln, xAPI, Neon and Ethereum Sepolia provide external services and infrastructure. They are not claimed as original team work.
-
-## Submission Status
-
-The ≤3-minute demo video, ≤10-page deck and recorded Track A refusal run still need to be linked. Team contributions and the registered roster also require final confirmation. See the [submission checklist](docs/SUBMISSION.md) and [task register](project_guideline.md#19-self-assignment-task-register).
 
 ## Further Reading
 
