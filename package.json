@@ -9,18 +9,26 @@
     "pnpm": "11.19.0"
   },
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "format": "prettier --write src tests package.json tsconfig.json .github",
-    "format:check": "prettier --check src tests package.json tsconfig.json .github",
-    "check": "tsc --noEmit && prettier --check src tests package.json tsconfig.json .github && tsx --test tests/*.test.ts"
+    "format": "prettier --write src tests package.json tsconfig.json .github next.config.ts",
+    "format:check": "prettier --check src tests package.json tsconfig.json .github next.config.ts",
+    "check": "tsc --noEmit && prettier --check src tests package.json tsconfig.json .github next.config.ts && tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "viem": "2.56.9",
     "zod": "4.6.5"
   },
   "devDependencies": {
     "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "prettier": "3.9.9",
     "tsx": "4.23.15",
     "typescript": "7.0.2"
