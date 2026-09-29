@@ -83,7 +83,9 @@ export default function ExploreDemo() {
   const [entered, setEntered] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
-  const [text, setText] = useState("Under $35 per person, somewhere quiet.");
+  const [text, setText] = useState("");
+  const [reviewRequested, setReviewRequested] = useState(false);
+  const draftRun = useRef<string | null>(null);
   const [correction, setCorrection] = useState("");
   const [code, setCode] = useState("");
   const [lastTx, setLastTx] = useState<string | null>(null);
@@ -116,6 +118,12 @@ export default function ExploreDemo() {
       return;
     setRefreshError(false);
     setView(result);
+    const runId = result.run?.id ?? null;
+    if (draftRun.current !== runId) {
+      draftRun.current = runId;
+      setText(result.run?.text ?? "");
+      setReviewRequested(false);
+    }
     const key = `${result.run?.id}:${result.run?.revision}`;
     if (result.run?.extraction && revision.current !== key) {
       setCorrection(JSON.stringify(result.run.extraction, null, 2));
@@ -272,6 +280,8 @@ export default function ExploreDemo() {
   const historical =
     !!state && !!view?.currentRunId && state.id !== view.currentRunId;
   const pending = busy || !!state?.command;
+  const showPreferenceReview =
+    reviewRequested && !!state?.extraction && text === state.text && !pending;
   const terminal =
     !!state && ["completed", "cancelled", "expired"].includes(state.phase);
   const demoReady = !!view?.enabled && view.workerOnline && !refreshError;
@@ -658,7 +668,11 @@ export default function ExploreDemo() {
                         <textarea
                           value={text}
                           maxLength={4000}
-                          onChange={(event) => setText(event.target.value)}
+                          placeholder="Under $35 per person, somewhere quiet."
+                          onChange={(event) => {
+                            setText(event.target.value);
+                            setReviewRequested(false);
+                          }}
                           rows={3}
                         />
                       </label>
@@ -666,18 +680,25 @@ export default function ExploreDemo() {
                         className="primary"
                         disabled={
                           pending ||
-                          !view?.workerOnline ||
-                          state.extractionCalls >= 3
+                          !text.trim() ||
+                          (text.trim() !== state.text &&
+                            (!view?.workerOnline || state.extractionCalls >= 3))
                         }
-                        onClick={() =>
-                          void run(() => command({ action: "extract", text }))
-                        }
+                        onClick={() => {
+                          const request = text.trim();
+                          setText(request);
+                          setReviewRequested(true);
+                          if (request !== state.text)
+                            void run(() =>
+                              command({ action: "extract", text: request }),
+                            );
+                        }}
                       >
                         {state.command?.action === "extract"
                           ? "Reading preferences..."
                           : "Review preferences"}
                       </button>
-                      {state.extraction && (
+                      {showPreferenceReview && (
                         <div className="explore-review">
                           <span className="eyebrow">HERE’S WHAT WE HEARD</span>
                           <h3>
@@ -715,7 +736,8 @@ export default function ExploreDemo() {
                           </button>
                         </div>
                       )}
-                      {state.evaluation &&
+                      {showPreferenceReview &&
+                        state.evaluation &&
                         state.evaluation.status !== "PROPOSAL_READY" &&
                         !state.extraction.clarifications.length &&
                         !state.extraction.unsupportedRequirements.length && (
