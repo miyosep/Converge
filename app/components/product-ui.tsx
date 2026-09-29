@@ -23,7 +23,7 @@ export function Brand() {
   return (
     <Link className="brand" href="/" aria-label="Converge home">
       <BrandMark className="brand-symbol" />
-      <span>converge</span>
+      <span>Converge</span>
     </Link>
   );
 }

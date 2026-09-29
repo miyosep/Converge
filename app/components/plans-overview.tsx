@@ -88,7 +88,7 @@ export function PlansOverview({
               <h2 id="first-plan-title">
                 Something good
                 <br />
-                starts with <em>a plan.</em>
+                starts with <em>a plan</em>
               </h2>
               <Link href="/group/new" className="primary plans-create">
                 Start a plan <ArrowRight size={18} aria-hidden="true" />
