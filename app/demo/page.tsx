@@ -42,6 +42,7 @@ import "./redesign.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
 import { LiveDemoSearch } from "./live-search";
+import { DemoPreferenceSummary } from "./preference-summary";
 import { canRestartDemo } from "../../src/lib/explore/sessions";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
@@ -643,10 +644,17 @@ export default function ExploreDemo() {
                 {!historical &&
                   ["preferences", "review"].includes(state.phase) &&
                   state.extraction && (
-                    <section className="explore-section">
-                      <h2>Your dinner preferences</h2>
+                    <section className="explore-section demo-preferences">
+                      <span className="eyebrow">YOUR SEAT AT THE TABLE</span>
+                      <h2>
+                        Make it <em>your kind of evening</em>
+                      </h2>
+                      <p>
+                        Tell us what matters. We’ll turn it into a plan everyone
+                        can share.
+                      </p>
                       <label>
-                        Preferences
+                        What would make a good evening?
                         <textarea
                           value={text}
                           maxLength={4000}
@@ -671,33 +679,15 @@ export default function ExploreDemo() {
                       </button>
                       {state.extraction && (
                         <div className="explore-review">
-                          <h3>Confirm your conditions</h3>
-                          <ul>
-                            {state.extraction.constraints.map(
-                              (condition, index) => (
-                                <li key={index}>
-                                  {condition.field.replaceAll("_", " ")}:{" "}
-                                  {"value" in condition
-                                    ? typeof condition.value === "object"
-                                      ? condition.value.startsAt
-                                      : String(condition.value)
-                                    : `preference weight ${condition.weight}`}
-                                </li>
-                              ),
-                            )}
-                          </ul>
-                          {[
-                            ...state.extraction.clarifications,
-                            ...state.extraction.unsupportedRequirements,
-                          ].map((message, index) => (
-                            <p key={index} className="explore-notice">
-                              {message}
-                            </p>
-                          ))}
+                          <span className="eyebrow">HERE’S WHAT WE HEARD</span>
+                          <h3>
+                            Your preferences, <em>at a glance</em>
+                          </h3>
+                          <DemoPreferenceSummary
+                            extraction={state.extraction}
+                          />
                           <details>
-                            <summary>
-                              Advanced: edit extracted conditions
-                            </summary>
+                            <summary>Advanced adjustments</summary>
                             <textarea
                               aria-label="Extracted conditions JSON"
                               rows={12}
@@ -720,13 +710,16 @@ export default function ExploreDemo() {
                               )
                             }
                           >
-                            Confirm conditions
+                            Confirm preferences{" "}
+                            <ArrowRight size={16} aria-hidden="true" />
                           </button>
                         </div>
                       )}
                       {state.evaluation &&
-                        state.evaluation.status !== "PROPOSAL_READY" && (
-                          <p className="explore-notice">
+                        state.evaluation.status !== "PROPOSAL_READY" &&
+                        !state.extraction.clarifications.length &&
+                        !state.extraction.unsupportedRequirements.length && (
+                          <p className="demo-review-feedback" role="status">
                             {state.evaluation.status === "NO_MATCH"
                               ? "No restaurant satisfies all conditions. Revise your preferences to try again."
                               : "Some conditions need clarification before a proposal can be made."}
