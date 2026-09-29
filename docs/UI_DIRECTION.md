@@ -4,6 +4,10 @@ Use the existing root `app/` and light workspace styling. PR #3 is a reference f
 
 ## Group workspace and Explore Demo
 
+- `/group/new` redirects to `/discover`: English requests and a category drive Qwen tool calling and xAPI search for all five venue categories. Display source links, unknown conditions and up to five comparison selections. Sign-in stays on this page without losing the request.
+- `/demo/catalog` retains the 200 fictional examples and the existing group creation flow. Live search never substitutes these examples when a provider fails.
+- The hackathon assumes live candidates can be reserved with USDC; omit availability checks and label the assumption. Discovery currently does not create payment policies or merchant registrations.
+
 - `/` and `/api/groups` serve ordinary groups with independently controlled participant wallets and private persisted preferences.
 - `/demo` and `/api/demo` serve the guided session with one user and five automated participants, synthetic restaurants, and bounded test funding. Keep the demo disclosure visible.
 - Share presentation components where useful, but do not share group IDs, demo session state, automated participation, or funding actions between these flows.
@@ -20,7 +24,9 @@ PR #3 informed the structured condition review, submitted/confirmed progress, ca
 | Route                     | UI and data                                                                                                                                                                                        |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/`                       | Authenticated group list, empty/loading/retry states, and create-group navigation                                                                                                                  |
-| `/group/new`              | Existing wallet-authenticated group creation                                                                                                                                                       |
+| `/group/new`              | Redirect to `/discover` |
+| `/discover`               | Live five-category search, wallet sign-in, clarification, source evidence and comparison; provider failures remain visible |
+| `/demo/catalog`           | Archived wallet-authenticated group creation using fictional examples |
 | `/group/[id]`             | Member lobby, confirmation progress, and workflow navigation                                                                                                                                       |
 | `/group/[id]/preferences` | Existing private input, extraction review, correction, confirmation, and invitations                                                                                                               |
 | `/group/[id]/results`     | Run evaluation after six confirmations; saved candidate comparison and no-match correction                                                                                                         |

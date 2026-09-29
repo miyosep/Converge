@@ -6,9 +6,13 @@ the contract freezes the participant list and requires every member's equal
 contribution and approval. Payment, cancellation, expiry and individual refunds
 use the actual participant count. The UI defaults to four members.
 
-The ordinary catalog has 40 fictional restaurants (A–Z and AA–AN). Search covers name,
+The archived planner at `/demo/catalog` has 40 fictional restaurants (A–Z and AA–AN),
+plus 40 examples in each of four other categories. Search covers name,
 cuisine and area. The selected shortlist is saved with the group. Dietary,
 availability and price metadata are synthetic; no real reservation is made.
+Default new-plan links now open live AI search at `/discover`, which assumes USDC
+reservations for the hackathon without checking availability. Its real candidates
+are not yet connected to this merchant registry and policy flow.
 Each person contributes 10 MockUSDC. Recommendation caps are the smaller of
 actual group funding and the configured 60 MockUSDC cap. A small group can receive
 NO_MATCH if every selected restaurant exceeds its funds or other requirements.

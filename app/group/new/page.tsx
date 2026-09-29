@@ -1,5 +1,5 @@
-import { GroupWorkspace } from "../../components/group-workspace";
+import { redirect } from "next/navigation";
 
 export default function NewGroupPage() {
-  return <GroupWorkspace mode="create" />;
+  redirect("/discover");
 }

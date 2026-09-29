@@ -1,0 +1,183 @@
+[
+  {
+    "category": "stay",
+    "query": "guesthouse near Seoul, South Korea",
+    "intent": {
+      "area": "Seoul, South Korea",
+      "cuisine": "",
+      "koreanQuery": "guesthouse near Seoul, South Korea",
+      "budget": null,
+      "people": 6,
+      "facilities": [
+        "parking"
+      ],
+      "otherRequirements": [
+        "pet-friendly",
+        "KRW 200000 nightly total"
+      ],
+      "clarifications": []
+    },
+    "count": 9,
+    "names": [
+      "SeouliteINN Myeongdong",
+      "R Guesthouse Seoul Station",
+      "Bukchonmaru Hanok Guesthouse"
+    ],
+    "durationMs": 9682,
+    "usage": [
+      {
+        "flow": "search_tool_selection",
+        "status": 200,
+        "durationMs": 7849,
+        "inputTokens": 829,
+        "outputTokens": 521,
+        "totalTokens": 1350,
+        "costUsd": 0.00017908
+      },
+      {
+        "flow": "place_search",
+        "status": 201,
+        "durationMs": 1827,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "costUsd": null
+      }
+    ]
+  },
+  {
+    "category": "space",
+    "query": "private meeting room near Seoul, South Korea",
+    "intent": {
+      "area": "Seoul, South Korea",
+      "cuisine": "",
+      "koreanQuery": "private meeting room near Seoul, South Korea",
+      "budget": null,
+      "people": 10,
+      "facilities": [],
+      "otherRequirements": [
+        "projector available",
+        "under KRW 100,000 per hour"
+      ],
+      "clarifications": []
+    },
+    "count": 10,
+    "names": [
+      "ECS153 Co-working Space",
+      "Regus",
+      "저스트코 공유오피스 저스트코타워점"
+    ],
+    "durationMs": 12619,
+    "usage": [
+      {
+        "flow": "search_tool_selection",
+        "status": 200,
+        "durationMs": 9490,
+        "inputTokens": 826,
+        "outputTokens": 651,
+        "totalTokens": 1477,
+        "costUsd": 0.00024804
+      },
+      {
+        "flow": "place_search",
+        "status": 201,
+        "durationMs": 3128,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "costUsd": null
+      }
+    ]
+  },
+  {
+    "category": "sport",
+    "query": "indoor badminton court near Seoul, South Korea",
+    "intent": {
+      "area": "Seoul, South Korea",
+      "cuisine": "",
+      "koreanQuery": "indoor badminton court near Seoul, South Korea",
+      "budget": null,
+      "people": 4,
+      "facilities": [],
+      "otherRequirements": [
+        "equipment rental",
+        "evening sessions"
+      ],
+      "clarifications": []
+    },
+    "count": 4,
+    "names": [
+      "Sanseong Indoor Badminton Courts",
+      "광장동실내배드민턴장",
+      "오동실내배드민턴장"
+    ],
+    "durationMs": 7144,
+    "usage": [
+      {
+        "flow": "search_tool_selection",
+        "status": 200,
+        "durationMs": 5706,
+        "inputTokens": 818,
+        "outputTokens": 364,
+        "totalTokens": 1182,
+        "costUsd": 0.00016703999999999997
+      },
+      {
+        "flow": "place_search",
+        "status": 201,
+        "durationMs": 1438,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "costUsd": null
+      }
+    ]
+  },
+  {
+    "category": "class",
+    "query": "workshops and classes near Seoul, South Korea",
+    "intent": {
+      "area": "Seoul, South Korea",
+      "cuisine": "",
+      "koreanQuery": "workshops and classes near Seoul, South Korea",
+      "budget": {
+        "amount": 59999,
+        "currency": "KRW"
+      },
+      "people": 6,
+      "facilities": [],
+      "otherRequirements": [
+        "English-language",
+        "beginners"
+      ],
+      "clarifications": []
+    },
+    "count": 10,
+    "names": [
+      "Seoul Insa: Traditional Chopstick Making Workshop",
+      "반지공방 아뜰리에호수 성수연무장",
+      "SEOUL PIECE"
+    ],
+    "durationMs": 9206,
+    "usage": [
+      {
+        "flow": "search_tool_selection",
+        "status": 200,
+        "durationMs": 5502,
+        "inputTokens": 823,
+        "outputTokens": 318,
+        "totalTokens": 1141,
+        "costUsd": 0.00015455999999999998
+      },
+      {
+        "flow": "place_search",
+        "status": 201,
+        "durationMs": 3701,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "costUsd": null
+      }
+    ]
+  }
+]

@@ -31,16 +31,32 @@ contribution remains 10 MockUSDC; recommendation spending limits cannot exceed
 the actual group's total contribution (and retain the configured 60 MockUSDC cap).
 Migration `0009_group_size.sql` preserves existing groups at six members.
 
-Ordinary groups can search and select from **200 fictional examples** across
-restaurants, stays, spaces, sports and classes, with 40 examples per category.
-Connect your wallet to sign in, then describe your requirements in a sentence to search.
-See [multi-industry examples](docs/MULTI_INDUSTRY.md) for price units and supported conditions. All members approve one immutable policy and contribute before
+**New plans start with live AI place search.** `/group/new` redirects to `/discover`,
+where English requests for restaurants, stays, spaces, sports facilities and classes
+become Kiln `qwen3-32b` tool calls executed through xAPI Places. Results include map
+links and evidence, and users can compare up to five candidates. Sign in on the
+search page when prompted; the request stays in place. Nightly, hourly and total
+budgets retain their original units.
+
+**Hackathon assumption:** returned places can be reserved with USDC. Booking
+availability and USDC acceptance are not checked. Prices and facilities remain
+unverified where source data does not establish them. Live search does not itself
+send payments or connect real venues to the existing on-chain merchant registry.
+See [live place search setup and verification](docs/LIVE_RESTAURANT_SEARCH.md).
+Server-only `KILN_API_KEY` and `XAPI_KEY` are required; Google Places and Kakao are
+optional restaurant-only adapters. Search failures never fall back to sample data.
+
+The previous **200 fictional examples** (40 per category) are preserved in
+[the archived catalog](data/demo/catalog-archive.json), with its planning flow at
+`/demo/catalog`. See [multi-industry examples](docs/MULTI_INDUSTRY.md) for demo price
+units and supported conditions. In the existing payment demonstration, all members
+approve one immutable policy and contribute before
 payment. The deployed **v2 contract supports 2–100 participants**, including four.
 Existing v1 policies remain supported. Explore Demo retains six participants and
 its original five-candidate catalog. Apply migrations through `0014`.
 See [variable-size payments](docs/GROUP_WALLET_V2.md) for deployment and verification.
 
-The payment flow supports one test restaurant reservation deposit:
+The separate payment demonstration supports one test restaurant reservation deposit:
 
 1. Each person submits a private natural-language preference and confirms the structured interpretation.
 2. Kiln `qwen3-32b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
@@ -49,7 +65,10 @@ The payment flow supports one test restaurant reservation deposit:
 5. The execution agent requests one deposit payment. The smart contract enforces the approved policy and rejects invalid attempts.
 6. Each participant can claim their share of unused funds. Cancellation and expiry also permit recovery of contributed funds.
 
-The restaurant catalog and token are synthetic. This prototype does not make a real restaurant booking, handle the remaining meal bill, or transfer real USDC.
+The payment demonstration's merchant catalog and token are synthetic. Live search
+uses external place listings, while reservations are assumed for the hackathon.
+The prototype does not make a real booking, handle the remaining bill, or transfer
+real USDC.
 
 ## Demo
 
@@ -79,6 +98,10 @@ The $45 deposit is credited toward the synthetic $192 meal estimate. The balance
 The application uses Next.js, TypeScript, server-side Kiln calls, Neon PostgreSQL, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use. Wallet browser integration currently uses the EIP-1193 provider; wagmi remains optional for later transaction UI.
 
 ```text
+English request + category -> Qwen search_places tool call -> xAPI Places
+                          -> source-linked candidates -> comparison
+
+Existing payment demonstration:
 Private input -> Kiln extraction -> participant confirmation
               -> deterministic filtering and scoring
               -> policy review -> six on-chain approvals and contributions
@@ -92,11 +115,14 @@ The policy has a canonical, versioned ABI encoding and a `policyHash` calculated
 
 | Layer            | Implemented responsibility                                                                                                                                                                                |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kiln `qwen3-32b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
+| Kiln `qwen3-32b` | Propose validated place-search tool calls from English requests; extract private group constraints and explain sanitized demo recommendations. |
 | Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence.                              |
 | Smart contract   | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable.                                 |
 
-The contract is the final authority for token movement. It cannot verify restaurant allergy safety, availability, or real-world service delivery; those are off-chain fixture claims in this MVP.
+The contract is the final authority for token movement. It cannot verify allergy
+safety, availability or real-world service delivery. Live search retains unknown
+conditions; booking availability is assumed for the hackathon. Payment-demo
+metadata remains synthetic.
 
 ## Kiln Integration
 

@@ -73,6 +73,9 @@ of enabling two competing transactions.
    pnpm version, `pnpm install --frozen-lockfile` and `pnpm build`.
 2. Set `DATABASE_URL` to the intended pooled Neon connection, `APP_ORIGIN` to the
    exact HTTPS origin, and retain the existing session/Kiln/RPC configuration.
+   For the default five-category search, set server-only `KILN_API_KEY`,
+   `XAPI_KEY` and `RESTAURANT_SEARCH_PROVIDER=xapi`. The ignored local `.env.local`
+   is not deployed. See `LIVE_RESTAURANT_SEARCH.md` for search setup and limitations.
 3. Set `BACKGROUND_DRIVER=inngest`, `BACKGROUND_JOBS_ENABLED=true`,
    `GROUP_EXECUTION_ENABLED=true` and `EXPLORE_DEMO_ENABLED=true` on the intended
    production deployment. Configure a private `EXPLORE_DEMO_ACCESS_CODE`.

@@ -1,0 +1,106 @@
+{
+  "recordedAt": "2026-09-29T15:45:16.033Z",
+  "scope": "Live Kiln -> one xAPI place search -> Kiln candidate selection. No booking, payment or on-chain transaction. One fixed English request does not measure reliability.",
+  "input": "Find a quiet Japanese restaurant near Gangnam Station in Seoul for six people, up to KRW 30000 per person.",
+  "arguments": {
+    "area": "Gangnam Station, Seoul",
+    "query": "Japanese restaurant",
+    "budget_krw_per_person": 30000,
+    "party_size": 6
+  },
+  "searchInput": {
+    "q": "Japanese restaurant near Gangnam Station, Seoul",
+    "gl": "kr",
+    "hl": "en",
+    "location": "Seoul, South Korea"
+  },
+  "providerCall": {
+    "httpStatus": 201,
+    "durationMs": 2499,
+    "count": 10
+  },
+  "calls": [
+    {
+      "flow": "tool_selection",
+      "httpStatus": 200,
+      "durationMs": 4945,
+      "requestId": "169d6aac-b96c-4674-ac9c-d3f88ea4769a",
+      "model": "qwen3-32b",
+      "usage": {
+        "completion_tokens": 307,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 251,
+          "rejected_prediction_tokens": 0
+        },
+        "cost": 0.0001316,
+        "prompt_tokens": 572,
+        "prompt_tokens_details": {
+          "cached_tokens": 3,
+          "audio_tokens": 0
+        },
+        "total_tokens": 879
+      },
+      "finishReason": "tool_calls"
+    },
+    {
+      "flow": "result_interpretation",
+      "httpStatus": 200,
+      "durationMs": 6664,
+      "requestId": "511d8e05-74b7-4753-a087-4da0e7938675",
+      "model": "qwen3-32b",
+      "usage": {
+        "completion_tokens": 447,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 360,
+          "rejected_prediction_tokens": 0
+        },
+        "cost": 0.00023264000000000002,
+        "prompt_tokens": 1345,
+        "prompt_tokens_details": {
+          "cached_tokens": 3,
+          "audio_tokens": 0
+        },
+        "total_tokens": 1792
+      },
+      "finishReason": "stop"
+    }
+  ],
+  "selection": {
+    "candidate_ids": [
+      "14988113708213072577",
+      "10996772185579233787",
+      "11749814032326637634"
+    ],
+    "quiet_verified": false,
+    "seats_verified": false,
+    "budget_verified": false
+  },
+  "markdownFenceRemoved": false,
+  "candidates": [
+    {
+      "title": "일품 강남점",
+      "cid": "14988113708213072577",
+      "address": "Seoul, Seocho District, Seocho-daero 74-gil, 23 B106호",
+      "category": "Japanese",
+      "mapsUrl": "https://www.google.com/maps?cid=14988113708213072577"
+    },
+    {
+      "title": "산쇼쿠라멘 강남본점",
+      "cid": "10996772185579233787",
+      "address": "Teheran-ro 4-gil, Yeoksam-dong, Gangnam District, Seoul",
+      "category": "Japanese",
+      "mapsUrl": "https://www.google.com/maps?cid=10996772185579233787"
+    },
+    {
+      "title": "오제제 강남",
+      "cid": "11749814032326637634",
+      "address": "Seoul, Gangnam District, Gangnam-daero, 358 2층 201호",
+      "category": "Japanese",
+      "mapsUrl": "https://www.google.com/maps?cid=11749814032326637634"
+    }
+  ]
+}
