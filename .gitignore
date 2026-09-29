@@ -18,3 +18,4 @@ contracts/deployments/*.pending.lock
 contracts/deployments/11155111.json.tmp-*
 docs/evidence/private/
 .neon
+.demo/

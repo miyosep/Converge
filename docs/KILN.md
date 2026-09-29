@@ -77,9 +77,11 @@ data. Provider billing semantics are documented under
 
 ## Remaining Integration
 
-The extraction adapter and offline decision engine are implemented separately.
-Pending work includes authenticated private submissions, persistent revisions,
-human corrections and confirmations, clarification handling, sanitized explanation
-generation, durable per-flow aggregates, application cache accounting, and the
-baseline/changed-condition full application runs. The existing blockchain-only
-baseline predates these live calls and must not be labeled AI-driven retroactively.
+Authenticated private submissions, persistent revisions, human corrections,
+explicit confirmations, and blocking of unresolved clarifications are connected
+to the web app. The ordinary-group decision engine also saves public candidate
+results and prepares an immutable off-chain policy. Pending work includes
+privacy-safe explanation generation, durable per-flow aggregates, application
+cache accounting, on-chain ordinary-group execution, and the baseline plus two
+changed-condition full application runs. The existing blockchain-only baseline
+predates these live calls and must not be labeled AI-driven retroactively.

@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "scope": "wallet-connected-explore-live-rehearsal",
+  "network": "ethereum-sepolia",
+  "chainId": 11155111,
+  "runId": "e0da5b8536970202e149cd73625e8e564eca7cffd75289c04b3cfe422398de5b",
+  "judge": "0x51BEae51bbD61b6831ca9a8597092fD20AF77Be7",
+  "automatedParticipants": [
+    "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+    "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+    "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+    "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+    "0x6f677023c08341985a557149a8c79b8D794F7458"
+  ],
+  "policy": {
+    "policyVersion": 1,
+    "chainId": 11155111,
+    "verifyingContract": "0xd43172D5bD904B68004D69545FD01DBcfDb82a89",
+    "decisionId": "0x7cbb531d05d4199ac1f08f78148718a7dae222cb7ab06cb390b1febd7f0dc144",
+    "token": "0x4707Bde238399A27f88855A34BFb31f20B386B17",
+    "merchant": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
+    "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+    "participants": [
+      "0x51BEae51bbD61b6831ca9a8597092fD20AF77Be7",
+      "0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "0x6f677023c08341985a557149a8c79b8D794F7458"
+    ],
+    "approvalThreshold": 6,
+    "contributionPerParticipant": "10000000",
+    "paymentAmount": "45000000",
+    "maxDeposit": "60000000",
+    "maxTotalSpend": "60000000",
+    "expiry": 1790746332,
+    "reservationReference": "0xc38e9ee2681fa82b84e308e0f4c3c20fa89c9b0a080db909ae567de36ed8bfb5"
+  },
+  "policyHash": "0xf5967d605707d69cbb963cc3b7608c49f56fb4a6b3ff822a91d5fb5df0616f74",
+  "restaurant": "KAGAMI",
+  "reservation": {
+    "source": "synthetic-restaurant",
+    "reference": "0xc38e9ee2681fa82b84e308e0f4c3c20fa89c9b0a080db909ae567de36ed8bfb5",
+    "decisionId": "0x7cbb531d05d4199ac1f08f78148718a7dae222cb7ab06cb390b1febd7f0dc144",
+    "restaurant": "KAGAMI",
+    "startsAt": "2030-01-05T10:00:00Z",
+    "guests": 6,
+    "contactName": "Converge demo group",
+    "contactEmail": "demo@converge.invalid",
+    "notes": "",
+    "status": "DEMO_CONFIRMED",
+    "requestedAt": "2026-09-29T06:32:18.562Z",
+    "updatedAt": "2026-09-29T06:40:03.135Z",
+    "paymentHash": "0xa576cc2ac485f4ed72f81018c8aee13bcf1c41dc5bfd23752035386d6e845177",
+    "confirmedAt": "2026-09-29T06:40:03.135Z"
+  },
+  "evaluation": {
+    "engineVersion": "decision-v1",
+    "fixtureVersion": "restaurants-v2",
+    "status": "PROPOSAL_READY",
+    "winnerId": "A",
+    "ranking": [
+      "A",
+      "B",
+      "D"
+    ],
+    "candidates": [
+      {
+        "id": "A",
+        "eligible": true,
+        "scoreMicros": 900000
+      },
+      {
+        "id": "B",
+        "eligible": true,
+        "scoreMicros": 700000
+      },
+      {
+        "id": "C",
+        "eligible": false,
+        "scoreMicros": null
+      },
+      {
+        "id": "D",
+        "eligible": true,
+        "scoreMicros": 400000
+      },
+      {
+        "id": "E",
+        "eligible": false,
+        "scoreMicros": null
+      }
+    ]
+  },
+  "rejection": {
+    "amount": "80000000",
+    "reason": "MaxDepositExceeded",
+    "kind": "eth_call",
+    "block": "11805960"
+  },
+  "transactions": [
+    {
+      "label": "Judge allowance",
+      "hash": "0xd3b9ae05f3c3b0ec11b99356164216960a4a5740c2c571ccdc2999e68252272b",
+      "confirmed": true
+    },
+    {
+      "label": "Judge contribution",
+      "hash": "0xeeec73747beab96230f587a6b6ebc964fb587c940da54328475a0d48455470e6",
+      "confirmed": true
+    },
+    {
+      "label": "Judge refund",
+      "hash": "0xf77cc87e871b03485e269e76f2008e797b63d8f50873b978ee469be554f98a1f",
+      "confirmed": true
+    },
+    {
+      "label": "Gas for you",
+      "hash": "0xb262881e17e025e3f994d2f206a3ca7932c9779a0b9b3b918a1f06d5dccd6d65",
+      "confirmed": true
+    },
+    {
+      "label": "MockUSDC for you",
+      "hash": "0x240901e2f4d57b7e8fb5db0460ff1f4c674914986ab5753cb9946f50666cd2fc",
+      "confirmed": true
+    },
+    {
+      "label": "Create policy",
+      "hash": "0xdd88782e777ffcaf0e335f11c924faafacac6ddd9a54a1893b3380cf1ec608db",
+      "confirmed": true
+    },
+    {
+      "label": "Your contribution",
+      "hash": "0xeeec73747beab96230f587a6b6ebc964fb587c940da54328475a0d48455470e6",
+      "confirmed": true
+    },
+    {
+      "label": "Contribution 0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "hash": "0x84062520e3d212a2cb529c873b262029b81420e56c11489122b3a09e2e768610",
+      "confirmed": true
+    },
+    {
+      "label": "Contribution 0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "hash": "0xaff530fabeb2aa3d5722c2d06fa4d7989279ee16a0631e1b75394a3d5732dfb6",
+      "confirmed": true
+    },
+    {
+      "label": "Contribution 0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "hash": "0xdf08cb060cf0d9892ef00fb6d33b2cf40484d0c90dfa02981180772d04fade40",
+      "confirmed": true
+    },
+    {
+      "label": "Contribution 0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "hash": "0xb9784e0f5f07f0298f60f85385c57adf0026c90baf4730b5227aa37d000b47f3",
+      "confirmed": true
+    },
+    {
+      "label": "Contribution 0x6f677023c08341985a557149a8c79b8D794F7458",
+      "hash": "0xfe6604edea26494358482dd4f957008033649c54366088745879f0f73e43c3c9",
+      "confirmed": true
+    },
+    {
+      "label": "Reservation payment",
+      "hash": "0xa576cc2ac485f4ed72f81018c8aee13bcf1c41dc5bfd23752035386d6e845177",
+      "confirmed": true
+    },
+    {
+      "label": "Refund 0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+      "hash": "0xa830737ce2b7f366e52d167bbd8f83e243c83651fa40e0b3668ef33a67e63ba4",
+      "confirmed": true
+    },
+    {
+      "label": "Refund 0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+      "hash": "0xf9665e99fba6d549ef63f390f5c43fcd97b176f071cd3032741daab661125a36",
+      "confirmed": true
+    },
+    {
+      "label": "Refund 0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+      "hash": "0x2a0c3b445551cfb3dc3c1a9e6e9069ce4686a43919b1e3b87a3a3a5e5e40f9b7",
+      "confirmed": true
+    },
+    {
+      "label": "Refund 0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+      "hash": "0x3b60b37d9a822d4d10245b5016224d94f2aee820dab8a6e8a40154d3d9d1eb9b",
+      "confirmed": true
+    },
+    {
+      "label": "Refund 0x6f677023c08341985a557149a8c79b8D794F7458",
+      "hash": "0x2c2853fb1a42a758c845c8b45e0cec17e1f6bf72be1dac286d678a531e6b0923",
+      "confirmed": true
+    },
+    {
+      "label": "Your refund",
+      "hash": "0xf77cc87e871b03485e269e76f2008e797b63d8f50873b978ee469be554f98a1f",
+      "confirmed": true
+    }
+  ],
+  "approvalCount": 6,
+  "spent": "45000000",
+  "refunded": true,
+  "allRefundsClaimed": true,
+  "timings": {
+    "startedAt": "2026-09-29T06:31:10.403Z",
+    "extractionReady": "2026-09-29T06:32:00.716Z",
+    "proposalReady": "2026-09-29T06:32:18.797Z",
+    "policyReady": "2026-09-29T06:35:27.358Z",
+    "judgeContributionConfirmed": "2026-09-29T06:36:19.827Z",
+    "paymentConfirmed": "2026-09-29T06:40:07.924Z",
+    "judgeRefundConfirmed": "2026-09-29T06:42:29.722Z",
+    "allRefundsConfirmed": "2026-09-29T06:42:31.078Z"
+  },
+  "elapsedSeconds": {
+    "extractionReady": 50,
+    "proposalReady": 68,
+    "policyReady": 257,
+    "judgeContributionConfirmed": 309,
+    "paymentConfirmed": 538,
+    "judgeRefundConfirmed": 679,
+    "allRefundsConfirmed": 681
+  },
+  "extractedFromLiveKiln": true,
+  "automatedPreferences": "synthetic",
+  "judgeSigner": "single-operator-rehearsal",
+  "recordedAt": "2026-09-29T06:42:31.635Z",
+  "verification": {
+    "verifiedAt": "2026-09-29T06:43:01.282Z",
+    "chainId": 11155111,
+    "approvalCount": 6,
+    "totalContributed": "60000000",
+    "paymentAmount": "45000000",
+    "totalRefunded": "15000000",
+    "allSixRefundsClaimed": true,
+    "paymentEvents": 1,
+    "refundEvents": 6,
+    "minimumConfirmations": 2,
+    "finalized": false,
+    "receipts": [
+      {
+        "label": "Judge allowance",
+        "hash": "0xd3b9ae05f3c3b0ec11b99356164216960a4a5740c2c571ccdc2999e68252272b",
+        "blockNumber": "11805945",
+        "blockHash": "0x8825db220708d59d31055669913e2abf131bf46e34c3204e653843b83107f237",
+        "status": "success",
+        "logIndex": []
+      },
+      {
+        "label": "Judge contribution",
+        "hash": "0xeeec73747beab96230f587a6b6ebc964fb587c940da54328475a0d48455470e6",
+        "blockNumber": "11805947",
+        "blockHash": "0x9d182f1ac3f9475c5fe50f8c14ca42b77f976a31989511675d7f13cb463da946",
+        "status": "success",
+        "logIndex": [
+          247
+        ]
+      },
+      {
+        "label": "Judge refund",
+        "hash": "0xf77cc87e871b03485e269e76f2008e797b63d8f50873b978ee469be554f98a1f",
+        "blockNumber": "11805968",
+        "blockHash": "0x343e56d8d07a11e0178aafe13d99b4f872389aa688f66cbda7a93eabab19f7c3",
+        "status": "success",
+        "logIndex": [
+          243
+        ]
+      },
+      {
+        "label": "Gas for you",
+        "hash": "0xb262881e17e025e3f994d2f206a3ca7932c9779a0b9b3b918a1f06d5dccd6d65",
+        "blockNumber": "11805933",
+        "blockHash": "0xb3f5af8bae907cb7a98f4ae72848a14988049cd5bcd9b49f0bfdaddba2288bbc",
+        "status": "success",
+        "logIndex": []
+      },
+      {
+        "label": "MockUSDC for you",
+        "hash": "0x240901e2f4d57b7e8fb5db0460ff1f4c674914986ab5753cb9946f50666cd2fc",
+        "blockNumber": "11805938",
+        "blockHash": "0xad753d6dfb12d57d769792835f5fa75f03e3e6b97d657a43f5f64d2a951dafa1",
+        "status": "success",
+        "logIndex": []
+      },
+      {
+        "label": "Create policy",
+        "hash": "0xdd88782e777ffcaf0e335f11c924faafacac6ddd9a54a1893b3380cf1ec608db",
+        "blockNumber": "11805941",
+        "blockHash": "0xcfab2d8b5f669eb48e1075d9a6696b7fcf403cd979b6bfee79f0f69ea1794dca",
+        "status": "success",
+        "logIndex": [
+          344
+        ]
+      },
+      {
+        "label": "Contribution 0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+        "hash": "0x84062520e3d212a2cb529c873b262029b81420e56c11489122b3a09e2e768610",
+        "blockNumber": "11805951",
+        "blockHash": "0x9e9a7880c074113033c49159af5253dcbf41ae3483a7466891e03533a5a2b83c",
+        "status": "success",
+        "logIndex": [
+          82
+        ]
+      },
+      {
+        "label": "Contribution 0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+        "hash": "0xaff530fabeb2aa3d5722c2d06fa4d7989279ee16a0631e1b75394a3d5732dfb6",
+        "blockNumber": "11805951",
+        "blockHash": "0x9e9a7880c074113033c49159af5253dcbf41ae3483a7466891e03533a5a2b83c",
+        "status": "success",
+        "logIndex": [
+          92
+        ]
+      },
+      {
+        "label": "Contribution 0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+        "hash": "0xdf08cb060cf0d9892ef00fb6d33b2cf40484d0c90dfa02981180772d04fade40",
+        "blockNumber": "11805951",
+        "blockHash": "0x9e9a7880c074113033c49159af5253dcbf41ae3483a7466891e03533a5a2b83c",
+        "status": "success",
+        "logIndex": [
+          100
+        ]
+      },
+      {
+        "label": "Contribution 0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+        "hash": "0xb9784e0f5f07f0298f60f85385c57adf0026c90baf4730b5227aa37d000b47f3",
+        "blockNumber": "11805951",
+        "blockHash": "0x9e9a7880c074113033c49159af5253dcbf41ae3483a7466891e03533a5a2b83c",
+        "status": "success",
+        "logIndex": [
+          110
+        ]
+      },
+      {
+        "label": "Contribution 0x6f677023c08341985a557149a8c79b8D794F7458",
+        "hash": "0xfe6604edea26494358482dd4f957008033649c54366088745879f0f73e43c3c9",
+        "blockNumber": "11805951",
+        "blockHash": "0x9e9a7880c074113033c49159af5253dcbf41ae3483a7466891e03533a5a2b83c",
+        "status": "success",
+        "logIndex": [
+          126,
+          127
+        ]
+      },
+      {
+        "label": "Reservation payment",
+        "hash": "0xa576cc2ac485f4ed72f81018c8aee13bcf1c41dc5bfd23752035386d6e845177",
+        "blockNumber": "11805961",
+        "blockHash": "0xb87b9ba8504ea8d8a4e0af87bfff50475127b9e4d7ba2bc7371e6574ad690e9b",
+        "status": "success",
+        "logIndex": [
+          243,
+          244
+        ]
+      },
+      {
+        "label": "Refund 0xfA17Db56195B9F40025aD09F4372EB72a29d1db6",
+        "hash": "0xa830737ce2b7f366e52d167bbd8f83e243c83651fa40e0b3668ef33a67e63ba4",
+        "blockNumber": "11805968",
+        "blockHash": "0x343e56d8d07a11e0178aafe13d99b4f872389aa688f66cbda7a93eabab19f7c3",
+        "status": "success",
+        "logIndex": [
+          153
+        ]
+      },
+      {
+        "label": "Refund 0x5989458B5D6e12943E7F7C28019b3C6Eadd3dc72",
+        "hash": "0xf9665e99fba6d549ef63f390f5c43fcd97b176f071cd3032741daab661125a36",
+        "blockNumber": "11805968",
+        "blockHash": "0x343e56d8d07a11e0178aafe13d99b4f872389aa688f66cbda7a93eabab19f7c3",
+        "status": "success",
+        "logIndex": [
+          223
+        ]
+      },
+      {
+        "label": "Refund 0xB6ba8fAd31615EA6b10b0188C627F6905a862A32",
+        "hash": "0x2a0c3b445551cfb3dc3c1a9e6e9069ce4686a43919b1e3b87a3a3a5e5e40f9b7",
+        "blockNumber": "11805968",
+        "blockHash": "0x343e56d8d07a11e0178aafe13d99b4f872389aa688f66cbda7a93eabab19f7c3",
+        "status": "success",
+        "logIndex": [
+          241
+        ]
+      },
+      {
+        "label": "Refund 0x6D5C0433f16D44fB7552F365bf93ebf2C531d5aA",
+        "hash": "0x3b60b37d9a822d4d10245b5016224d94f2aee820dab8a6e8a40154d3d9d1eb9b",
+        "blockNumber": "11805968",
+        "blockHash": "0x343e56d8d07a11e0178aafe13d99b4f872389aa688f66cbda7a93eabab19f7c3",
+        "status": "success",
+        "logIndex": [
+          260
+        ]
+      },
+      {
+        "label": "Refund 0x6f677023c08341985a557149a8c79b8D794F7458",
+        "hash": "0x2c2853fb1a42a758c845c8b45e0cec17e1f6bf72be1dac286d678a531e6b0923",
+        "blockNumber": "11805969",
+        "blockHash": "0xa8eb6b8bfe915bb613491c13038b4ff1d2f6f3761d325668773270d98cd1b2f3",
+        "status": "success",
+        "logIndex": [
+          184
+        ]
+      }
+    ]
+  }
+}

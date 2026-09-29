@@ -18,10 +18,7 @@ export function createBaselinePreferences(
       },
       { type: "soft", field: "quiet", weight: 1 },
     ],
-    [
-      { type: "non_negotiable", field: "shellfish_safe", value: true },
-      { type: "soft", field: "subway_proximity", weight: 1 },
-    ],
+    [{ type: "soft", field: "subway_proximity", weight: 1 }],
     [{ type: "soft", field: "atmosphere", weight: 1 }],
     [{ type: "soft", field: "quiet", weight: 1 }],
     [{ type: "soft", field: "atmosphere", weight: 1 }],

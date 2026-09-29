@@ -43,7 +43,7 @@ export const restaurantSchema = z.strictObject({
 });
 export const restaurantCatalogSchema = z
   .strictObject({
-    fixtureVersion: z.literal("restaurants-v1"),
+    fixtureVersion: z.enum(["restaurants-v1", "restaurants-v2"]),
     synthetic: z.literal(true),
     restaurants: z.array(restaurantSchema).min(1).max(100),
   })

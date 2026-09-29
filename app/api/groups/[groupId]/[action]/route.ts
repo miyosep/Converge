@@ -3,6 +3,10 @@ import { z } from "zod";
 import { createKilnClient } from "../../../../../src/lib/kiln/client.js";
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
 import {
+  groupEvaluationOptions,
+  groupPolicyConfig,
+} from "../../../../../src/lib/server/group-config.js";
+import {
   api,
   recordKilnAttempt,
   services,
@@ -18,6 +22,10 @@ export async function GET(request: NextRequest, context: Context) {
   return api(async () => {
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "overview")
+      return NextResponse.json(
+        await services().preferences.getOverview(groupId, actor),
+      );
     if (action === "progress")
       return NextResponse.json({
         participants: await services().preferences.getProgress(groupId, actor),
@@ -35,6 +43,33 @@ export async function POST(request: NextRequest, context: Context) {
     verifyOrigin(request);
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "evaluate") {
+      z.strictObject({}).parse(await request.json());
+      const repository = services().preferences;
+      const overview = await repository.getOverview(groupId, actor);
+      if (Date.parse(overview.group.startsAt) <= Date.now())
+        return NextResponse.json(
+          { error: "RESERVATION_PASSED" },
+          { status: 409 },
+        );
+      await repository.evaluateAndFreeze(
+        groupId,
+        actor,
+        groupEvaluationOptions(overview.group.startsAt),
+      );
+      return NextResponse.json(await repository.getOverview(groupId, actor));
+    }
+    if (action === "decisions") {
+      z.strictObject({}).parse(await request.json());
+      await services().preferences.preparePolicy(
+        groupId,
+        actor,
+        groupPolicyConfig,
+      );
+      return NextResponse.json(
+        await services().preferences.getOverview(groupId, actor),
+      );
+    }
     if (action === "invite") {
       const invite = await services().auth.createInvite(groupId, actor);
       return NextResponse.json(invite, { status: 201 });

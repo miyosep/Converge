@@ -14,7 +14,7 @@ export function createRestaurantCatalog(
       id: "A",
       mealPricePerPersonCents: 3200,
       depositBaseUnits: "45000000",
-      shellfishSafe: "supported",
+      shellfishSafe: "unknown",
       subwayDistanceMeters: 150,
       quiet: 90,
       atmosphere: 95,
@@ -38,7 +38,7 @@ export function createRestaurantCatalog(
       subwayDistanceMeters: 100,
       quiet: 80,
       atmosphere: 85,
-      available: true,
+      available: false,
     },
     {
       id: "D",
@@ -62,11 +62,11 @@ export function createRestaurantCatalog(
     },
   ] as const;
   return restaurantCatalogSchema.parse({
-    fixtureVersion: "restaurants-v1",
+    fixtureVersion: "restaurants-v2",
     synthetic: true,
     restaurants: rows.map((row) => ({
       ...row,
-      name: `Restaurant ${row.id}`,
+      name: row.id === "A" ? "KAGAMI" : `Restaurant ${row.id}`,
       merchant: roles.merchants[row.id],
       currency: "USD",
       depositCreditedToMeal: true,

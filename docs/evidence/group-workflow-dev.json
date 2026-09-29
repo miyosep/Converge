@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "liveKiln": false,
+  "onChainTransactions": false,
+  "branch": "dev-preferences",
+  "checkedAt": "2026-09-29T05:22:10.934Z",
+  "groupId": "d44c0b7c-2c0b-4edc-bfa0-39e5fc1583d9",
+  "noMatchPersisted": true,
+  "staleResultHidden": true,
+  "incompleteEvaluationRejected": true,
+  "concurrentEvaluationIdempotent": true,
+  "concurrentPolicyIdempotent": true,
+  "policyUpdatesRejected": true,
+  "outsiderRejected": true,
+  "csrfRejected": true,
+  "clientTermsRejected": true,
+  "policyHash": "0x21e12158e20b92e3619efa47338a38b42344a23d86e5bf56a6ab658e5ced3c11",
+  "winner": "A"
+}

@@ -58,6 +58,11 @@ test("the specified baseline, lower-budget, and changed-merchant scenarios choos
 
 test("unknown safety and unsupported dietary metadata never satisfy non-negotiables", () => {
   const input = baseline();
+  input.preferences[0]!.extraction.constraints.push({
+    type: "non_negotiable",
+    field: "shellfish_safe",
+    value: true,
+  });
   for (const candidate of input.catalog.restaurants)
     candidate.shellfishSafe = "unknown";
   assert.equal(evaluateDecision(input).status, "NO_MATCH");

@@ -39,7 +39,7 @@ by their maximum to preserve tiny positive weights without numerical underflow.
 The average is rounded to millionths using `Math.round`, and that stored integer
 is the ranking key. Ties use lower meal price, then ordinal candidate ID.
 
-The five `restaurants-v1` entries use the public merchant role manifest. Unknown
+The five `restaurants-v2` entries use the public merchant role manifest. Restaurant A is displayed as KAGAMI, the fictional demo storefront at `/restaurant`. Its $32 table meal estimate and deposit remain synthetic catalog assumptions; the separate KAGAMI concept page lists a $148 omakase. KAGAMI's shellfish-safety field is unknown, so it cannot satisfy a shellfish-safety requirement. Version 1 evidence retains the original Restaurant A label and constraints. Unknown
 wheelchair and dietary metadata is deliberate: the brief does not supply it.
 Do not silently turn missing metadata into support. A changed catalog needs a new
 version and updated evidence. Expected results are A for the baseline, B for a
@@ -55,6 +55,8 @@ disclosure but cannot prevent inference in a small group. Access control and
 privacy-safe explanation generation are separate application responsibilities.
 
 The offline fixture runner preconfirms synthetic revisions solely for testing.
-It does not prove wallet authentication, user confirmation, persistence,
-stale-proposal concurrency handling, policy construction, or end-to-end payment.
-Those integrations remain open in the task register; no owner is assigned here.
+Separate development-branch rehearsals cover wallet authentication, user
+confirmation, persistence, stale-result handling, and immutable policy
+preparation with synthetic inputs. Neither rehearsal proves a full live Kiln and
+on-chain application run. Privacy-safe explanation and end-to-end payment remain
+open in the task register.

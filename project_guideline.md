@@ -3,7 +3,7 @@
 > AI proposes. Humans approve. Smart contracts enforce.
 
 Document status: implementation specification, not a report of completed work.
-Reviewed on: 2026-09-28.
+Reviewed on: 2026-09-29.
 Language: English for project documentation, code comments, issues, and demo evidence.
 Demo platform: MacBook. Native macOS support is required; the foundation targets Apple Silicon and Intel. See `docs/MACBOOK_DEMO.md` for setup and rehearsal requirements.
 Task ownership: self-assigned. Sage has claimed the blockchain contract and deployment work in Section 19; other tasks remain open for contributors to claim.
@@ -16,7 +16,7 @@ The challenge brief in `hackathon_descrip.txt` is the source of truth for compet
 
 At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, and a partial Next.js/Neon/Kiln group workflow. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. Proposal, financial UI, and full acceptance runs remain subsequent work.
+The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, and a partial Next.js/Neon/Kiln group workflow through saved results and off-chain immutable policy preparation. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. Ordinary-group on-chain financial UI and full acceptance runs remain subsequent work.
 
 ### 1.1 Required README Declaration
 
@@ -199,6 +199,8 @@ Use wallet-signature login with a server-issued nonce, expiration, domain bindin
 
 Group invitations establish membership through a server-validated invitation. Freeze membership before publishing a proposal. In a local automated demo, six dedicated test accounts may perform the same operations programmatically. Any persona-switching convenience must be explicitly limited to development and disabled in a shared deployment.
 
+The separate wallet-connected **Explore Demo** at `/demo` admits one SIWE-authenticated judge and five clearly labeled automated participants. The judge's address is discovered on connection and frozen in a new policy before contributions. The judge signs their own approval, contribution, cancellation, and refund transactions; the local worker never impersonates them. A bounded test-fund grant supplies missing MockUSDC and Sepolia ETH. The other five accounts contribute only after the judge's on-chain contribution. Shared hosting requires an event access code, a persistent shared filesystem, a total session cap, and a transaction-cost budget. This is a guided demonstration, not evidence of six independently controlled users. See [Explore Demo](docs/EXPLORE_DEMO.md) for the runtime, limits, and recovery procedure. Normal group membership and authorization remain unchanged.
+
 ### 5.2 Access Rules
 
 | Resource | Participant access | Public evidence access |
@@ -302,11 +304,13 @@ Use synthetic data with five candidates. Resolve merchant addresses from a deplo
 
 | ID | Name | Meal price/person | Deposit/group | Shellfish fixture status | Subway distance | Quiet | Atmosphere | Availability |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| A | Restaurant A | $32 | 45 USDC | Confirmed safe in mock data | 150 m | 90 | 95 | Available |
+| A | KAGAMI (Restaurant A) | $32 | 45 USDC | Unknown | 150 m | 90 | 95 | Available |
 | B | Restaurant B | $24 | 36 USDC | Confirmed safe in mock data | 300 m | 70 | 70 | Available |
-| C | Restaurant C | $22 | 30 USDC | Not safe in mock data | 100 m | 80 | 85 | Available |
+| C | Restaurant C | $22 | 30 USDC | Not safe in mock data | 100 m | 80 | 85 | Unavailable |
 | D | Restaurant D | $28 | 42 USDC | Confirmed safe in mock data | 900 m | 50 | 60 | Available |
 | E | Restaurant E | $30 | 45 USDC | Unknown | 200 m | 85 | 90 | Unavailable |
+
+Current `restaurants-v2` presents Restaurant A as KAGAMI in the application. The $32 table meal estimate is a synthetic fixture assumption, not a price verified by the separate fictional KAGAMI concept page. Its $148 omakase is a different offering. KAGAMI's shellfish-safety field is unknown, so a confirmed shellfish-safety requirement excludes it. Existing `restaurants-v1` evidence retains the original Restaurant A label and conditions.
 
 Include currency, fixture version, supported reservation slots, accessibility/dietary fields, and the deposit-credit convention. All prices are synthetic final estimates including assumed fees; do not imply a live restaurant quote.
 
@@ -348,14 +352,14 @@ Use these six synthetic baseline submissions in the scripted demo. Each person s
 | Participant | Private example input | Confirmed interpretation |
 | --- | --- | --- |
 | Alice | `I can spend at most $35 per person, and I would like somewhere quiet.` | Hard budget at most $35; soft quiet |
-| Bob | `I have a shellfish allergy and would prefer to be near a subway station.` | Non-negotiable shellfish-safe fixture requirement; soft subway proximity |
+| Bob | `I would prefer to be near a subway station.` | Soft subway proximity; the KAGAMI demo does not claim allergy safety |
 | Charlie | `Atmosphere matters most to me.` | Soft atmosphere |
 | Dana | `I want a calm place where we can talk.` | Soft quiet |
 | Erin | `I prefer a place with a strong atmosphere.` | Soft atmosphere |
 | Farah | `Easy subway access would make the evening simpler.` | Soft subway proximity |
 
-- Baseline: Alice confirms a $35 maximum and quiet preference; Bob confirms shellfish safety and subway proximity; Charlie confirms atmosphere preference; Dana prefers quiet conversation; Erin prefers atmosphere; Farah prefers subway proximity. Restaurant A wins.
-- Lower budget: Alice confirms a $25 maximum. Restaurant A and D fail the budget, C fails shellfish safety, E is unavailable, and B wins.
+- Baseline: Alice confirms a $35 maximum and quiet preference; Bob confirms subway proximity; Charlie confirms atmosphere preference; Dana prefers quiet conversation; Erin prefers atmosphere; Farah prefers subway proximity. KAGAMI (Restaurant A) wins.
+- Lower budget: Alice confirms a $25 maximum. KAGAMI and D fail the budget, C and E are unavailable, and B wins.
 - Changed merchant permission: exclude A in a fresh run while restoring the baseline budget. B wins over D under the same confirmed soft-preference structure.
 
 Test ranking with fixed structured inputs. Real LLM output may vary, so end-to-end runs must record and confirm the actual parsed constraints rather than assume exact model output bytes.
@@ -674,6 +678,8 @@ Use a consistent error envelope containing `code`, a safe `message`, `requestId`
 
 ## 13. Frontend Requirements
 
+Keep the ordinary group workspace and the guided `/demo` experience separate. Use the existing root `app/`; PR #3 is an information-layout reference only. See [UI direction](docs/UI_DIRECTION.md) for the route, data, and evidence boundaries.
+
 ### 13.1 Required Views
 
 | Route | Content and interactions | Essential states |
@@ -880,7 +886,7 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 
 ### 17.3 Command Contract to Implement
 
-Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, and `pnpm demo:fund`. `pnpm check` combines type checking, formatting checks, and foundation tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. The web app and live integrations are still pending.
+Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm build`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, `pnpm demo:fund`, and the Explore Demo commands in `package.json`. `pnpm check` combines type checking, formatting checks, and application tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. The ordinary-group on-chain workflow and full acceptance runs remain pending.
 
 The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
 
@@ -958,23 +964,23 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
 | T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Four versioned migrations for groups, preferences, evaluations, EOA sessions, invites, and Kiln attempt metadata tested on Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
+| T09 | Database and migrations | Five versioned migrations include immutable group policies on the Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
 | T10 | Identity and privacy | EOA SIWE nonce/session and capped invites implemented; signed HTTP login, replay, Origin, and outsider access tested; contract-wallet and deployment hardening remain | T09 | | | In progress |
-| T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; two live synthetic extractions passed; app integration pending | T02 | | | In review |
+| T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; live synthetic extractions passed and authenticated private submission is connected | T02 | | | In review |
 | T12 | Usage and efficiency | Per-attempt usage persisted for live web extraction; final per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
 | T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
-| T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; API integration pending | T13 | | | In review |
-| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; proposal API pending | T10, T11 | | | In progress |
+| T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; ordinary-group evaluation API connected | T13 | | | In review |
+| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; full live application run pending | T10, T11 | | | In progress |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
-| T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
+| T17 | Proposal APIs | Frozen revision snapshot, public saved evaluation, and immutable off-chain policy rehearsed with synthetic inputs; on-chain registration remains separate | T03, T14, T15 | | | In progress |
 | T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
-| T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
+| T19 | Results and policy UI | Saved candidate outcomes, no-match state, and complete off-chain policy review implemented; privacy-safe explanation and on-chain actions remain | T16, T17 | | | In progress |
 | T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks | T08 | Sage | | In review |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
 | T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
 | T24 | Execution and refund UI | Policy enforcement display, transaction history, claims and settlement | T07, T21-T23 | | | Unclaimed |
-| T25 | Evidence view/export | Run comparison, per-flow usage, real receipts, redacted artifacts | T12, T23, T24 | | | Unclaimed |
+| T25 | Evidence view/export | Published evidence view separates blockchain baseline, live Kiln smoke, and deterministic fixtures; correlated full-run export remains | T12, T23, T24 | | | In progress |
 | T26 | Baseline demo script | Direct-contract payment/refund rehearsal verified in `docs/evidence/baseline-001.json`; real Kiln and full application workflow remain | T15, T17, T20, T22, T23 | | | Unclaimed |
 | T27 | Changed-condition scripts | Complete lower-budget and changed-merchant runs with comparison | T26 | | | Unclaimed |
 | T28 | Integration and privacy QA | Cross-session tests, failure recovery, access-control verification | T18-T27 | | | Unclaimed |
