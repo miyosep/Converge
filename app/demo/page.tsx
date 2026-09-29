@@ -42,7 +42,6 @@ import "./redesign.css";
 import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
 import { LiveDemoSearch } from "./live-search";
-import { DemoPreferenceSummary } from "./preference-summary";
 import { canRestartDemo } from "../../src/lib/explore/sessions";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
@@ -83,13 +82,8 @@ export default function ExploreDemo() {
   const [entered, setEntered] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
-  const [text, setText] = useState("");
-  const [reviewRequested, setReviewRequested] = useState(false);
-  const draftRun = useRef<string | null>(null);
-  const [correction, setCorrection] = useState("");
   const [code, setCode] = useState("");
   const [lastTx, setLastTx] = useState<string | null>(null);
-  const revision = useRef("");
   const selectedRun = useRef("");
   const refreshSequence = useRef(0);
   const refreshing = useRef(false);
@@ -118,17 +112,6 @@ export default function ExploreDemo() {
       return;
     setRefreshError(false);
     setView(result);
-    const runId = result.run?.id ?? null;
-    if (draftRun.current !== runId) {
-      draftRun.current = runId;
-      setText(result.run?.text ?? "");
-      setReviewRequested(false);
-    }
-    const key = `${result.run?.id}:${result.run?.revision}`;
-    if (result.run?.extraction && revision.current !== key) {
-      setCorrection(JSON.stringify(result.run.extraction, null, 2));
-      revision.current = key;
-    }
   }, []);
   useEffect(() => {
     void refresh().catch((error) => setNotice(error.message));
@@ -177,7 +160,6 @@ export default function ExploreDemo() {
     setWallet(session.walletAddress);
     setNotice("");
     setLastTx(null);
-    revision.current = "";
     selectedRun.current = "";
   }
   async function command(body: unknown) {
@@ -280,21 +262,22 @@ export default function ExploreDemo() {
   const historical =
     !!state && !!view?.currentRunId && state.id !== view.currentRunId;
   const pending = busy || !!state?.command;
-  const showPreferenceReview =
-    reviewRequested && !!state?.extraction && text === state.text && !pending;
   const terminal =
     !!state && ["completed", "cancelled", "expired"].includes(state.phase);
   const demoReady = !!view?.enabled && view.workerOnline && !refreshError;
   const journeyIndex =
     !entered || !state || ["cancelled", "expired"].includes(state.phase)
       ? -1
-      : ["preferences", "review"].includes(state.phase)
-        ? 0
-        : ["proposal", "preparing"].includes(state.phase)
-          ? 1
-          : ["approval", "contributing"].includes(state.phase)
-            ? 2
-            : 3;
+      : state.command?.action === "search" ||
+          (state.discovery && ["preferences", "review"].includes(state.phase))
+        ? 1
+        : ["preferences", "review"].includes(state.phase)
+          ? 0
+          : ["proposal", "preparing"].includes(state.phase)
+            ? 1
+            : ["approval", "contributing"].includes(state.phase)
+              ? 2
+              : 3;
   return (
     <div
       className={`shell plans-shell explore-shell demo-redesign ${entered ? "demo-in-session" : ""}`}
@@ -393,7 +376,12 @@ export default function ExploreDemo() {
               ? "Checking demo availability…"
               : demoReady
                 ? entered && state
-                  ? phaseNames[state.phase]
+                  ? state.command?.action === "search"
+                    ? "Finding places for your group…"
+                    : state.discovery &&
+                        ["preferences", "review"].includes(state.phase)
+                      ? "Review your search results"
+                      : phaseNames[state.phase]
                   : "Ready when you are"
                 : "The live demo is currently paused"}
         </div>
@@ -653,8 +641,7 @@ export default function ExploreDemo() {
                   )}
                 </div>
                 {!historical &&
-                  ["preferences", "review"].includes(state.phase) &&
-                  !state.extraction && (
+                  ["preferences", "review"].includes(state.phase) && (
                     <LiveDemoSearch
                       key={`search:${state.id}`}
                       run={state}
@@ -663,105 +650,10 @@ export default function ExploreDemo() {
                       onCommand={(body) => void run(() => command(body))}
                     />
                   )}
-                {!historical &&
-                  ["preferences", "review"].includes(state.phase) &&
-                  state.extraction && (
-                    <section className="explore-section demo-preferences">
-                      <h2>
-                        Make it <em>your kind of evening</em>
-                      </h2>
-                      <p>
-                        Tell us what matters. We’ll turn it into a plan everyone
-                        can share.
-                      </p>
-                      <label>
-                        What would make a good evening?
-                        <textarea
-                          value={text}
-                          maxLength={4000}
-                          placeholder="Under $35 per person, somewhere quiet."
-                          onChange={(event) => {
-                            setText(event.target.value);
-                            setReviewRequested(false);
-                          }}
-                          rows={3}
-                        />
-                      </label>
-                      <button
-                        className="primary"
-                        disabled={
-                          pending ||
-                          !text.trim() ||
-                          (text.trim() !== state.text &&
-                            (!view?.workerOnline || state.extractionCalls >= 3))
-                        }
-                        onClick={() => {
-                          const request = text.trim();
-                          setText(request);
-                          setReviewRequested(true);
-                          if (request !== state.text)
-                            void run(() =>
-                              command({ action: "extract", text: request }),
-                            );
-                        }}
-                      >
-                        {state.command?.action === "extract"
-                          ? "Reading preferences..."
-                          : "Review preferences"}
-                      </button>
-                      {showPreferenceReview && (
-                        <div className="explore-review">
-                          <h3>
-                            Your preferences, <em>at a glance</em>
-                          </h3>
-                          <DemoPreferenceSummary
-                            extraction={state.extraction}
-                          />
-                          <details>
-                            <summary>Advanced adjustments</summary>
-                            <textarea
-                              aria-label="Extracted conditions JSON"
-                              rows={12}
-                              value={correction}
-                              onChange={(event) =>
-                                setCorrection(event.target.value)
-                              }
-                            />
-                          </details>
-                          <button
-                            className="primary"
-                            disabled={pending}
-                            onClick={() =>
-                              void run(() =>
-                                command({
-                                  action: "confirm",
-                                  revision: state.revision,
-                                  extraction: JSON.parse(correction),
-                                }),
-                              )
-                            }
-                          >
-                            Confirm preferences{" "}
-                            <ArrowRight size={16} aria-hidden="true" />
-                          </button>
-                        </div>
-                      )}
-                      {showPreferenceReview &&
-                        state.evaluation &&
-                        state.evaluation.status !== "PROPOSAL_READY" &&
-                        !state.extraction.clarifications.length &&
-                        !state.extraction.unsupportedRequirements.length && (
-                          <p className="demo-review-feedback" role="status">
-                            {state.evaluation.status === "NO_MATCH"
-                              ? "No restaurant satisfies all conditions. Revise your preferences to try again."
-                              : "Some conditions need clarification before a proposal can be made."}
-                          </p>
-                        )}
-                    </section>
+                {state.evaluation &&
+                  !["preferences", "review"].includes(state.phase) && (
+                    <DemoCandidateResults result={state.evaluation} />
                   )}
-                {state.evaluation && (
-                  <DemoCandidateResults result={state.evaluation} />
-                )}
                 {state.policy && (
                   <section className="explore-section">
                     <h2>{state.restaurant}</h2>

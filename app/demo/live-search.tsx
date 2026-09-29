@@ -18,9 +18,12 @@ export function LiveDemoSearch({
   const [placeId, setPlaceId] = useState("");
   const [deposit, setDeposit] = useState("45");
   const [accepted, setAccepted] = useState(false);
+  const [reviewedText, setReviewedText] = useState<string | null>(null);
+  const searching = run.command?.action === "search" || run.searchInFlight;
   useEffect(() => {
     setPlaceId("");
     setAccepted(false);
+    setReviewedText(null);
   }, [run.revision]);
   const result = run.discovery;
   const amount = Number(deposit);
@@ -43,9 +46,7 @@ export function LiveDemoSearch({
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          setPlaceId("");
-          setAccepted(false);
-          onCommand({ action: "search", text });
+          setReviewedText(text.trim());
         }}
       >
         <label htmlFor="demo-live-request">
@@ -54,7 +55,11 @@ export function LiveDemoSearch({
         <textarea
           id="demo-live-request"
           value={text}
-          onChange={(event) => setText(event.target.value)}
+          disabled={disabled}
+          onChange={(event) => {
+            setText(event.target.value);
+            setReviewedText(null);
+          }}
           required
           minLength={3}
           maxLength={2000}
@@ -72,7 +77,10 @@ export function LiveDemoSearch({
               className="secondary"
               key={example}
               disabled={disabled}
-              onClick={() => setText(example)}
+              onClick={() => {
+                setText(example);
+                setReviewedText(null);
+              }}
             >
               {example}
             </button>
@@ -93,15 +101,53 @@ export function LiveDemoSearch({
             text.trim().length < 3
           }
         >
-          {run.command?.action === "search"
-            ? "Searching Gangnam Station…"
-            : "Search restaurants"}
+          {searching ? "Searching Gangnam Station…" : "Review preferences"}
         </button>
         <p>
           {run.searchCalls ?? 0} of 3 searches used. Results stay fixed until
           you search again.
         </p>
       </form>
+      {reviewedText !== null && !searching && (
+        <section
+          className="demo-request-review"
+          aria-label="Review your request"
+        >
+          <h3>
+            Sound like <em>your kind of evening?</em>
+          </h3>
+          <blockquote>{reviewedText}</blockquote>
+          <p>For six people near Gangnam Station. No payment at this step.</p>
+          <button
+            type="button"
+            className="primary"
+            disabled={
+              disabled ||
+              !configured ||
+              (run.searchCalls ?? 0) >= 3 ||
+              reviewedText !== text.trim()
+            }
+            onClick={() => {
+              setPlaceId("");
+              setAccepted(false);
+              onCommand({ action: "search", text: reviewedText });
+            }}
+          >
+            Confirm &amp; find places
+          </button>
+        </section>
+      )}
+      {searching && (
+        <p className="demo-search-progress" role="status">
+          Finding real places for your group… This can take a moment.
+        </p>
+      )}
+      {run.error?.includes("SEARCH") && !searching && (
+        <p role="alert">
+          The search could not finish. Your request is saved; you can retry
+          while searches remain.
+        </p>
+      )}
       {!!run.searchUsage?.length && (
         <details>
           <summary>Search activity</summary>

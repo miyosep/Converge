@@ -860,3 +860,99 @@
     width: 100%;
   }
 }
+.demo-redesign,
+.demo-redesign.demo-in-session {
+  background:
+    linear-gradient(180deg, #faf8f570 0, #faf8f5b0 340px, #faf8f5 720px),
+    url("/images/converge-city-sky.webp") center top / auto 760px no-repeat,
+    #faf8f5;
+}
+.demo-redesign .explore-heading h1 em,
+.demo-redesign .explore-section h2 em,
+.demo-redesign .explore-review h3 em,
+.demo-redesign .demo-heading-aside p,
+.demo-redesign .demo-guide h2 em {
+  color: var(--ink);
+}
+.demo-redesign .demo-heading-aside .icon-button,
+.demo-redesign .demo-scope summary,
+.demo-redesign .demo-sessions > summary::after,
+.demo-redesign .demo-help a,
+.demo-redesign .demo-guide > a {
+  color: var(--ink);
+}
+.demo-redesign .demo-guide,
+.demo-redesign .demo-start {
+  background: #fffdf8e8;
+  border-color: #e2dbd0;
+}
+.demo-redesign .demo-seat-line > .demo-seat-you,
+.demo-in-session .explore-avatar.judge {
+  background: var(--accent);
+  color: white;
+}
+.demo-redesign .demo-seat-line > .demo-seat-bot {
+  background: #ece5dd;
+  color: #766657;
+}
+.demo-redesign .current .journey-number {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.demo-redesign .past .journey-number {
+  background: #eee3dc;
+  color: var(--accent);
+}
+.demo-redesign .demo-start-top .eyebrow,
+.demo-redesign .demo-guide .eyebrow {
+  color: var(--accent);
+}
+.demo-in-session .demo-main > .demo-live-search {
+  background: #fffdf9ed;
+  border: 1px solid #e7dfd3;
+  border-radius: 28px;
+  padding: 40px;
+  box-shadow: 0 12px 36px #624b3310;
+}
+.demo-redesign .demo-live-search > h2 {
+  font-size: clamp(32px, 4vw, 44px);
+  letter-spacing: -0.045em;
+}
+.demo-request-review {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.demo-request-review h3 {
+  font-size: 23px;
+}
+.demo-request-review h3 em {
+  font-family: Georgia, serif;
+  color: var(--accent);
+}
+.demo-request-review blockquote {
+  margin: 20px 0;
+  padding: 8px 0 8px 20px;
+  border-left: 2px solid var(--accent);
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.demo-search-progress {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 600px) {
+  .demo-in-session .demo-main > .demo-live-search {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+}
+.demo-redesign .main-nav a[aria-current="page"] {
+  background: #f3e7df;
+  color: var(--accent);
+}
+.demo-redesign .demo-journey .current {
+  color: var(--ink);
+}
