@@ -36,7 +36,7 @@ export function AppHeader({
   action,
   publicView = false,
 }: {
-  active?: "workspace" | "demo" | "evidence";
+  active?: "workspace" | "demo" | "evidence" | "discover";
   action?: ReactNode;
   publicView?: boolean;
 }) {
@@ -48,6 +48,12 @@ export function AppHeader({
       <header className={`topbar${publicView ? " floating-topbar" : ""}`}>
         <Brand />
         <nav className="main-nav" aria-label="Main navigation">
+          <Link
+            href="/discover"
+            aria-current={active === "discover" ? "page" : undefined}
+          >
+            Find places
+          </Link>
           <Link
             href={publicView ? "#how-it-works" : "/"}
             aria-current={

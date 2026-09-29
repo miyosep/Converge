@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-09-29T15:57:35.716Z",
+  "scope": "Live authenticated local HTTP discovery with a changed budget; no payment or booking. Model/provider usage is logged by the server.",
+  "outcomes": [
+    {
+      "budget": 30000,
+      "httpStatus": 200,
+      "durationMs": 10741,
+      "count": 10,
+      "query": "Japanese restaurants near Gangnam Station, Seoul",
+      "allConditionsUnverified": true
+    },
+    {
+      "budget": 20000,
+      "httpStatus": 200,
+      "durationMs": 9150,
+      "count": 10,
+      "query": "Japanese restaurants near Gangnam Station, Seoul",
+      "allConditionsUnverified": true
+    }
+  ]
+}

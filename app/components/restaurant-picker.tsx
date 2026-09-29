@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { CatalogSearchResult } from "../../src/lib/catalog-search";
 import { Utensils, BedDouble, Building2, Trophy, Palette } from "lucide-react";
 import {
@@ -139,6 +140,15 @@ function CategoryRestaurantPicker({
           ? "What are you planning?"
           : "Choose places to consider"}
       </legend>
+      {category === "restaurant" && (
+        <p className="flow-note">
+          Looking for a real place?{" "}
+          <Link href="/discover">
+            Search real restaurants and compare candidates
+          </Link>
+          .
+        </p>
+      )}
       {onCategoryChange && (
         <CategoryPicker
           category={category}

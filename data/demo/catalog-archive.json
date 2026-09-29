@@ -1,0 +1,3020 @@
+{
+  "description": "Synthetic catalog preserved for demo, test and compatibility. Not live search results.",
+  "total": 200,
+  "counts": {
+    "restaurant": 40,
+    "stay": 40,
+    "space": 40,
+    "sport": 40,
+    "class": 40
+  },
+  "options": [
+    {
+      "id": "A",
+      "name": "KAGAMI",
+      "cuisine": "Japanese",
+      "area": "City center",
+      "price": 32,
+      "deposit": 45,
+      "category": "restaurant",
+      "kind": "Japanese",
+      "facilities": []
+    },
+    {
+      "id": "B",
+      "name": "Green Table",
+      "cuisine": "Seasonal",
+      "area": "Riverside",
+      "price": 24,
+      "deposit": 36,
+      "category": "restaurant",
+      "kind": "Seasonal",
+      "facilities": []
+    },
+    {
+      "id": "C",
+      "name": "Corner Kitchen",
+      "cuisine": "Comfort food",
+      "area": "Old town",
+      "price": 22,
+      "deposit": 30,
+      "category": "restaurant",
+      "kind": "Comfort food",
+      "facilities": []
+    },
+    {
+      "id": "D",
+      "name": "Ember House",
+      "cuisine": "Grill",
+      "area": "Garden district",
+      "price": 28,
+      "deposit": 42,
+      "category": "restaurant",
+      "kind": "Grill",
+      "facilities": []
+    },
+    {
+      "id": "E",
+      "name": "Evening Room",
+      "cuisine": "Modern European",
+      "area": "City center",
+      "price": 30,
+      "deposit": 45,
+      "category": "restaurant",
+      "kind": "Modern European",
+      "facilities": []
+    },
+    {
+      "id": "F",
+      "name": "Noodle Yard",
+      "cuisine": "Chinese noodles",
+      "area": "Station quarter",
+      "price": 14,
+      "deposit": 12,
+      "category": "restaurant",
+      "kind": "Chinese noodles",
+      "facilities": []
+    },
+    {
+      "id": "G",
+      "name": "Seoul Bowl",
+      "cuisine": "Korean",
+      "area": "University quarter",
+      "price": 18,
+      "deposit": 18,
+      "category": "restaurant",
+      "kind": "Korean",
+      "facilities": []
+    },
+    {
+      "id": "H",
+      "name": "Olive Courtyard",
+      "cuisine": "Mediterranean",
+      "area": "Garden district",
+      "price": 27,
+      "deposit": 32,
+      "category": "restaurant",
+      "kind": "Mediterranean",
+      "facilities": []
+    },
+    {
+      "id": "I",
+      "name": "Saffron House",
+      "cuisine": "Indian",
+      "area": "Old town",
+      "price": 26,
+      "deposit": 28,
+      "category": "restaurant",
+      "kind": "Indian",
+      "facilities": []
+    },
+    {
+      "id": "J",
+      "name": "Little Napoli",
+      "cuisine": "Italian",
+      "area": "Riverside",
+      "price": 25,
+      "deposit": 25,
+      "category": "restaurant",
+      "kind": "Italian",
+      "facilities": []
+    },
+    {
+      "id": "K",
+      "name": "Mezze & Mint",
+      "cuisine": "Middle Eastern",
+      "area": "Station quarter",
+      "price": 23,
+      "deposit": 24,
+      "category": "restaurant",
+      "kind": "Middle Eastern",
+      "facilities": []
+    },
+    {
+      "id": "L",
+      "name": "Plant Studio",
+      "cuisine": "Vegan",
+      "area": "Garden district",
+      "price": 26,
+      "deposit": 26,
+      "category": "restaurant",
+      "kind": "Vegan",
+      "facilities": []
+    },
+    {
+      "id": "M",
+      "name": "Taco Patio",
+      "cuisine": "Mexican",
+      "area": "University quarter",
+      "price": 19,
+      "deposit": 20,
+      "category": "restaurant",
+      "kind": "Mexican",
+      "facilities": []
+    },
+    {
+      "id": "N",
+      "name": "Lotus Kitchen",
+      "cuisine": "Vietnamese",
+      "area": "Old town",
+      "price": 20,
+      "deposit": 20,
+      "category": "restaurant",
+      "kind": "Vietnamese",
+      "facilities": []
+    },
+    {
+      "id": "O",
+      "name": "Bangkok Garden",
+      "cuisine": "Thai",
+      "area": "Riverside",
+      "price": 24,
+      "deposit": 30,
+      "category": "restaurant",
+      "kind": "Thai",
+      "facilities": []
+    },
+    {
+      "id": "P",
+      "name": "Cedar Bistro",
+      "cuisine": "French",
+      "area": "City center",
+      "price": 38,
+      "deposit": 55,
+      "category": "restaurant",
+      "kind": "French",
+      "facilities": []
+    },
+    {
+      "id": "Q",
+      "name": "Harvest Room",
+      "cuisine": "Gluten-free",
+      "area": "Garden district",
+      "price": 29,
+      "deposit": 30,
+      "category": "restaurant",
+      "kind": "Gluten-free",
+      "facilities": []
+    },
+    {
+      "id": "R",
+      "name": "Smoke & Oak",
+      "cuisine": "Barbecue",
+      "area": "Station quarter",
+      "price": 33,
+      "deposit": 48,
+      "category": "restaurant",
+      "kind": "Barbecue",
+      "facilities": []
+    },
+    {
+      "id": "S",
+      "name": "Marina Table",
+      "cuisine": "Seafood",
+      "area": "Riverside",
+      "price": 36,
+      "deposit": 50,
+      "category": "restaurant",
+      "kind": "Seafood",
+      "facilities": []
+    },
+    {
+      "id": "T",
+      "name": "Sunday Deli",
+      "cuisine": "Cafe & sandwiches",
+      "area": "University quarter",
+      "price": 17,
+      "deposit": 15,
+      "category": "restaurant",
+      "kind": "Cafe & sandwiches",
+      "facilities": []
+    },
+    {
+      "id": "U",
+      "name": "Morning Miso",
+      "cuisine": "Japanese",
+      "area": "Station quarter",
+      "price": 16,
+      "deposit": 14,
+      "category": "restaurant",
+      "kind": "Japanese",
+      "facilities": []
+    },
+    {
+      "id": "V",
+      "name": "Basil Lane",
+      "cuisine": "Italian",
+      "area": "Garden district",
+      "price": 31,
+      "deposit": 28,
+      "category": "restaurant",
+      "kind": "Italian",
+      "facilities": []
+    },
+    {
+      "id": "W",
+      "name": "Curry Junction",
+      "cuisine": "Indian",
+      "area": "University quarter",
+      "price": 18,
+      "deposit": 16,
+      "category": "restaurant",
+      "kind": "Indian",
+      "facilities": []
+    },
+    {
+      "id": "X",
+      "name": "Grove Falafel",
+      "cuisine": "Middle Eastern",
+      "area": "Riverside",
+      "price": 15,
+      "deposit": 12,
+      "category": "restaurant",
+      "kind": "Middle Eastern",
+      "facilities": []
+    },
+    {
+      "id": "Y",
+      "name": "Roots & Grains",
+      "cuisine": "Vegan",
+      "area": "Old town",
+      "price": 21,
+      "deposit": 20,
+      "category": "restaurant",
+      "kind": "Vegan",
+      "facilities": []
+    },
+    {
+      "id": "Z",
+      "name": "Pepper Dock",
+      "cuisine": "Thai",
+      "area": "Harbor",
+      "price": 29,
+      "deposit": 26,
+      "category": "restaurant",
+      "kind": "Thai",
+      "facilities": []
+    },
+    {
+      "id": "AA",
+      "name": "Dumpling Loft",
+      "cuisine": "Chinese",
+      "area": "Arts district",
+      "price": 20,
+      "deposit": 18,
+      "category": "restaurant",
+      "kind": "Chinese",
+      "facilities": []
+    },
+    {
+      "id": "AB",
+      "name": "Han River Grill",
+      "cuisine": "Korean barbecue",
+      "area": "Riverside",
+      "price": 39,
+      "deposit": 46,
+      "category": "restaurant",
+      "kind": "Korean barbecue",
+      "facilities": []
+    },
+    {
+      "id": "AC",
+      "name": "Sunrise Arepa",
+      "cuisine": "Venezuelan",
+      "area": "Station quarter",
+      "price": 17,
+      "deposit": 14,
+      "category": "restaurant",
+      "kind": "Venezuelan",
+      "facilities": []
+    },
+    {
+      "id": "AD",
+      "name": "Terracotta Tapas",
+      "cuisine": "Spanish",
+      "area": "Heritage quarter",
+      "price": 34,
+      "deposit": 38,
+      "category": "restaurant",
+      "kind": "Spanish",
+      "facilities": []
+    },
+    {
+      "id": "AE",
+      "name": "Coconut Veranda",
+      "cuisine": "Sri Lankan",
+      "area": "Garden district",
+      "price": 25,
+      "deposit": 24,
+      "category": "restaurant",
+      "kind": "Sri Lankan",
+      "facilities": []
+    },
+    {
+      "id": "AF",
+      "name": "Mountain Broth",
+      "cuisine": "Korean",
+      "area": "Highlands",
+      "price": 19,
+      "deposit": 18,
+      "category": "restaurant",
+      "kind": "Korean",
+      "facilities": []
+    },
+    {
+      "id": "AG",
+      "name": "Lemon Quay",
+      "cuisine": "Greek",
+      "area": "Harbor",
+      "price": 33,
+      "deposit": 35,
+      "category": "restaurant",
+      "kind": "Greek",
+      "facilities": []
+    },
+    {
+      "id": "AH",
+      "name": "Pocket Creperie",
+      "cuisine": "French",
+      "area": "University quarter",
+      "price": 13,
+      "deposit": 10,
+      "category": "restaurant",
+      "kind": "French",
+      "facilities": []
+    },
+    {
+      "id": "AI",
+      "name": "Orchard Supper",
+      "cuisine": "Seasonal",
+      "area": "Orchard district",
+      "price": 44,
+      "deposit": 48,
+      "category": "restaurant",
+      "kind": "Seasonal",
+      "facilities": []
+    },
+    {
+      "id": "AJ",
+      "name": "Coastfire Kitchen",
+      "cuisine": "Seafood",
+      "area": "Coast",
+      "price": 52,
+      "deposit": 58,
+      "category": "restaurant",
+      "kind": "Seafood",
+      "facilities": []
+    },
+    {
+      "id": "AK",
+      "name": "Garden Injera",
+      "cuisine": "Ethiopian",
+      "area": "Old town",
+      "price": 23,
+      "deposit": 22,
+      "category": "restaurant",
+      "kind": "Ethiopian",
+      "facilities": []
+    },
+    {
+      "id": "AL",
+      "name": "Canyon Tacos",
+      "cuisine": "Mexican",
+      "area": "Warehouse district",
+      "price": 22,
+      "deposit": 20,
+      "category": "restaurant",
+      "kind": "Mexican",
+      "facilities": []
+    },
+    {
+      "id": "AM",
+      "name": "Lakehouse Deli",
+      "cuisine": "Cafe & sandwiches",
+      "area": "Lakeside",
+      "price": 21,
+      "deposit": 18,
+      "category": "restaurant",
+      "kind": "Cafe & sandwiches",
+      "facilities": []
+    },
+    {
+      "id": "AN",
+      "name": "Pine Hearth Pizza",
+      "cuisine": "Italian",
+      "area": "Pine valley",
+      "price": 28,
+      "deposit": 26,
+      "category": "restaurant",
+      "kind": "Italian",
+      "facilities": []
+    },
+    {
+      "id": "stay-01",
+      "category": "stay",
+      "name": "Pine & Porch",
+      "kind": "Forest cabin",
+      "area": "Pine valley",
+      "price": 48,
+      "deposit": 18,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-02",
+      "category": "stay",
+      "name": "Tide House",
+      "kind": "Beach house",
+      "area": "Coast",
+      "price": 72,
+      "deposit": 30,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 6,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-03",
+      "category": "stay",
+      "name": "Maple Guesthouse",
+      "kind": "Guesthouse",
+      "area": "Old town",
+      "price": 35,
+      "deposit": 16,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 8,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-04",
+      "category": "stay",
+      "name": "Cloudline Lodge",
+      "kind": "Mountain lodge",
+      "area": "Highlands",
+      "price": 65,
+      "deposit": 28,
+      "capacity": 16,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 12,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-05",
+      "category": "stay",
+      "name": "Little Orchard",
+      "kind": "Farm stay",
+      "area": "Orchard district",
+      "price": 42,
+      "deposit": 20,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "pet_friendly"
+      ],
+      "beds": 3,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-06",
+      "category": "stay",
+      "name": "Harbor Loft",
+      "kind": "Loft apartment",
+      "area": "Harbor",
+      "price": 88,
+      "deposit": 38,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "beds": 2,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-07",
+      "category": "stay",
+      "name": "Willow Retreat",
+      "kind": "Retreat house",
+      "area": "Lakeside",
+      "price": 58,
+      "deposit": 24,
+      "capacity": 12,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 8,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-08",
+      "category": "stay",
+      "name": "Station House",
+      "kind": "Budget guesthouse",
+      "area": "Station quarter",
+      "price": 28,
+      "deposit": 12,
+      "capacity": 20,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 20,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-09",
+      "category": "stay",
+      "name": "Cedar Camp",
+      "kind": "Glamping",
+      "area": "Pine valley",
+      "price": 52,
+      "deposit": 22,
+      "capacity": 8,
+      "facilities": [
+        "parking",
+        "pet_friendly"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-10",
+      "category": "stay",
+      "name": "Bluebell Cottage",
+      "kind": "Cottage",
+      "area": "Garden district",
+      "price": 54,
+      "deposit": 24,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-11",
+      "category": "stay",
+      "name": "Riverstone Villa",
+      "kind": "Villa",
+      "area": "Riverside",
+      "price": 95,
+      "deposit": 45,
+      "capacity": 14,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 9,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-12",
+      "category": "stay",
+      "name": "City Nest",
+      "kind": "Serviced apartment",
+      "area": "City center",
+      "price": 62,
+      "deposit": 26,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 2,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-13",
+      "category": "stay",
+      "name": "Sunfield Barn",
+      "kind": "Converted barn",
+      "area": "Countryside",
+      "price": 46,
+      "deposit": 18,
+      "capacity": 18,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 12,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-14",
+      "category": "stay",
+      "name": "Moonlit Hanok",
+      "kind": "Courtyard guesthouse",
+      "area": "Heritage quarter",
+      "price": 78,
+      "deposit": 32,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "private_space"
+      ],
+      "beds": 6,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-15",
+      "category": "stay",
+      "name": "Dune Hideaway",
+      "kind": "Coastal cabin",
+      "area": "Coast",
+      "price": 68,
+      "deposit": 28,
+      "capacity": 4,
+      "facilities": [
+        "parking",
+        "pet_friendly"
+      ],
+      "beds": 2,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-16",
+      "category": "stay",
+      "name": "Birch Commons",
+      "kind": "Group hostel",
+      "area": "University quarter",
+      "price": 25,
+      "deposit": 10,
+      "capacity": 40,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 40,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-17",
+      "category": "stay",
+      "name": "Summit Base",
+      "kind": "Hiking lodge",
+      "area": "Highlands",
+      "price": 39,
+      "deposit": 16,
+      "capacity": 24,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "beds": 24,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-18",
+      "category": "stay",
+      "name": "Garden Courtyard",
+      "kind": "Boutique guesthouse",
+      "area": "Garden district",
+      "price": 60,
+      "deposit": 25,
+      "capacity": 10,
+      "facilities": [
+        "wifi",
+        "parking"
+      ],
+      "beds": 7,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-19",
+      "category": "stay",
+      "name": "Lakeview Haven",
+      "kind": "Lake house",
+      "area": "Lakeside",
+      "price": 82,
+      "deposit": 36,
+      "capacity": 12,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 8,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-20",
+      "category": "stay",
+      "name": "Meadow Gathering",
+      "kind": "Retreat center",
+      "area": "Countryside",
+      "price": 44,
+      "deposit": 20,
+      "capacity": 100,
+      "facilities": [
+        "parking",
+        "wifi",
+        "projector"
+      ],
+      "beds": 100,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-21",
+      "category": "stay",
+      "name": "Fern Hollow",
+      "kind": "Woodland cottage",
+      "area": "Pine valley",
+      "price": 45,
+      "deposit": 18,
+      "capacity": 8,
+      "facilities": [
+        "parking",
+        "wifi",
+        "pet_friendly"
+      ],
+      "beds": 5,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-22",
+      "category": "stay",
+      "name": "Coastlight Rooms",
+      "kind": "Beach guesthouse",
+      "area": "Coast",
+      "price": 38,
+      "deposit": 16,
+      "capacity": 12,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 10,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-23",
+      "category": "stay",
+      "name": "Brookside Bunkhouse",
+      "kind": "Group hostel",
+      "area": "Riverside",
+      "price": 32,
+      "deposit": 14,
+      "capacity": 28,
+      "facilities": [
+        "parking",
+        "wifi"
+      ],
+      "beds": 20,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-24",
+      "category": "stay",
+      "name": "Juniper Lookout",
+      "kind": "Mountain cabin",
+      "area": "Highlands",
+      "price": 92,
+      "deposit": 36,
+      "capacity": 2,
+      "facilities": [
+        "parking",
+        "private_space"
+      ],
+      "beds": 1,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-25",
+      "category": "stay",
+      "name": "Orchard Annex",
+      "kind": "Farm cottage",
+      "area": "Orchard district",
+      "price": 49,
+      "deposit": 22,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "wifi",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 6,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-26",
+      "category": "stay",
+      "name": "Canal Landing",
+      "kind": "Serviced apartment",
+      "area": "Harbor",
+      "price": 56,
+      "deposit": 24,
+      "capacity": 6,
+      "facilities": [
+        "wifi",
+        "indoor",
+        "private_space"
+      ],
+      "beds": 3,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-27",
+      "category": "stay",
+      "name": "Hearthstone Hall",
+      "kind": "Retreat house",
+      "area": "Countryside",
+      "price": 36,
+      "deposit": 28,
+      "capacity": 32,
+      "facilities": [
+        "parking",
+        "wifi",
+        "projector"
+      ],
+      "beds": 24,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-28",
+      "category": "stay",
+      "name": "Wren Garden",
+      "kind": "Garden cottage",
+      "area": "Garden district",
+      "price": 64,
+      "deposit": 26,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 3,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-29",
+      "category": "stay",
+      "name": "Station Sleepover",
+      "kind": "Budget guesthouse",
+      "area": "Station quarter",
+      "price": 22,
+      "deposit": 10,
+      "capacity": 16,
+      "facilities": [
+        "wifi"
+      ],
+      "beds": 12,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-30",
+      "category": "stay",
+      "name": "Heritage Lantern",
+      "kind": "Courtyard guesthouse",
+      "area": "Heritage quarter",
+      "price": 110,
+      "deposit": 48,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 7,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-31",
+      "category": "stay",
+      "name": "Lake Birch Cabin",
+      "kind": "Lake cabin",
+      "area": "Lakeside",
+      "price": 47,
+      "deposit": 20,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "wifi"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-32",
+      "category": "stay",
+      "name": "Alpine Gathering",
+      "kind": "Mountain lodge",
+      "area": "Highlands",
+      "price": 57,
+      "deposit": 30,
+      "capacity": 36,
+      "facilities": [
+        "parking",
+        "wifi",
+        "equipment_rental"
+      ],
+      "beds": 30,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-33",
+      "category": "stay",
+      "name": "Urban Terrace",
+      "kind": "Rooftop apartment",
+      "area": "City center",
+      "price": 76,
+      "deposit": 32,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "private_space"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-34",
+      "category": "stay",
+      "name": "Campus Rest",
+      "kind": "Group hostel",
+      "area": "University quarter",
+      "price": 19,
+      "deposit": 8,
+      "capacity": 48,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "beds": 40,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-35",
+      "category": "stay",
+      "name": "Saltwind Cottage",
+      "kind": "Coastal cottage",
+      "area": "Coast",
+      "price": 59,
+      "deposit": 26,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "beds": 4,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-36",
+      "category": "stay",
+      "name": "Meadow Yurts",
+      "kind": "Glamping",
+      "area": "Countryside",
+      "price": 34,
+      "deposit": 16,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "equipment_rental"
+      ],
+      "beds": 5,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-37",
+      "category": "stay",
+      "name": "Lakeshore Commons",
+      "kind": "Retreat center",
+      "area": "Lakeside",
+      "price": 43,
+      "deposit": 35,
+      "capacity": 60,
+      "facilities": [
+        "parking",
+        "wifi",
+        "projector",
+        "indoor"
+      ],
+      "beds": 48,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "stay-38",
+      "category": "stay",
+      "name": "Old Mill Stay",
+      "kind": "Converted mill",
+      "area": "Old town",
+      "price": 68,
+      "deposit": 30,
+      "capacity": 14,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "pet_friendly"
+      ],
+      "beds": 9,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-39",
+      "category": "stay",
+      "name": "Pinecrest Studio",
+      "kind": "Studio cabin",
+      "area": "Pine valley",
+      "price": 41,
+      "deposit": 14,
+      "capacity": 2,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "beds": 1,
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "stay-40",
+      "category": "stay",
+      "name": "Harvest Homestead",
+      "kind": "Farm stay",
+      "area": "Orchard district",
+      "price": 51,
+      "deposit": 24,
+      "capacity": 20,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "projector"
+      ],
+      "beds": 14,
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-01",
+      "category": "space",
+      "name": "Canvas Room",
+      "kind": "Creative meeting room",
+      "area": "City center",
+      "price": 18,
+      "deposit": 12,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-02",
+      "category": "space",
+      "name": "Loft Twenty",
+      "kind": "Party loft",
+      "area": "Harbor",
+      "price": 32,
+      "deposit": 24,
+      "capacity": 20,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-03",
+      "category": "space",
+      "name": "Common Ground",
+      "kind": "Workshop room",
+      "area": "Station quarter",
+      "price": 12,
+      "deposit": 10,
+      "capacity": 16,
+      "facilities": [
+        "wifi",
+        "projector",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-04",
+      "category": "space",
+      "name": "Daylight Studio",
+      "kind": "Photo studio",
+      "area": "Arts district",
+      "price": 28,
+      "deposit": 22,
+      "capacity": 6,
+      "facilities": [
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-05",
+      "category": "space",
+      "name": "Garden Pavilion",
+      "kind": "Outdoor pavilion",
+      "area": "Garden district",
+      "price": 22,
+      "deposit": 18,
+      "capacity": 30,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-06",
+      "category": "space",
+      "name": "Focus Eight",
+      "kind": "Meeting room",
+      "area": "City center",
+      "price": 15,
+      "deposit": 12,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-07",
+      "category": "space",
+      "name": "Open Stage",
+      "kind": "Rehearsal space",
+      "area": "Arts district",
+      "price": 20,
+      "deposit": 16,
+      "capacity": 12,
+      "facilities": [
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-08",
+      "category": "space",
+      "name": "Rooftop Social",
+      "kind": "Rooftop venue",
+      "area": "Riverside",
+      "price": 38,
+      "deposit": 32,
+      "capacity": 24,
+      "facilities": [
+        "wifi",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-09",
+      "category": "space",
+      "name": "The Reading Room",
+      "kind": "Study room",
+      "area": "University quarter",
+      "price": 8,
+      "deposit": 8,
+      "capacity": 6,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-10",
+      "category": "space",
+      "name": "Frame Factory",
+      "kind": "Film studio",
+      "area": "Warehouse district",
+      "price": 42,
+      "deposit": 35,
+      "capacity": 20,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-11",
+      "category": "space",
+      "name": "Roundtable Hub",
+      "kind": "Boardroom",
+      "area": "City center",
+      "price": 24,
+      "deposit": 20,
+      "capacity": 14,
+      "facilities": [
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-12",
+      "category": "space",
+      "name": "Sound Cellar",
+      "kind": "Music studio",
+      "area": "Old town",
+      "price": 26,
+      "deposit": 20,
+      "capacity": 5,
+      "facilities": [
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-13",
+      "category": "space",
+      "name": "Maker Hall",
+      "kind": "Maker space",
+      "area": "Arts district",
+      "price": 16,
+      "deposit": 14,
+      "capacity": 25,
+      "facilities": [
+        "wifi",
+        "equipment_rental",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-14",
+      "category": "space",
+      "name": "Brickhouse Events",
+      "kind": "Event hall",
+      "area": "Warehouse district",
+      "price": 30,
+      "deposit": 40,
+      "capacity": 100,
+      "facilities": [
+        "parking",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-15",
+      "category": "space",
+      "name": "Tea & Talk",
+      "kind": "Small meeting room",
+      "area": "Old town",
+      "price": 10,
+      "deposit": 8,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-16",
+      "category": "space",
+      "name": "Motion Studio",
+      "kind": "Dance studio",
+      "area": "University quarter",
+      "price": 14,
+      "deposit": 12,
+      "capacity": 18,
+      "facilities": [
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-17",
+      "category": "space",
+      "name": "Greenhouse Gather",
+      "kind": "Greenhouse venue",
+      "area": "Garden district",
+      "price": 27,
+      "deposit": 24,
+      "capacity": 20,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-18",
+      "category": "space",
+      "name": "Pixel Lab",
+      "kind": "Streaming studio",
+      "area": "Station quarter",
+      "price": 35,
+      "deposit": 28,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-19",
+      "category": "space",
+      "name": "Harbor Conference",
+      "kind": "Conference room",
+      "area": "Harbor",
+      "price": 19,
+      "deposit": 30,
+      "capacity": 60,
+      "facilities": [
+        "wifi",
+        "projector",
+        "parking",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-20",
+      "category": "space",
+      "name": "Weekend Living",
+      "kind": "Private lounge",
+      "area": "Riverside",
+      "price": 21,
+      "deposit": 18,
+      "capacity": 12,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-21",
+      "category": "space",
+      "name": "Copper Workshop",
+      "kind": "Workshop room",
+      "area": "Warehouse district",
+      "price": 11,
+      "deposit": 12,
+      "capacity": 10,
+      "facilities": [
+        "wifi",
+        "projector",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-22",
+      "category": "space",
+      "name": "Willow Boardroom",
+      "kind": "Boardroom",
+      "area": "Garden district",
+      "price": 29,
+      "deposit": 26,
+      "capacity": 18,
+      "facilities": [
+        "parking",
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-23",
+      "category": "space",
+      "name": "Pocket Studio",
+      "kind": "Photo studio",
+      "area": "Old town",
+      "price": 9,
+      "deposit": 8,
+      "capacity": 3,
+      "facilities": [
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-24",
+      "category": "space",
+      "name": "Harbor Roof",
+      "kind": "Rooftop venue",
+      "area": "Harbor",
+      "price": 44,
+      "deposit": 40,
+      "capacity": 40,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-25",
+      "category": "space",
+      "name": "Station Seminar",
+      "kind": "Seminar room",
+      "area": "Station quarter",
+      "price": 13,
+      "deposit": 20,
+      "capacity": 48,
+      "facilities": [
+        "wifi",
+        "projector",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-26",
+      "category": "space",
+      "name": "Riverside Glasshouse",
+      "kind": "Greenhouse venue",
+      "area": "Riverside",
+      "price": 33,
+      "deposit": 28,
+      "capacity": 26,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-27",
+      "category": "space",
+      "name": "Campus Collective",
+      "kind": "Study room",
+      "area": "University quarter",
+      "price": 6,
+      "deposit": 8,
+      "capacity": 12,
+      "facilities": [
+        "wifi",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-28",
+      "category": "space",
+      "name": "Atelier North",
+      "kind": "Art studio",
+      "area": "Arts district",
+      "price": 23,
+      "deposit": 18,
+      "capacity": 8,
+      "facilities": [
+        "wifi",
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-29",
+      "category": "space",
+      "name": "Pine Meeting Cabin",
+      "kind": "Meeting cabin",
+      "area": "Pine valley",
+      "price": 17,
+      "deposit": 16,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "wifi",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-30",
+      "category": "space",
+      "name": "Grand Assembly",
+      "kind": "Event hall",
+      "area": "City center",
+      "price": 48,
+      "deposit": 55,
+      "capacity": 80,
+      "facilities": [
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-31",
+      "category": "space",
+      "name": "Lakeview Tables",
+      "kind": "Workshop pavilion",
+      "area": "Lakeside",
+      "price": 15,
+      "deposit": 18,
+      "capacity": 22,
+      "facilities": [
+        "parking",
+        "projector"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-32",
+      "category": "space",
+      "name": "Soundproof Corner",
+      "kind": "Music studio",
+      "area": "Station quarter",
+      "price": 31,
+      "deposit": 24,
+      "capacity": 4,
+      "facilities": [
+        "wifi",
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-33",
+      "category": "space",
+      "name": "Orchard Celebration",
+      "kind": "Party barn",
+      "area": "Orchard district",
+      "price": 25,
+      "deposit": 35,
+      "capacity": 56,
+      "facilities": [
+        "parking",
+        "pet_friendly",
+        "projector",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-34",
+      "category": "space",
+      "name": "Heritage Salon",
+      "kind": "Private lounge",
+      "area": "Heritage quarter",
+      "price": 36,
+      "deposit": 30,
+      "capacity": 16,
+      "facilities": [
+        "wifi",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-35",
+      "category": "space",
+      "name": "Hilltop Classroom",
+      "kind": "Training room",
+      "area": "Highlands",
+      "price": 10,
+      "deposit": 14,
+      "capacity": 24,
+      "facilities": [
+        "parking",
+        "projector",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-36",
+      "category": "space",
+      "name": "Coastal Gathering",
+      "kind": "Beach pavilion",
+      "area": "Coast",
+      "price": 20,
+      "deposit": 22,
+      "capacity": 32,
+      "facilities": [
+        "parking",
+        "pet_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-37",
+      "category": "space",
+      "name": "Tiny Broadcast",
+      "kind": "Streaming studio",
+      "area": "City center",
+      "price": 39,
+      "deposit": 28,
+      "capacity": 2,
+      "facilities": [
+        "wifi",
+        "equipment_rental",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "space-38",
+      "category": "space",
+      "name": "Warehouse Forum",
+      "kind": "Conference hall",
+      "area": "Warehouse district",
+      "price": 18,
+      "deposit": 45,
+      "capacity": 90,
+      "facilities": [
+        "parking",
+        "wifi",
+        "projector",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-39",
+      "category": "space",
+      "name": "Garden Steps",
+      "kind": "Dance studio",
+      "area": "Garden district",
+      "price": 12,
+      "deposit": 15,
+      "capacity": 14,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "space-40",
+      "category": "space",
+      "name": "Evening Roundtable",
+      "kind": "Meeting room",
+      "area": "Old town",
+      "price": 16,
+      "deposit": 16,
+      "capacity": 10,
+      "facilities": [
+        "wifi",
+        "projector",
+        "private_space",
+        "indoor"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-01",
+      "category": "sport",
+      "name": "Northside Futsal",
+      "kind": "Futsal pitch",
+      "area": "North park",
+      "price": 15,
+      "deposit": 18,
+      "capacity": 14,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-02",
+      "category": "sport",
+      "name": "Rally Point",
+      "kind": "Tennis court",
+      "area": "Riverside",
+      "price": 20,
+      "deposit": 16,
+      "capacity": 4,
+      "facilities": [
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-03",
+      "category": "sport",
+      "name": "Shuttle House",
+      "kind": "Badminton courts",
+      "area": "Station quarter",
+      "price": 10,
+      "deposit": 12,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-04",
+      "category": "sport",
+      "name": "Hoop District",
+      "kind": "Basketball court",
+      "area": "University quarter",
+      "price": 12,
+      "deposit": 15,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-05",
+      "category": "sport",
+      "name": "Summit Climb",
+      "kind": "Climbing gym",
+      "area": "Arts district",
+      "price": 24,
+      "deposit": 20,
+      "capacity": 16,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-06",
+      "category": "sport",
+      "name": "Lane & Strike",
+      "kind": "Bowling lanes",
+      "area": "City center",
+      "price": 18,
+      "deposit": 18,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-07",
+      "category": "sport",
+      "name": "Aqua Lane",
+      "kind": "Swimming pool",
+      "area": "Garden district",
+      "price": 16,
+      "deposit": 20,
+      "capacity": 20,
+      "facilities": [
+        "indoor",
+        "parking"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-08",
+      "category": "sport",
+      "name": "Spin Club",
+      "kind": "Table tennis",
+      "area": "Old town",
+      "price": 8,
+      "deposit": 8,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-09",
+      "category": "sport",
+      "name": "Green Tee",
+      "kind": "Golf simulator",
+      "area": "City center",
+      "price": 28,
+      "deposit": 24,
+      "capacity": 6,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-10",
+      "category": "sport",
+      "name": "Sand Court",
+      "kind": "Beach volleyball",
+      "area": "Coast",
+      "price": 14,
+      "deposit": 16,
+      "capacity": 12,
+      "facilities": [
+        "equipment_rental",
+        "parking"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-11",
+      "category": "sport",
+      "name": "Paddle Dock",
+      "kind": "Kayaking",
+      "area": "Lakeside",
+      "price": 30,
+      "deposit": 26,
+      "capacity": 10,
+      "facilities": [
+        "equipment_rental",
+        "beginner_friendly",
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-12",
+      "category": "sport",
+      "name": "Ice Circle",
+      "kind": "Ice rink",
+      "area": "Station quarter",
+      "price": 22,
+      "deposit": 20,
+      "capacity": 30,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-13",
+      "category": "sport",
+      "name": "Court Central",
+      "kind": "Squash courts",
+      "area": "City center",
+      "price": 19,
+      "deposit": 15,
+      "capacity": 4,
+      "facilities": [
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-14",
+      "category": "sport",
+      "name": "Arrow Field",
+      "kind": "Archery range",
+      "area": "North park",
+      "price": 25,
+      "deposit": 20,
+      "capacity": 12,
+      "facilities": [
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-15",
+      "category": "sport",
+      "name": "Cycle Grove",
+      "kind": "Cycling experience",
+      "area": "Riverside",
+      "price": 18,
+      "deposit": 14,
+      "capacity": 20,
+      "facilities": [
+        "equipment_rental",
+        "beginner_friendly",
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-16",
+      "category": "sport",
+      "name": "Balance Barn",
+      "kind": "Yoga studio",
+      "area": "Garden district",
+      "price": 17,
+      "deposit": 16,
+      "capacity": 18,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-17",
+      "category": "sport",
+      "name": "Urban Padel",
+      "kind": "Padel court",
+      "area": "Harbor",
+      "price": 23,
+      "deposit": 18,
+      "capacity": 4,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-18",
+      "category": "sport",
+      "name": "Field Day Arena",
+      "kind": "Multi-sport field",
+      "area": "Countryside",
+      "price": 12,
+      "deposit": 35,
+      "capacity": 100,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-19",
+      "category": "sport",
+      "name": "Roller Yard",
+      "kind": "Roller rink",
+      "area": "Warehouse district",
+      "price": 14,
+      "deposit": 16,
+      "capacity": 24,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-20",
+      "category": "sport",
+      "name": "Rainproof Futsal",
+      "kind": "Indoor futsal",
+      "area": "Station quarter",
+      "price": 21,
+      "deposit": 20,
+      "capacity": 14,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-21",
+      "category": "sport",
+      "name": "Pine Trail Ride",
+      "kind": "Cycling experience",
+      "area": "Pine valley",
+      "price": 22,
+      "deposit": 18,
+      "capacity": 12,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-22",
+      "category": "sport",
+      "name": "Harbor Racquets",
+      "kind": "Tennis court",
+      "area": "Harbor",
+      "price": 26,
+      "deposit": 20,
+      "capacity": 8,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-23",
+      "category": "sport",
+      "name": "Campus Shuttle",
+      "kind": "Badminton courts",
+      "area": "University quarter",
+      "price": 7,
+      "deposit": 10,
+      "capacity": 16,
+      "facilities": [
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-24",
+      "category": "sport",
+      "name": "River Row",
+      "kind": "Rowing session",
+      "area": "Riverside",
+      "price": 34,
+      "deposit": 28,
+      "capacity": 8,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-25",
+      "category": "sport",
+      "name": "Highland Boulders",
+      "kind": "Climbing gym",
+      "area": "Highlands",
+      "price": 18,
+      "deposit": 16,
+      "capacity": 20,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-26",
+      "category": "sport",
+      "name": "Garden Stretch",
+      "kind": "Yoga studio",
+      "area": "Garden district",
+      "price": 12,
+      "deposit": 10,
+      "capacity": 10,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-27",
+      "category": "sport",
+      "name": "City Spin Arena",
+      "kind": "Table tennis",
+      "area": "City center",
+      "price": 11,
+      "deposit": 12,
+      "capacity": 24,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-28",
+      "category": "sport",
+      "name": "Coast Surf School",
+      "kind": "Surfing session",
+      "area": "Coast",
+      "price": 48,
+      "deposit": 36,
+      "capacity": 6,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-29",
+      "category": "sport",
+      "name": "Orchard Archers",
+      "kind": "Archery range",
+      "area": "Orchard district",
+      "price": 19,
+      "deposit": 18,
+      "capacity": 18,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-30",
+      "category": "sport",
+      "name": "Station Lanes",
+      "kind": "Bowling lanes",
+      "area": "Station quarter",
+      "price": 16,
+      "deposit": 22,
+      "capacity": 20,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "wifi"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-31",
+      "category": "sport",
+      "name": "Lakeside Boards",
+      "kind": "Paddleboarding",
+      "area": "Lakeside",
+      "price": 29,
+      "deposit": 24,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-32",
+      "category": "sport",
+      "name": "Old Town Ring",
+      "kind": "Boxing gym",
+      "area": "Old town",
+      "price": 21,
+      "deposit": 16,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-33",
+      "category": "sport",
+      "name": "Meadow Goals",
+      "kind": "Football pitch",
+      "area": "Countryside",
+      "price": 9,
+      "deposit": 26,
+      "capacity": 30,
+      "facilities": [
+        "parking"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-34",
+      "category": "sport",
+      "name": "Warehouse Wheels",
+      "kind": "Roller rink",
+      "area": "Warehouse district",
+      "price": 13,
+      "deposit": 18,
+      "capacity": 40,
+      "facilities": [
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-35",
+      "category": "sport",
+      "name": "North Park Nets",
+      "kind": "Volleyball court",
+      "area": "North park",
+      "price": 8,
+      "deposit": 12,
+      "capacity": 16,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-36",
+      "category": "sport",
+      "name": "Heritage Balance",
+      "kind": "Tai chi session",
+      "area": "Heritage quarter",
+      "price": 10,
+      "deposit": 10,
+      "capacity": 14,
+      "facilities": [
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-37",
+      "category": "sport",
+      "name": "Rooftop Pickleball",
+      "kind": "Pickleball court",
+      "area": "City center",
+      "price": 27,
+      "deposit": 20,
+      "capacity": 4,
+      "facilities": [
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "sport-38",
+      "category": "sport",
+      "name": "Warmwater Club",
+      "kind": "Swimming pool",
+      "area": "Garden district",
+      "price": 32,
+      "deposit": 28,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "parking",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-39",
+      "category": "sport",
+      "name": "Arts District Moves",
+      "kind": "Dance fitness",
+      "area": "Arts district",
+      "price": 15,
+      "deposit": 14,
+      "capacity": 22,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "wifi"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "sport-40",
+      "category": "sport",
+      "name": "Mountain Fieldhouse",
+      "kind": "Multi-sport hall",
+      "area": "Highlands",
+      "price": 17,
+      "deposit": 32,
+      "capacity": 60,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-01",
+      "category": "class",
+      "name": "Clay & Company",
+      "kind": "Pottery workshop",
+      "area": "Arts district",
+      "price": 38,
+      "deposit": 18,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-02",
+      "category": "class",
+      "name": "Brush Hour",
+      "kind": "Painting workshop",
+      "area": "Old town",
+      "price": 30,
+      "deposit": 15,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-03",
+      "category": "class",
+      "name": "Dough Together",
+      "kind": "Baking class",
+      "area": "Garden district",
+      "price": 45,
+      "deposit": 20,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-04",
+      "category": "class",
+      "name": "Bloom School",
+      "kind": "Flower arranging",
+      "area": "Garden district",
+      "price": 42,
+      "deposit": 18,
+      "capacity": 10,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-05",
+      "category": "class",
+      "name": "Coffee Notes",
+      "kind": "Coffee brewing",
+      "area": "Station quarter",
+      "price": 28,
+      "deposit": 12,
+      "capacity": 6,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-06",
+      "category": "class",
+      "name": "Timber Hands",
+      "kind": "Woodworking",
+      "area": "Warehouse district",
+      "price": 60,
+      "deposit": 28,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-07",
+      "category": "class",
+      "name": "Silver Thread",
+      "kind": "Jewelry making",
+      "area": "Arts district",
+      "price": 55,
+      "deposit": 24,
+      "capacity": 6,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-08",
+      "category": "class",
+      "name": "Lens Walk",
+      "kind": "Photography walk",
+      "area": "Old town",
+      "price": 25,
+      "deposit": 10,
+      "capacity": 12,
+      "facilities": [
+        "beginner_friendly",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-09",
+      "category": "class",
+      "name": "Scent Library",
+      "kind": "Perfume workshop",
+      "area": "City center",
+      "price": 48,
+      "deposit": 22,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-10",
+      "category": "class",
+      "name": "Rhythm Circle",
+      "kind": "Drumming class",
+      "area": "University quarter",
+      "price": 24,
+      "deposit": 12,
+      "capacity": 16,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-11",
+      "category": "class",
+      "name": "Paper Stories",
+      "kind": "Bookbinding",
+      "area": "Old town",
+      "price": 32,
+      "deposit": 14,
+      "capacity": 10,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-12",
+      "category": "class",
+      "name": "Kitchen Passport",
+      "kind": "Cooking class",
+      "area": "Riverside",
+      "price": 52,
+      "deposit": 25,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-13",
+      "category": "class",
+      "name": "Knot Studio",
+      "kind": "Macrame workshop",
+      "area": "Arts district",
+      "price": 26,
+      "deposit": 12,
+      "capacity": 10,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-14",
+      "category": "class",
+      "name": "Candle Commons",
+      "kind": "Candle making",
+      "area": "Garden district",
+      "price": 29,
+      "deposit": 12,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-15",
+      "category": "class",
+      "name": "Stage First",
+      "kind": "Improv workshop",
+      "area": "University quarter",
+      "price": 22,
+      "deposit": 10,
+      "capacity": 20,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-16",
+      "category": "class",
+      "name": "Garden Hands",
+      "kind": "Terrarium making",
+      "area": "Garden district",
+      "price": 35,
+      "deposit": 16,
+      "capacity": 14,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "parking"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-17",
+      "category": "class",
+      "name": "Leather Letter",
+      "kind": "Leather crafting",
+      "area": "Warehouse district",
+      "price": 58,
+      "deposit": 26,
+      "capacity": 6,
+      "facilities": [
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-18",
+      "category": "class",
+      "name": "Print Parade",
+      "kind": "Screen printing",
+      "area": "Arts district",
+      "price": 40,
+      "deposit": 18,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-19",
+      "category": "class",
+      "name": "Starlight Lab",
+      "kind": "Astronomy experience",
+      "area": "Highlands",
+      "price": 34,
+      "deposit": 16,
+      "capacity": 24,
+      "facilities": [
+        "parking",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-20",
+      "category": "class",
+      "name": "Team Create",
+      "kind": "Group art workshop",
+      "area": "City center",
+      "price": 20,
+      "deposit": 30,
+      "capacity": 100,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "projector",
+        "wifi"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-21",
+      "category": "class",
+      "name": "Kilnside Clay",
+      "kind": "Pottery workshop",
+      "area": "Warehouse district",
+      "price": 29,
+      "deposit": 16,
+      "capacity": 14,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-22",
+      "category": "class",
+      "name": "Harbor Watercolors",
+      "kind": "Painting workshop",
+      "area": "Harbor",
+      "price": 42,
+      "deposit": 22,
+      "capacity": 6,
+      "facilities": [
+        "indoor",
+        "beginner_friendly",
+        "wifi"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-23",
+      "category": "class",
+      "name": "Campus Bread Lab",
+      "kind": "Bread baking class",
+      "area": "University quarter",
+      "price": 24,
+      "deposit": 14,
+      "capacity": 16,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-24",
+      "category": "class",
+      "name": "Garden Botanics",
+      "kind": "Flower arranging",
+      "area": "Garden district",
+      "price": 55,
+      "deposit": 28,
+      "capacity": 8,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-25",
+      "category": "class",
+      "name": "Pine Lens Walk",
+      "kind": "Photography walk",
+      "area": "Pine valley",
+      "price": 18,
+      "deposit": 12,
+      "capacity": 12,
+      "facilities": [
+        "parking",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-26",
+      "category": "class",
+      "name": "Station Stitch",
+      "kind": "Sewing workshop",
+      "area": "Station quarter",
+      "price": 35,
+      "deposit": 18,
+      "capacity": 10,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-27",
+      "category": "class",
+      "name": "Old Town Improv",
+      "kind": "Theater workshop",
+      "area": "Old town",
+      "price": 16,
+      "deposit": 10,
+      "capacity": 20,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-28",
+      "category": "class",
+      "name": "Coastal Woodcraft",
+      "kind": "Woodworking class",
+      "area": "Coast",
+      "price": 68,
+      "deposit": 35,
+      "capacity": 4,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-29",
+      "category": "class",
+      "name": "Meadow Kitchen",
+      "kind": "Farm cooking class",
+      "area": "Countryside",
+      "price": 46,
+      "deposit": 24,
+      "capacity": 12,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-30",
+      "category": "class",
+      "name": "City Code Circle",
+      "kind": "Coding workshop",
+      "area": "City center",
+      "price": 22,
+      "deposit": 16,
+      "capacity": 24,
+      "facilities": [
+        "wifi",
+        "projector",
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-31",
+      "category": "class",
+      "name": "Lakeside Sketch",
+      "kind": "Drawing workshop",
+      "area": "Lakeside",
+      "price": 14,
+      "deposit": 10,
+      "capacity": 18,
+      "facilities": [
+        "parking",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-32",
+      "category": "class",
+      "name": "Heritage Brush",
+      "kind": "Calligraphy class",
+      "area": "Heritage quarter",
+      "price": 31,
+      "deposit": 18,
+      "capacity": 8,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-33",
+      "category": "class",
+      "name": "Highland Sky School",
+      "kind": "Astronomy experience",
+      "area": "Highlands",
+      "price": 48,
+      "deposit": 26,
+      "capacity": 16,
+      "facilities": [
+        "parking",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-34",
+      "category": "class",
+      "name": "Orchard Preserves",
+      "kind": "Jam making class",
+      "area": "Orchard district",
+      "price": 33,
+      "deposit": 18,
+      "capacity": 10,
+      "facilities": [
+        "parking",
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-35",
+      "category": "class",
+      "name": "Studio Rhythm",
+      "kind": "Drumming workshop",
+      "area": "Arts district",
+      "price": 27,
+      "deposit": 16,
+      "capacity": 14,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-36",
+      "category": "class",
+      "name": "Tiny Silver Bench",
+      "kind": "Jewelry workshop",
+      "area": "Old town",
+      "price": 82,
+      "deposit": 40,
+      "capacity": 3,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "private_space"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-37",
+      "category": "class",
+      "name": "Riverside Print Club",
+      "kind": "Printmaking workshop",
+      "area": "Riverside",
+      "price": 39,
+      "deposit": 22,
+      "capacity": 12,
+      "facilities": [
+        "indoor",
+        "equipment_rental",
+        "wifi"
+      ],
+      "wheelchairAccessible": true
+    },
+    {
+      "id": "class-38",
+      "category": "class",
+      "name": "Green Thread Circle",
+      "kind": "Embroidery class",
+      "area": "Garden district",
+      "price": 19,
+      "deposit": 12,
+      "capacity": 22,
+      "facilities": [
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-39",
+      "category": "class",
+      "name": "Warehouse Robotics",
+      "kind": "Robotics workshop",
+      "area": "Warehouse district",
+      "price": 58,
+      "deposit": 32,
+      "capacity": 18,
+      "facilities": [
+        "wifi",
+        "projector",
+        "indoor",
+        "equipment_rental"
+      ],
+      "wheelchairAccessible": false
+    },
+    {
+      "id": "class-40",
+      "category": "class",
+      "name": "Community Stories",
+      "kind": "Creative writing class",
+      "area": "University quarter",
+      "price": 12,
+      "deposit": 8,
+      "capacity": 30,
+      "facilities": [
+        "wifi",
+        "indoor",
+        "beginner_friendly"
+      ],
+      "wheelchairAccessible": true
+    }
+  ]
+}
