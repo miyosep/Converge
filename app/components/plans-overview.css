@@ -1,0 +1,529 @@
+.plans-shell {
+  background:
+    radial-gradient(ellipse at 85% 0%, #e9eff0 0, transparent 38%),
+    var(--canvas);
+  padding: 24px 0 0;
+}
+.plans-shell .topbar {
+  width: calc(100% - 64px);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px 28px;
+  border: 1px solid #fff;
+  border-radius: 80px;
+  background: #ffffffdf;
+  min-height: 80px;
+}
+.plans-shell .topbar .network {
+  font-size: 12px;
+}
+.plans-main {
+  max-width: 1240px;
+  padding: 62px 40px 24px;
+  margin: auto;
+}
+.plans-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+.plans-heading .eyebrow {
+  margin: 0 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+.plans-heading h1 {
+  margin: 0;
+  font-size: clamp(42px, 4.6vw, 64px);
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+  font-weight: 600;
+}
+.plans-heading h1 span {
+  color: var(--accent);
+}
+.plans-heading > div > p:last-child {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+.plans-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 50px;
+  padding: 13px 24px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 13px;
+}
+.plans-first {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  background: #efede5;
+  border-radius: 28px;
+  overflow: hidden;
+}
+.plans-first-copy {
+  padding: clamp(28px, 4vw, 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.plans-small-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--green);
+  font-weight: 700;
+}
+.plans-small-label > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.plans-first h2 {
+  font-size: clamp(32px, 3.5vw, 48px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+  margin: 26px 0 18px;
+  text-wrap: balance;
+}
+.plans-first h2 em {
+  white-space: nowrap;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  color: var(--accent);
+}
+.plans-first-copy > p {
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 365px;
+  margin: 0 0 28px;
+  font-size: 15px;
+}
+.plans-first-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 12px;
+}
+.plans-first-photo {
+  position: relative;
+  min-height: 420px;
+}
+.plans-first-photo > img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.plans-first-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 40%, #101b12b8);
+}
+.plans-photo-caption {
+  position: absolute;
+  left: 36px;
+  bottom: 30px;
+  z-index: 1;
+  color: white;
+}
+.plans-photo-caption > span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.plans-photo-caption strong {
+  display: block;
+  font-size: 38px;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.plans-photo-caption em {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+.plans-how {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  padding: 36px 4px;
+}
+.plans-how > div {
+  display: flex;
+  gap: 16px;
+}
+.plans-step-number {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 25px;
+  color: var(--accent);
+  line-height: 1.25;
+}
+.plans-how h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 5px;
+}
+.plans-how p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.65;
+  max-width: 240px;
+}
+.plans-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  padding: 20px 0 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.plans-footer > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plans-footer p {
+  margin: 0;
+}
+.plans-collection {
+  padding-bottom: 38px;
+}
+.plans-collection-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+}
+.plans-collection-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  margin: 0;
+  font-weight: 600;
+}
+.plans-collection-heading h2 span {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 9px;
+  background: var(--green-soft);
+  border-radius: 20px;
+  color: var(--green);
+}
+.plans-collection-heading p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.plan-tile {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 26px 26px 0;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+  min-width: 0;
+}
+.plan-tile:hover {
+  border-color: #a7b49e;
+  box-shadow: 0 8px 28px #292d2909;
+}
+.plan-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.plan-category {
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.plan-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--green);
+  padding: 4px 9px;
+  border-radius: 20px;
+  background: var(--green-soft);
+}
+.plan-state > span {
+  height: 5px;
+  width: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.plan-state.is-saved {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.plan-tile-body {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 0 24px;
+}
+.plan-date {
+  width: 62px;
+  flex-shrink: 0;
+  text-align: center;
+  background: #f4f2ed;
+  border-radius: 12px;
+  padding: 10px 5px;
+}
+.plan-date span {
+  display: block;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+.plan-date strong {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+.plan-tile h3 {
+  font-size: 24px;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+.plan-tile-body > div:last-child {
+  min-width: 0;
+}
+.plan-tile-body p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin: 0;
+  color: var(--muted);
+}
+.plan-tile-body p svg {
+  flex-shrink: 0;
+}
+.plan-timezone {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.plan-members {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  padding-bottom: 20px;
+  flex-wrap: wrap;
+}
+.plan-members > span:last-child {
+  margin-left: auto;
+}
+.plan-tile-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding: 15px 0;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.plans-feedback {
+  padding: 75px 24px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  margin-bottom: 36px;
+  background: #ffffff80;
+}
+.plans-feedback h2 {
+  font-size: 25px;
+  font-weight: 500;
+  margin: 16px 0 8px;
+}
+.plans-feedback p {
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+.plans-loading-mark {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+}
+.plans-shell :is(a, button):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 5px;
+}
+@media (max-width: 1050px) {
+  .plans-shell .topbar .network {
+    display: none;
+  }
+  .plans-first-copy {
+    padding: 34px;
+  }
+  .plans-first-photo {
+    min-height: 400px;
+  }
+}
+@media (max-width: 760px) {
+  .plans-shell {
+    padding-top: 12px;
+  }
+  .plans-shell .topbar {
+    width: calc(100% - 24px);
+    padding: 14px 18px;
+    border-radius: 26px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .plans-shell .topbar .brand {
+    font-size: 23px;
+  }
+  .plans-shell .topbar .brand-symbol {
+    width: 30px;
+    height: 30px;
+  }
+  .plans-shell .topbar .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    gap: 12px;
+  }
+  .plans-shell .top-actions {
+    margin-left: auto;
+  }
+  .plans-shell .wallet-button {
+    padding: 10px 12px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+  .plans-main {
+    padding: 36px 22px 20px;
+  }
+  .plans-heading {
+    margin-bottom: 26px;
+    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+  .plans-heading > div {
+    display: contents;
+  }
+  .plans-heading h1 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .plans-heading .eyebrow {
+    font-size: 9px;
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+  .plans-heading > div > p:last-child {
+    font-size: 14px;
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+  .plans-heading .plans-create {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    min-height: 44px;
+    padding: 11px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  .plans-first {
+    grid-template-columns: 1fr;
+    border-radius: 22px;
+  }
+  .plans-first-copy {
+    padding: 32px 28px;
+  }
+  .plans-first h2 {
+    font-size: 34px;
+  }
+  .plans-first-photo {
+    min-height: 240px;
+  }
+  .plans-photo-caption {
+    left: 28px;
+    bottom: 20px;
+  }
+  .plans-photo-caption strong {
+    font-size: 32px;
+  }
+  .plans-how {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 30px 6px;
+  }
+  .plans-how p {
+    max-width: none;
+  }
+  .plans-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 11px;
+  }
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  .plans-collection-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .plan-tile {
+    padding: 22px 20px 0;
+  }
+  .plan-tile-body {
+    gap: 14px;
+  }
+  .plan-tile h3 {
+    font-size: 22px;
+  }
+}

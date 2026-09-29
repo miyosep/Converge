@@ -1,5 +1,6 @@
 "use client";
 import { SignInDialog } from "./sign-in-dialog";
+import { PlansOverview } from "./plans-overview";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -412,6 +413,24 @@ export function GroupWorkspace({
         />
       </div>
     );
+  if (mode === "home" && !groupId)
+    return (
+      <PlansOverview
+        wallet={wallet}
+        groups={groups}
+        loading={groupsLoading}
+        error={groupsError}
+        busy={busy}
+        notice={notice}
+        onRetry={() => setGroupsRevision((value) => value + 1)}
+        onSignOut={() =>
+          void run(async () => {
+            await api("/api/auth/logout", {});
+            setWallet(null);
+          })
+        }
+      />
+    );
   return (
     <div className="shell">
       <AppHeader
@@ -541,79 +560,6 @@ export function GroupWorkspace({
                 Join group <ArrowRight size={16} />
               </button>
             </div>
-          )}
-          {wallet && mode === "home" && !groupId && (
-            <section>
-              <div className="panel-heading">
-                <h2>Your shared decisions</h2>
-                <Link href="/group/new" className="primary flow-link">
-                  <Plus size={16} />
-                  Create group
-                </Link>
-              </div>
-              {groupsLoading ? (
-                <div className="flow-panel" role="status">
-                  Loading your groups…
-                </div>
-              ) : groupsError ? (
-                <div className="flow-panel" role="alert">
-                  <h3>Couldn't load your groups</h3>
-                  <p>Please try again.</p>
-                  <button
-                    className="secondary"
-                    onClick={() => setGroupsRevision((value) => value + 1)}
-                  >
-                    Retry
-                  </button>
-                </div>
-              ) : groups.length === 0 ? (
-                <div className="flow-panel flow-empty">
-                  <Users size={30} />
-                  <h2>Your next decision starts here</h2>
-                  <p>
-                    Create a group, invite your people, and let everyone share
-                    their requirements privately.
-                  </p>
-                  <Link className="primary flow-link" href="/group/new">
-                    Create your first group <ArrowRight size={16} />
-                  </Link>
-                </div>
-              ) : (
-                <div className="group-card-grid">
-                  {groups.map((group) => (
-                    <Link
-                      className="group-card"
-                      key={group.id}
-                      href={`/group/${encodeURIComponent(group.id)}`}
-                    >
-                      <span className="pill">
-                        {group.locked
-                          ? "Proposal saved"
-                          : group.confirmedCount === group.targetMemberCount
-                            ? "Ready for evaluation"
-                            : "Collecting preferences"}
-                      </span>
-                      <h3>{group.name}</h3>
-                      <p>{categories[group.category ?? "restaurant"].label}</p>
-                      <p>
-                        {new Date(group.startsAt).toLocaleString("en-US", {
-                          timeZone: group.timeZone,
-                        })}
-                        <br />
-                        {group.timeZone}
-                      </p>
-                      <div className="panel-heading">
-                        <span>
-                          {group.memberCount} / {group.targetMemberCount} joined
-                          · {group.confirmedCount} confirmed
-                        </span>
-                        <ArrowRight size={19} />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
           )}
           {wallet &&
             mode === "create" &&
