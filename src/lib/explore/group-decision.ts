@@ -15,6 +15,8 @@ export type DemoGroupMember = {
 export type DemoGroupDecision = {
   stage:
     "aggregating" | "searching" | "choosing" | "ready" | "blocked" | "failed";
+  failureStage?: "aggregating" | "searching" | "choosing";
+  failureCode?: "timeout" | "unavailable";
   members: DemoGroupMember[];
   rationale?: string;
   uncertainties?: string[];
@@ -110,6 +112,7 @@ export async function findDemoGroupCandidates(config: {
     area: EXPLORE_SEARCH_LOCATION,
     category: "restaurant",
     people: 6,
+    searchTimeoutMs: 60000,
     startsAt: EXPLORE_DEMO_SLOT.startsAt,
     preferences: config.members.map((member) => member.preference),
     fetchImpl: async (url, init) => {

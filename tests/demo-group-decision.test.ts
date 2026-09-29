@@ -319,3 +319,52 @@ test("saved candidates resume selection without xAPI and invented winners or omi
     else process.env.XAPI_KEY = oldXapi;
   }
 });
+
+test("a restaurant search timeout preserves all confirmed preferences and stops without payment or automatic repeat", async () => {
+  const oldFetch = globalThis.fetch;
+  const oldKey = process.env.KILN_API_KEY;
+  const oldXapi = process.env.XAPI_KEY;
+  process.env.KILN_API_KEY = "fixture";
+  process.env.XAPI_KEY = "fixture";
+  let searches = 0;
+  globalThis.fetch = async (url, init) => {
+    if (String(url).includes("action.xapi.to")) {
+      searches++;
+      throw new DOMException("Timed out", "TimeoutError");
+    }
+    const input = JSON.parse(
+      JSON.parse(String(init?.body)).messages[1].content,
+    );
+    return completion({
+      query: "Japanese restaurants Gangnam",
+      consideredIds: input.requirements.map((_: unknown, i: number) => i),
+      conflicts: [],
+    });
+  };
+  try {
+    const run = fixture();
+    await worker([]).tick(run);
+    assert.equal(searches, 1);
+    assert.equal(run.groupDecision?.stage, "failed");
+    assert.equal(run.groupDecision?.failureStage, "searching");
+    assert.equal(run.groupDecision?.failureCode, "timeout");
+    assert.deepEqual(run.groupDecision?.members[0]?.preference, preference);
+    assert.equal(run.command, undefined);
+    assert.equal(run.searchInFlight, undefined);
+    assert.equal(run.policy, undefined);
+    assert.equal(run.searchCalls, 1);
+    assert.equal(run.error, "GROUP_DECISION_FAILED");
+    const retry = {
+      action: "group_search" as const,
+      text: run.text!,
+      preference: run.groupDecision!.members[0]!.preference,
+    };
+    assert.doesNotThrow(() => validateLiveCommand(run, retry));
+  } finally {
+    globalThis.fetch = oldFetch;
+    if (oldKey === undefined) delete process.env.KILN_API_KEY;
+    else process.env.KILN_API_KEY = oldKey;
+    if (oldXapi === undefined) delete process.env.XAPI_KEY;
+    else process.env.XAPI_KEY = oldXapi;
+  }
+});

@@ -414,7 +414,7 @@ export default function ExploreDemo() {
             {notice}
           </p>
         )}
-        {entered && state?.error && (
+        {entered && state?.error && state.groupDecision?.stage !== "failed" && (
           <p className="explore-notice" role="status">
             {state.error.startsWith("WAITING")
               ? "Waiting for transaction confirmations."

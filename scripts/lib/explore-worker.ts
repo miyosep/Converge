@@ -557,7 +557,34 @@ export class ExploreWorker {
         } catch (error) {
           if (error instanceof Error && error.message === "JOB_LEASE_LOST")
             throw error;
-          if (run.groupDecision) run.groupDecision.stage = "failed";
+          if (run.groupDecision) {
+            const stage = run.groupDecision.stage;
+            if (
+              stage === "aggregating" ||
+              stage === "searching" ||
+              stage === "choosing"
+            )
+              run.groupDecision.failureStage = stage;
+            run.groupDecision.failureCode =
+              error instanceof Error &&
+              ["TimeoutError", "AbortError"].includes(error.name)
+                ? "timeout"
+                : "unavailable";
+            run.groupDecision.stage = "failed";
+          }
+          // Store only diagnostic codes, never raw provider payloads or preferences.
+          await this.persistence?.attempt(
+            `${run.id}:${run.revision}:group-failure`,
+            {
+              stage: run.groupDecision?.failureStage,
+              errorType: error instanceof Error ? error.name : "UnknownError",
+              code:
+                error instanceof Error &&
+                /^[A-Z_0-9]{1,80}$/.test(error.message)
+                  ? error.message
+                  : run.groupDecision?.failureCode,
+            },
+          );
           run.error = "GROUP_DECISION_FAILED";
         }
         delete run.command;

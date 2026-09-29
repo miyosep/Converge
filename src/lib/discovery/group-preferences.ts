@@ -72,6 +72,7 @@ export async function recommendForGroup(config: {
   startsAt: string;
   preferences: z.infer<typeof livePreferenceSchema>[];
   fetchImpl?: typeof fetch;
+  searchTimeoutMs?: number;
 }): Promise<{
   places: DiscoveredPlace[];
   searchedAt: string;
@@ -135,6 +136,7 @@ export async function recommendForGroup(config: {
   const result = await searchXapiPlaces({
     xapiKey: config.xapiKey,
     query: planned.query,
+    timeoutMs: config.searchTimeoutMs ?? 30000,
     fetchImpl: config.fetchImpl ?? fetch,
   });
   const unique = new Map<string, DiscoveredPlace>();

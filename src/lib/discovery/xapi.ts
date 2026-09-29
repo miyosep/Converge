@@ -124,6 +124,7 @@ export async function searchXapiPlaces(config: {
   query: string;
   fetchImpl?: typeof fetch;
   onStatus?: (status: number) => void;
+  timeoutMs?: number;
 }) {
   const response = await (config.fetchImpl ?? fetch)(
     "https://action.xapi.to/v1/actions/execute",
@@ -131,7 +132,7 @@ export async function searchXapiPlaces(config: {
       method: "POST",
       redirect: "error",
       cache: "no-store",
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(config.timeoutMs ?? 30000),
       headers: {
         "XAPI-Key": config.xapiKey,
         "Content-Type": "application/json",

@@ -375,20 +375,63 @@ export function LiveDemoSearch({
           Finding real places for your group… This can take a moment.
         </p>
       )}
-      {run.error?.includes("SEARCH") && !searching && (
-        <p role="alert">
-          The search could not finish. Your request is saved; you can retry
-          while searches remain.
-        </p>
-      )}
+      {run.error?.includes("SEARCH") &&
+        !searching &&
+        run.groupDecision?.stage !== "failed" && (
+          <p role="alert">
+            The search could not finish. Your request is saved; you can retry
+            while searches remain.
+          </p>
+        )}
       {run.groupDecision?.stage === "blocked" && (
         <p role="status">{run.groupDecision.rationale}</p>
       )}
       {run.groupDecision?.stage === "failed" && (
-        <p role="alert">
-          We couldn’t finish the group decision. Review your preferences and try
-          again.
-        </p>
+        <div className="demo-clarifications" role="alert">
+          <h3>Let’s try that again</h3>
+          <p>
+            {run.groupDecision.failureStage === "searching"
+              ? run.groupDecision.failureCode === "timeout"
+                ? "The restaurant search took too long to respond."
+                : "The restaurant search service couldn’t return results."
+              : "We couldn’t finish finding a shared plan this time."}{" "}
+            Your preferences are saved. No payment was made.
+          </p>
+          {(run.searchCalls ?? 0) < 3 ? (
+            <button
+              type="button"
+              className="primary"
+              disabled={
+                disabled ||
+                reviewing ||
+                !configured ||
+                text.trim() !== run.text?.trim()
+              }
+              onClick={() => {
+                const preference = run.groupDecision?.members.find(
+                  (member) =>
+                    member.address.toLowerCase() === run.judge.toLowerCase(),
+                )?.preference;
+                if (preference && run.text)
+                  onCommand({
+                    action: "group_search",
+                    text: run.text,
+                    preference,
+                  });
+              }}
+            >
+              Retry with saved preferences
+            </button>
+          ) : (
+            <p>
+              This session has used its three searches. Start a new demo from
+              Demo sessions to try again.
+            </p>
+          )}
+          {text.trim() !== run.text?.trim() && (
+            <p>Review your edited preferences before searching again.</p>
+          )}
+        </div>
       )}
     </section>
   );
