@@ -78,6 +78,7 @@ export default function ExploreDemo() {
   const [view, setView] = useState<ExploreView | null>(null);
   const [refreshError, setRefreshError] = useState(false);
   const [wallet, setWallet] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [text, setText] = useState("Under $35 per person, somewhere quiet.");
@@ -87,19 +88,25 @@ export default function ExploreDemo() {
   const revision = useRef("");
   const selectedRun = useRef("");
   const refreshSequence = useRef(0);
+  const refreshing = useRef(false);
   const refresh = useCallback(async () => {
     const sequence = ++refreshSequence.current;
+    refreshing.current = true;
     const requestedRun = selectedRun.current;
     const result = await api<ExploreView>(
       `/api/demo${selectedRun.current ? `?runId=${selectedRun.current}` : ""}`,
-    ).catch((error: unknown) => {
-      if (
-        sequence === refreshSequence.current &&
-        requestedRun === selectedRun.current
-      )
-        setRefreshError(true);
-      throw error;
-    });
+    )
+      .catch((error: unknown) => {
+        if (
+          sequence === refreshSequence.current &&
+          requestedRun === selectedRun.current
+        )
+          setRefreshError(true);
+        throw error;
+      })
+      .finally(() => {
+        if (sequence === refreshSequence.current) refreshing.current = false;
+      });
     if (
       sequence !== refreshSequence.current ||
       requestedRun !== selectedRun.current
@@ -117,9 +124,10 @@ export default function ExploreDemo() {
     void refresh().catch((error) => setNotice(error.message));
     void api<{ walletAddress: string }>("/api/auth/session")
       .then((session) => setWallet(session.walletAddress))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
     const timer = setInterval(() => {
-      void refresh().catch(() => {});
+      if (!refreshing.current) void refresh().catch(() => {});
     }, 4000);
     return () => clearInterval(timer);
   }, [refresh]);
@@ -282,11 +290,17 @@ export default function ExploreDemo() {
         action={
           <button
             className="wallet-button"
-            disabled={busy}
+            disabled={busy || sessionLoading}
             onClick={() => void run(connect)}
           >
             <Wallet size={16} aria-hidden="true" />
-            {busy ? "Please wait…" : wallet ? short(wallet) : "Connect wallet"}
+            {sessionLoading
+              ? "Connecting…"
+              : busy
+                ? "Please wait…"
+                : wallet
+                  ? short(wallet)
+                  : "Connect wallet"}
           </button>
         }
       />
@@ -426,7 +440,22 @@ export default function ExploreDemo() {
                 </div>
               </section>
             )}
-            {!state ? (
+            {!view || sessionLoading ? (
+              !refreshError && (
+                <section
+                  className="explore-section demo-loading"
+                  role="status"
+                  aria-busy="true"
+                >
+                  <div className="demo-loading-shapes" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <p>Loading your demo…</p>
+                </section>
+              )
+            ) : !state ? (
               <section className="explore-section demo-start">
                 <div className="demo-start-top">
                   <span className="eyebrow">A LITTLE TASTE OF CONVERGE</span>

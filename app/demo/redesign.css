@@ -506,3 +506,36 @@
 .demo-sessions[open] > summary::after {
   content: "−";
 }
+
+.demo-redesign .demo-loading {
+  min-height: 440px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+}
+.demo-loading-shapes span {
+  display: block;
+  height: 18px;
+  margin: 18px 0;
+  border-radius: 10px;
+  background: #edf0e7;
+  width: 65%;
+}
+.demo-loading-shapes span:first-child {
+  height: 46px;
+  width: 45%;
+}
+.demo-loading-shapes span:last-child {
+  width: 85%;
+}
+.demo-redesign .demo-loading > p {
+  font-size: 13px;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .demo-redesign .demo-loading {
+    min-height: 360px;
+    padding: 24px;
+  }
+}
