@@ -15,6 +15,12 @@ not assumed permanently from documentation.
 
 ## Setup and Live Check
 
+Live place discovery has a separate bounded tool-calling adapter in
+`src/lib/discovery/xapi.ts`. It supports all five categories through xAPI;
+the extraction client remains responsible for private group preferences.
+See [current search behavior and setup](LIVE_RESTAURANT_SEARCH.md) and
+[the earlier tool-calling evaluation](KILN_TOOL_CALLING.md).
+
 Use Node.js 24.19.0 and pnpm 11.19.0 on Windows or macOS. Put credentials only in
 the ignored root `.env`:
 

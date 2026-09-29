@@ -57,7 +57,14 @@ USD 0.00448068. These small fixed fixtures do not measure general reliability,
 multi-cuisine coverage, real search quality, multi-turn condition changes or
 end-to-end spending control. The changed-condition cases are independent requests.
 
-## MVP recommendation
+## MVP recommendation from this evaluation
+
+The subsequent implementation uses one Qwen tool proposal and validated xAPI
+results rendered directly by application code; it does not require a second
+model synthesis call. It now searches all five venue categories. See
+[current implementation and live evidence](LIVE_RESTAURANT_SEARCH.md).
+The protocol recommendation below and the synthetic scores above describe the
+earlier isolated evaluation, not the current complete application flow.
 
 Use Qwen to propose one `search_places` call, validate its arguments on the
 server, execute the approved read-only provider, and return its results with the

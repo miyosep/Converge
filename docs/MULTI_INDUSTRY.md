@@ -1,7 +1,13 @@
-# Multi-industry sample catalog
+# Archived multi-industry sample catalog
 
-Ordinary groups choose from five categories with 40 fictional examples each:
-restaurants, stays, spaces, sports and classes. `/group/new` shows the project introduction until wallet sign-in succeeds.
+The default flow is now [live AI place search](LIVE_RESTAURANT_SEARCH.md) at
+`/discover`; `/group/new` redirects there. It searches all five categories and
+assumes USDC reservations are available for the hackathon, without checking booking availability.
+
+This document describes the archived planner at `/demo/catalog`, which uses five
+categories with 40 fictional examples each (200 total): restaurants, stays, spaces,
+sports and classes. The complete snapshot is `data/demo/catalog-archive.json`.
+The archived planner shows the project introduction until wallet sign-in succeeds.
 Planning, searching and shortlisting become available after the server verifies
 the wallet login signature. Natural-language search extracts budget, capacity, beds, facilities, names, types and areas, and displays any conditions it cannot verify. Names and searchable condition combinations are distinct within each category.
 Changing category resets the shortlist and search. Each group uses one category.

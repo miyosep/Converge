@@ -140,15 +140,10 @@ function CategoryRestaurantPicker({
           ? "What are you planning?"
           : "Choose places to consider"}
       </legend>
-      {category === "restaurant" && (
-        <p className="flow-note">
-          Looking for a real place?{" "}
-          <Link href="/discover">
-            Search real restaurants and compare candidates
-          </Link>
-          .
-        </p>
-      )}
+      <p className="flow-note">
+        Looking for a real place?{" "}
+        <Link href="/discover">Search real places and compare candidates</Link>.
+      </p>
       {onCategoryChange && (
         <CategoryPicker
           category={category}

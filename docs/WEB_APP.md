@@ -1,11 +1,18 @@
 # First Web Workflow
 
-## Multi-industry examples
+## Live place search and archived examples
 
-Ordinary groups now offer 100 fictional examples: 20 each for restaurants, stays,
-spaces, sports and classes. Apply migration `0011_multi_industry_catalog.sql`.
-See [multi-industry behavior and verification](MULTI_INDUSTRY.md). The restaurant
-and payment workflows described below remain compatible.
+New-plan links at `/group/new` redirect to `/discover`. Kiln Qwen tool calling and
+xAPI provide live search for restaurants, stays, spaces, sports and classes from
+English requests. Authentication is requested within the search page. Configure
+server-only `KILN_API_KEY` and `XAPI_KEY`; see [setup and evidence](LIVE_RESTAURANT_SEARCH.md).
+For the hackathon, candidates are assumed reservable using USDC; availability is
+not checked. This search/comparison flow does not itself create a group payment policy.
+
+The archived planner at `/demo/catalog` uses 200 fictional examples, 40 per category.
+Apply migrations through `0014_catalog_forty.sql` for its saved shortlists.
+See [archived catalog behavior](MULTI_INDUSTRY.md). The group and payment workflows
+below describe this compatible synthetic merchant flow and existing groups.
 
 
 ## Flexible group formation
@@ -23,9 +30,10 @@ the group's contribution total and the existing configured caps.
 
 New ordinary policies use the deployed v2 contract with 2–100 members and
 unanimous approval. Existing v1 policies still use their original contract.
-Ordinary groups search and select among 20 fictional restaurants; migration
-`0010_restaurant_catalog.sql` expands saved shortlists while preserving existing
-selections. Explore Demo keeps six participants and its original five candidates.
+Archived demo groups select among 40 fictional restaurants or one of four other
+40-example categories. Migrations through `0014_catalog_forty.sql` expand saved
+shortlists while preserving existing selections. Explore Demo keeps six participants
+and its original five candidates.
 See [v2 deployment and verification](GROUP_WALLET_V2.md).
 
 Run `node --env-file=.env.development --import tsx scripts/group-size-rehearsal.ts`

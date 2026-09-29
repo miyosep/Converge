@@ -115,11 +115,14 @@ The policy has a canonical, versioned ABI encoding and a `policyHash` calculated
 
 | Layer            | Implemented responsibility                                                                                                                                                                                |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kiln `qwen3-32b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
+| Kiln `qwen3-32b` | Propose validated place-search tool calls from English requests; extract private group constraints and explain sanitized demo recommendations. |
 | Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence.                              |
 | Smart contract   | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable.                                 |
 
-The contract is the final authority for token movement. It cannot verify restaurant allergy safety, availability, or real-world service delivery; those are off-chain fixture claims in this MVP.
+The contract is the final authority for token movement. It cannot verify allergy
+safety, availability or real-world service delivery. Live search retains unknown
+conditions; booking availability is assumed for the hackathon. Payment-demo
+metadata remains synthetic.
 
 ## Kiln Integration
 

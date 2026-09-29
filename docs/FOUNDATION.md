@@ -2,6 +2,10 @@
 
 This is the initial common foundation to merge before feature branches diverge. These conventions are stable defaults for the six-person MVP, not a promise that requirements will never change.
 
+This document records the initial foundation. For current implemented scope and
+remaining work, use `README.md`, `project_guideline.md` and `LIVE_RESTAURANT_SEARCH.md`.
+The original open-task list below is historical, not the current implementation status.
+
 ## Available Now
 
 - Node.js 24.19.0, pnpm 11.19.0, exact dependency versions, and one lockfile.

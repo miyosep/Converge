@@ -64,7 +64,11 @@ Six friends want to choose a restaurant together without sharing all of their pe
 
 Alice, Bob, Charlie, Dana, Erin, and Farah are demo participant personas, not engineering assignments.
 
-Explore Demo and the deployed v1 contract retain six participants. Ordinary groups choose 2–100 participants, select among 20 fictional restaurants, and use the separately deployed v2 contract for unanimous contributions, payment and refunds. Existing v1 policies and six-account acceptance evidence remain unchanged. The six-person specification below describes the original demo; see `docs/GROUP_WALLET_V2.md` for the current ordinary-group extension.
+The default new-plan route `/group/new` now redirects to `/discover`. Kiln `qwen3-32b` selects a `search_places` tool call from an English request; the server executes xAPI Places search for restaurants, stays, spaces, sports facilities or classes. Results retain source links and unknown price/facility conditions, with comparison of up to five candidates. Nightly, hourly and total budgets keep their units. See `docs/LIVE_RESTAURANT_SEARCH.md` for configuration and measured verification.
+
+For the hackathon, discovered places are assumed reservable with USDC: booking availability and USDC acceptance are not checked. This assumption does not itself enroll a real venue as a payment merchant or send a payment. Connecting discovered candidates to the group policy/payment flow remains separate work.
+
+The archived planning flow at `/demo/catalog` preserves 200 fictional examples, 40 per category, also saved in `data/demo/catalog-archive.json`. It supports groups of 2–100 with the deployed v2 contract. Explore Demo and v1 retain six participants and their original five candidates. Existing policies and historical acceptance evidence remain unchanged. The six-person specification below describes the original payment demo; see `docs/GROUP_WALLET_V2.md` for variable-size groups.
 
 ### 3.2 Baseline Financial Example
 
@@ -688,7 +692,9 @@ Keep the ordinary group workspace and the guided `/demo` experience separate. Us
 | Route                     | Content and interactions                                                  | Essential states                                          |
 | ------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `/`                       | Existing groups and create-group action                                   | Empty, loading, error                                     |
-| `/group/new`              | Group name, reservation date/time, invitation creation                    | Invalid slot, submitting, created                         |
+| `/group/new`              | Redirect to live place search at `/discover`                              | Redirect                                                  |
+| `/discover`               | Category, location, English request, live candidates and comparison       | Sign-in required, clarification, searching, empty, provider error |
+| `/demo/catalog`           | Archived fictional planning: group name, date/time and invitations        | Sign-in required, invalid slot, submitting, created        |
 | `/group/[id]`             | Six members, submission/confirmation progress                             | Waiting, complete, membership locked                      |
 | `/group/[id]/preferences` | Private text, extracted interpretation, correction and confirmation       | Parsing, clarification, provider failure, confirmed       |
 | `/group/[id]/results`     | Eligible/rejected candidates, sanitized reasons, winner                   | No match, proposal stale, explanation fallback            |
