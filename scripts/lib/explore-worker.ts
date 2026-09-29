@@ -148,6 +148,7 @@ export class ExploreWorker {
     to: Address,
     data: Hex = "0x",
     value = 0n,
+    broadcastOnly = false,
   ) {
     const key = `${run.id}:${label}`;
     const wallet = createWalletClient({
@@ -182,7 +183,13 @@ export class ExploreWorker {
       intent,
       load: async () => this.ledger[key],
       prepare: async () => {
-        if (Object.values(this.ledger).some((entry) => !entry.confirmed))
+        if (
+          Object.values(this.ledger).some(
+            (entry) =>
+              !entry.confirmed &&
+              entry.intent.from.toLowerCase() === account.address.toLowerCase(),
+          )
+        )
           throw new Error("WAITING_FOR_OTHER_TRANSACTION");
         const request = await wallet.prepareTransactionRequest({
           account,
@@ -217,12 +224,16 @@ export class ExploreWorker {
       broadcast: (serialized) =>
         this.client.sendRawTransaction({ serializedTransaction: serialized }),
       waitReceipt: (hash) =>
-        this.client.waitForTransactionReceipt({
-          hash,
-          timeout: 25000,
-          confirmations: 1,
-        }),
+        broadcastOnly
+          ? Promise.resolve(null)
+          : this.client.waitForTransactionReceipt({
+              hash,
+              timeout: 25000,
+              confirmations: 1,
+            }),
     });
+    if (broadcastOnly) return;
+    if (!outcome.receipt) throw new Error("Receipt missing");
     // Interactive progress uses two confirmations, not a claim of finalized evidence.
     if (
       (await this.client.getBlockNumber({ cacheTime: 0 })) <
@@ -256,6 +267,7 @@ export class ExploreWorker {
     abi: Abi,
     functionName: string,
     args: unknown[],
+    broadcastOnly = false,
   ) {
     await this.transact(
       run,
@@ -263,6 +275,8 @@ export class ExploreWorker {
       account,
       address,
       encodeFunctionData({ abi, functionName, args }),
+      0n,
+      broadcastOnly,
     );
   }
   async provision(
@@ -569,6 +583,7 @@ export class ExploreWorker {
     if (status >= 2 || expired) {
       run.phase =
         status === 2 ? "completed" : status === 3 ? "cancelled" : "expired";
+      const refundBots: Account[] = [];
       for (const bot of this.bots) {
         const contributed = (await this.readWallet("contributionOf", [
           id,
@@ -578,19 +593,19 @@ export class ExploreWorker {
           id,
           bot.address,
         ])) as boolean;
-        if (contributed > 0n && !claimed) {
-          await this.contract(
-            run,
-            `Refund ${bot.address}`,
-            bot,
-            this.escrow,
-            walletAbi,
-            "claimRefund",
-            [id],
-          );
-          return;
-        }
+        if (contributed > 0n && !claimed) refundBots.push(bot);
       }
+      for (const bot of refundBots)
+        await this.contract(
+          run,
+          `Refund ${bot.address}`,
+          bot,
+          this.escrow,
+          walletAbi,
+          "claimRefund",
+          [id],
+          true,
+        );
       return;
     }
     if (run.contributions[0] !== "10000000") {
@@ -598,8 +613,11 @@ export class ExploreWorker {
       return;
     }
     run.phase = "contributing";
-    for (const [index, bot] of this.bots.entries()) {
-      if (run.contributions[index + 1] === "10000000") continue;
+    const remaining = this.bots.filter(
+      (_bot, index) => run.contributions[index + 1] !== "10000000",
+    );
+    for (const bot of remaining) {
+      const index = this.bots.indexOf(bot);
       if (
         !(await this.provision(
           run,
@@ -610,11 +628,17 @@ export class ExploreWorker {
         ))
       )
         return;
+    }
+    const missingAllowances: Account[] = [];
+    for (const bot of remaining) {
       const allowance = (await this.readToken("allowance", [
         bot.address,
         this.escrow,
       ])) as bigint;
-      if (allowance < 10_000_000n) {
+      if (allowance < 10_000_000n) missingAllowances.push(bot);
+    }
+    if (missingAllowances.length) {
+      for (const bot of missingAllowances)
         await this.contract(
           run,
           `Allowance ${bot.address}`,
@@ -623,18 +647,22 @@ export class ExploreWorker {
           tokenAbi,
           "approve",
           [this.escrow, 10_000_000n],
+          true,
         );
-        return;
-      }
-      await this.contract(
-        run,
-        `Contribution ${bot.address}`,
-        bot,
-        this.escrow,
-        walletAbi,
-        "approveAndContribute",
-        [id, run.policyHash],
-      );
+      return;
+    }
+    if (remaining.length) {
+      for (const bot of remaining)
+        await this.contract(
+          run,
+          `Contribution ${bot.address}`,
+          bot,
+          this.escrow,
+          walletAbi,
+          "approveAndContribute",
+          [id, run.policyHash],
+          true,
+        );
       return;
     }
     if (

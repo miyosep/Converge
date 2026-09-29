@@ -152,6 +152,7 @@ async function main() {
         functionName: name,
         args,
       });
+    const maxPending = new Map<string, number>();
     async function advance(id: string) {
       // Reload the signed journal on every pass, exercising restart recovery.
       worker.ledger =
@@ -167,6 +168,10 @@ async function main() {
           throw error;
       }
       await store.save(state);
+      const pending = Object.entries(worker.ledger).filter(
+        ([key, entry]) => key.startsWith(`${id}:`) && !entry.confirmed,
+      ).length;
+      maxPending.set(id, Math.max(maxPending.get(id) ?? 0, pending));
       await rpc("evm_mine");
       return state;
     }
@@ -279,6 +284,10 @@ async function main() {
       if (scenario === "payment") {
         assert.equal(finished.approvals, 6);
         assert.equal(finished.rejection?.reason, "MaxDepositExceeded");
+        assert.ok(
+          (maxPending.get(state.id) ?? 0) >= 5,
+          "Five independent automated wallet transactions must be broadcast in one pass",
+        );
       }
       await judgeCall("claimRefund");
       await advance(state.id);

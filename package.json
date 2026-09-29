@@ -12,6 +12,8 @@
     "demo:explore": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts",
     "demo:explore-check": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-demo-worker.ts --check",
     "demo:explore-test": "node --import tsx scripts/explore-local-rehearsal.ts",
+    "demo:explore-live": "node --env-file=.env --env-file=.env.development --import tsx scripts/explore-live-rehearsal.ts",
+    "demo:explore-verify": "node --env-file=.env --import tsx scripts/explore-verify-evidence.ts",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",

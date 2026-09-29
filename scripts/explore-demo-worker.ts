@@ -70,9 +70,18 @@ async function main() {
     }
   });
 }
-main().catch(() => {
+main().catch((error: unknown) => {
+  const name =
+    error instanceof Error
+      ? error.name.replace(/[^A-Za-z0-9_]/g, "").slice(0, 40)
+      : "UnknownError";
+  const frame =
+    error instanceof Error ? (error.stack?.split("\n")[1] ?? "") : "";
+  const source = (frame.trim().replace(/^at /, "").split(" (")[0] ?? "")
+    .replace(/[^A-Za-z0-9_./:\\ -]/g, "")
+    .slice(0, 160);
   console.error(
-    "Explore worker stopped. Check configuration, signer manifests, RPC connectivity, and .demo/worker.lock. No secrets are printed.",
+    `Explore worker stopped (${name}${source ? ` at ${source}` : ""}). Check configuration, RPC connectivity, and local lock files. No credentials are printed.`,
   );
   process.exitCode = 1;
 });
