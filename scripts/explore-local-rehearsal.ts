@@ -22,6 +22,7 @@ import {
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { ExploreWorker } from "./lib/explore-worker.js";
+import { demoTransactionGas } from "../src/lib/explore/wallet-transactions.js";
 import { ExploreStore, optionalJson } from "../src/lib/explore/store.js";
 import { createBaselinePreferences } from "../src/lib/fixtures/preferences.js";
 
@@ -334,11 +335,14 @@ async function main() {
         10_000_000n,
       );
       const id = ready.policy!.decisionId;
-      async function judgeCall(functionName: string) {
+      async function judgeCall(
+        functionName: "approveAndContribute" | "claimRefund" | "cancelDecision",
+      ) {
         const hash = await judgeWallet.writeContract({
           address: escrow,
           abi: walletArtifact.abi,
           functionName,
+          gas: demoTransactionGas[functionName],
           args:
             functionName === "approveAndContribute"
               ? [id, ready.policyHash]
@@ -355,6 +359,7 @@ async function main() {
           address: token,
           abi: tokenArtifact.abi,
           functionName: "approve",
+          gas: demoTransactionGas.approve,
           args: [escrow, 10_000_000n],
         }),
       });

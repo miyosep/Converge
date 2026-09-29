@@ -8,7 +8,6 @@ import {
   connectWalletAccount,
   ensureSepolia,
   signWalletLogin,
-  walletConnectionError,
 } from "../../src/lib/wallet-connection";
 import {
   ArrowLeft,
@@ -43,6 +42,10 @@ import { DemoCandidateResults } from "./candidate-results";
 import { DemoTransactionHistory } from "./transaction-history";
 import { LiveDemoSearch } from "./live-search";
 import { canRestartDemo } from "../../src/lib/explore/sessions";
+import {
+  demoTransactionGas,
+  demoWalletError,
+} from "../../src/lib/explore/wallet-transactions";
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(
@@ -131,7 +134,7 @@ export default function ExploreDemo() {
       await work();
       await refresh();
     } catch (error) {
-      setNotice(walletConnectionError(error));
+      setNotice(demoWalletError(error));
     } finally {
       setBusy(false);
     }
@@ -205,8 +208,20 @@ export default function ExploreDemo() {
         args: [accounts[0], policy.verifyingContract],
       })) as bigint;
       if (allowance < BigInt(policy.contributionPerParticipant)) {
+        await reader.simulateContract({
+          account: accounts[0],
+          address: policy.token,
+          abi: tokenAbi as Abi,
+          functionName: "approve",
+          args: [
+            policy.verifyingContract,
+            BigInt(policy.contributionPerParticipant),
+          ],
+          gas: demoTransactionGas.approve,
+        });
         const approval = await client.sendTransaction({
           to: policy.token,
+          gas: demoTransactionGas.approve,
           data: encodeFunctionData({
             abi: tokenAbi as Abi,
             functionName: "approve",
@@ -247,7 +262,16 @@ export default function ExploreDemo() {
         : action === "contribute"
           ? [policy.decisionId, current.policyHash]
           : [policy.decisionId];
+    await reader.simulateContract({
+      account: accounts[0],
+      address: action === "allowance" ? policy.token : policy.verifyingContract,
+      abi: (action === "allowance" ? tokenAbi : walletAbi) as Abi,
+      functionName,
+      args,
+      gas: demoTransactionGas[functionName],
+    });
     const hash = await client.sendTransaction({
+      gas: demoTransactionGas[functionName],
       to: action === "allowance" ? policy.token : policy.verifyingContract,
       data: encodeFunctionData({
         abi: (action === "allowance" ? tokenAbi : walletAbi) as Abi,
