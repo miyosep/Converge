@@ -1,4 +1,3 @@
-import { AppHeader } from "../components/product-ui";
 import { RestaurantDiscovery } from "../components/restaurant-discovery";
 
 export const dynamic = "force-dynamic";
@@ -16,19 +15,17 @@ export default function DiscoverPage() {
   );
   return (
     <div className="shell plans-shell discover-shell">
-      <AppHeader active="discover" />
-      <main id="main-content" className="discover-main" tabIndex={-1}>
-        <RestaurantDiscovery
-          configured={configured}
-          source={
-            provider === "xapi"
-              ? "xAPI (Google Maps)"
-              : provider === "google"
-                ? "Google Maps"
-                : "Kakao Map"
-          }
-        />
-      </main>
+      <RestaurantDiscovery
+        standalone
+        configured={configured}
+        source={
+          provider === "xapi"
+            ? "xAPI (Google Maps)"
+            : provider === "google"
+              ? "Google Maps"
+              : "Kakao Map"
+        }
+      />
     </div>
   );
 }

@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useCardTilt } from "./use-card-tilt";
+import { AppHeader } from "./product-ui";
+import { GroupFirstForm } from "./group-first-form";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
@@ -11,6 +14,8 @@ import {
   Search,
   Trophy,
   Utensils,
+  Wallet,
+  LogOut,
 } from "lucide-react";
 import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
 import {
@@ -111,11 +116,13 @@ export function RestaurantDiscovery({
   configured,
   source,
   explore = false,
+  standalone = false,
   onSignedIn,
 }: {
   configured: boolean;
   source: DiscoveryResult["source"];
   explore?: boolean;
+  standalone?: boolean;
   onSignedIn?: () => void;
 }) {
   const [location, setLocation] = useState(
@@ -132,10 +139,47 @@ export function RestaurantDiscovery({
   const [signInOpen, setSignInOpen] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [signInNotice, setSignInNotice] = useState("");
+  const [wallet, setWallet] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(standalone);
+  const [signingOut, setSigningOut] = useState(false);
+  useEffect(() => {
+    if (!standalone) return;
+    const controller = new AbortController();
+    fetch("/api/auth/session", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (response.ok) {
+          const session = await response.json();
+          if (!controller.signal.aborted) setWallet(session.walletAddress);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setSessionLoading(false);
+      });
+    return () => controller.abort();
+  }, [standalone]);
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (!response.ok)
+        throw new Error("Could not sign out. Please try again.");
+      setWallet(null);
+      invalidate();
+    } catch {
+      setError("Could not sign out. Please try again.");
+    } finally {
+      setSigningOut(false);
+    }
+  }
   const restoring = useRef(true);
   const selectionWrites = useRef(Promise.resolve());
   async function restore() {
-    if (explore) return;
+    if (explore || standalone) return;
     try {
       const response = await fetch("/api/discover", { cache: "no-store" });
       if (!response.ok) return;
@@ -203,6 +247,8 @@ export function RestaurantDiscovery({
       });
       if (!response.ok)
         throw new Error("Could not verify sign-in. Please try again.");
+      const session = await response.json();
+      setWallet(session.walletAddress);
       setSignInOpen(false);
       setNeedsLogin(false);
       setError("");
@@ -274,11 +320,12 @@ export function RestaurantDiscovery({
       }
     }
   }
+  const cardFrame = useCardTilt();
   const places =
     result?.places.filter(
       (place) => !comparing || selected.includes(place.id),
     ) ?? [];
-  return (
+  const content = (
     <section className="discovery discovery-redesign">
       <div className="discovery-intro">
         {explore ? (
@@ -294,166 +341,183 @@ export function RestaurantDiscovery({
             : "Somewhere that feels right for everyone."}
         </p>
       </div>
-      <div className="discovery-workbench">
-        <form
-          className="discovery-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void search();
-          }}
-        >
-          {!explore && (
-            <fieldset className="discovery-categories">
-              <legend>What brings you together?</legend>
-              <div>
-                {Object.entries(discoveryCategories).map(([value, item]) => {
-                  const Icon = categoryIcons[value as DiscoveryCategory];
-                  return (
+      <div className="discovery-card-frame" ref={cardFrame}>
+        <div className="discovery-workbench">
+          {standalone ? (
+            <GroupFirstForm
+              wallet={wallet}
+              sessionLoading={sessionLoading || signingOut}
+              onBusyChange={setBusy}
+              onSignIn={() => setSignInOpen(true)}
+            />
+          ) : (
+            <form
+              className="discovery-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void search();
+              }}
+            >
+              {!explore && (
+                <fieldset className="discovery-categories">
+                  <legend>What brings you together?</legend>
+                  <div>
+                    {Object.entries(discoveryCategories).map(
+                      ([value, item]) => {
+                        const Icon = categoryIcons[value as DiscoveryCategory];
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            aria-pressed={category === value}
+                            disabled={
+                              source !== "xAPI (Google Maps)" &&
+                              value !== "restaurant"
+                            }
+                            onClick={() => {
+                              if (category === value) return;
+                              invalidate();
+                              setCategory(value as DiscoveryCategory);
+                              setText("");
+                            }}
+                          >
+                            <Icon
+                              size={19}
+                              strokeWidth={1.6}
+                              aria-hidden="true"
+                            />
+                            {item.label}
+                          </button>
+                        );
+                      },
+                    )}
+                  </div>
+                </fieldset>
+              )}
+              <div className="discovery-field">
+                <label htmlFor="discovery-location">Where shall we meet?</label>
+                <div className="discovery-location-wrap">
+                  <MapPin size={18} aria-hidden="true" />
+                  <input
+                    id="discovery-location"
+                    value={location}
+                    readOnly={explore}
+                    required
+                    minLength={2}
+                    maxLength={160}
+                    placeholder="City, neighborhood or landmark"
+                    onChange={(event) => {
+                      invalidate();
+                      setLocation(event.target.value);
+                    }}
+                  />
+                </div>
+                {explore && (
+                  <p>
+                    This demo searches around Gangnam Station. Check walking
+                    distances on the map.
+                  </p>
+                )}
+              </div>
+              <div className="discovery-field">
+                <label htmlFor="discovery-request">
+                  What would make it a good fit?
+                </label>
+                <textarea
+                  id="discovery-request"
+                  value={text}
+                  required
+                  minLength={3}
+                  maxLength={2000}
+                  rows={3}
+                  aria-describedby="discovery-help"
+                  placeholder={discoveryCategories[category].example}
+                  onChange={(event) => {
+                    invalidate();
+                    setText(event.target.value);
+                  }}
+                />
+                <p id="discovery-help" className="discovery-hint">
+                  Write in English. Include your group size, must-haves and
+                  budget with currency.
+                </p>
+              </div>
+              {explore && (
+                <div className="discovery-links" aria-label="Example requests">
+                  {[
+                    "Japanese food for six people.",
+                    "A quiet Italian restaurant under KRW 30,000 per person.",
+                    "Korean barbecue with parking.",
+                  ].map((example) => (
                     <button
-                      key={value}
+                      key={example}
                       type="button"
-                      aria-pressed={category === value}
-                      disabled={
-                        source !== "xAPI (Google Maps)" &&
-                        value !== "restaurant"
-                      }
+                      className="secondary"
                       onClick={() => {
-                        if (category === value) return;
                         invalidate();
-                        setCategory(value as DiscoveryCategory);
-                        setText("");
+                        setText(example);
                       }}
                     >
-                      <Icon size={19} strokeWidth={1.6} aria-hidden="true" />
-                      {item.label}
+                      {example}
                     </button>
-                  );
-                })}
-              </div>
-            </fieldset>
-          )}
-          <div className="discovery-field">
-            <label htmlFor="discovery-location">Where shall we meet?</label>
-            <div className="discovery-location-wrap">
-              <MapPin size={18} aria-hidden="true" />
-              <input
-                id="discovery-location"
-                value={location}
-                readOnly={explore}
-                required
-                minLength={2}
-                maxLength={160}
-                placeholder="City, neighborhood or landmark"
-                onChange={(event) => {
-                  invalidate();
-                  setLocation(event.target.value);
-                }}
-              />
-            </div>
-            {explore && (
-              <p>
-                This demo searches around Gangnam Station. Check walking
-                distances on the map.
+                  ))}
+                </div>
+              )}
+              {!configured && (
+                <p className="notice" role="status">
+                  Live search is not connected yet. You can explore the planning
+                  demo while the search service is being configured.{" "}
+                  <Link href="/demo/catalog">Open planning demo</Link>
+                </p>
+              )}
+              <button
+                type="submit"
+                className="primary"
+                disabled={
+                  !configured ||
+                  busy ||
+                  location.trim().length < 2 ||
+                  text.trim().length < 3
+                }
+              >
+                <Search size={18} aria-hidden="true" />
+                {busy
+                  ? "Finding your places…"
+                  : `Find ${discoveryCategories[category].label.toLowerCase()}`}
+                {!busy && <ArrowRight size={18} aria-hidden="true" />}
+              </button>
+              <p className="discovery-form-note">
+                Compare up to five places before making a plan.
               </p>
-            )}
-          </div>
-          <div className="discovery-field">
-            <label htmlFor="discovery-request">
-              What would make it a good fit?
-            </label>
-            <textarea
-              id="discovery-request"
-              value={text}
-              required
-              minLength={3}
-              maxLength={2000}
-              rows={3}
-              aria-describedby="discovery-help"
-              placeholder={discoveryCategories[category].example}
-              onChange={(event) => {
-                invalidate();
-                setText(event.target.value);
-              }}
-            />
-            <p id="discovery-help" className="discovery-hint">
-              Write in English. Include your group size, must-haves and budget
-              with currency.
-            </p>
-          </div>
-          {explore && (
-            <div className="discovery-links" aria-label="Example requests">
-              {[
-                "Japanese food for six people.",
-                "A quiet Italian restaurant under KRW 30,000 per person.",
-                "Korean barbecue with parking.",
-              ].map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  className="secondary"
-                  onClick={() => {
-                    invalidate();
-                    setText(example);
-                  }}
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
+            </form>
           )}
-          {!configured && (
-            <p className="notice" role="status">
-              Live search is not connected yet. You can explore the planning
-              demo while the search service is being configured.{" "}
-              <Link href="/demo/catalog">Open planning demo</Link>
-            </p>
-          )}
-          <button
-            type="submit"
-            className="primary"
-            disabled={
-              !configured ||
-              busy ||
-              location.trim().length < 2 ||
-              text.trim().length < 3
-            }
+          <aside
+            className="discovery-mood"
+            aria-label="A little inspiration for your next gathering"
           >
-            <Search size={18} aria-hidden="true" />
-            {busy
-              ? "Finding your places…"
-              : `Find ${discoveryCategories[category].label.toLowerCase()}`}
-            {!busy && <ArrowRight size={18} aria-hidden="true" />}
-          </button>
-          <p className="discovery-form-note">
-            Compare up to five places before making a plan.
-          </p>
-        </form>
-        <aside
-          className="discovery-mood"
-          aria-label="A little inspiration for your next gathering"
-        >
-          <img
-            src="/images/converge-together.webp"
-            alt="Friends sharing a meal at a sunny outdoor table"
-            width={1536}
-            height={1024}
-          />
-          <div className="discovery-mood-copy">
-            <span>GOOD COMPANY. THE RIGHT PLACE.</span>
-            <p>
-              A little closer
-              <br />
-              to <em>getting together.</em>
-            </p>
-          </div>
-        </aside>
+            <img
+              src="/images/converge-park-friends.webp"
+              alt="Friends relaxing together on a grassy riverside park lawn"
+              width={1024}
+              height={1536}
+            />
+            <div className="discovery-mood-copy">
+              <span>GOOD COMPANY. THE RIGHT PLACE.</span>
+              <p>
+                A little closer
+                <br />
+                to <em>getting together.</em>
+              </p>
+            </div>
+          </aside>
+        </div>
       </div>
       <p className="discovery-booking-note">
         Confirm prices and facilities with the venue. Booking availability is
         not checked. Demo bookings assume USDC support.
       </p>
       <div role="status" aria-live="polite" aria-busy={busy}>
-        {busy && (
+        {busy && !standalone && (
           <p>
             Reading your requirements, searching {source} and checking the
             available facts…
@@ -592,5 +656,35 @@ export function RestaurantDiscovery({
         onConnect={() => void signIn()}
       />
     </section>
+  );
+  if (!standalone) return content;
+  const shortWallet = wallet
+    ? `${wallet.slice(0, 6)}…${wallet.slice(-4)}`
+    : null;
+  return (
+    <>
+      <AppHeader
+        active="discover"
+        action={
+          <button
+            type="button"
+            className="wallet-button"
+            disabled={sessionLoading || signingIn || signingOut || busy}
+            onClick={() => (wallet ? void signOut() : setSignInOpen(true))}
+            aria-label={
+              wallet ? `Sign out of wallet ${shortWallet}` : undefined
+            }
+            title={wallet ? "Sign out" : undefined}
+          >
+            <Wallet size={16} aria-hidden="true" />
+            {sessionLoading ? "Connecting…" : (shortWallet ?? "Sign in")}
+            {wallet && <LogOut size={15} aria-hidden="true" />}
+          </button>
+        }
+      />
+      <main id="main-content" className="discover-main" tabIndex={-1}>
+        {content}
+      </main>
+    </>
   );
 }

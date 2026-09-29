@@ -11,6 +11,7 @@ import {
 import { currentGroupPolicyConfig } from "../src/lib/server/group-config.js";
 import { LiveGroupPanel } from "../app/components/live-group-panel.js";
 import { calendarEvent } from "../src/lib/calendar/google.js";
+import { GroupFirstForm } from "../app/components/group-first-form.js";
 
 const members = [
   "0x0000000000000000000000000000000000000011",
@@ -180,4 +181,48 @@ test("friends review unverified venue conditions and separate place choice from 
   );
   assert.equal(event.location, "Saved real candidate — Seoul");
   assert.match(event.description, /NOT a real venue reservation/);
+});
+
+test("a new group accepts private draft preferences without a prior search or shortlist", () => {
+  const request = {
+    requestId: "11111111-1111-4111-8111-111111111111",
+    category: "restaurant",
+    location: "Gangnam Station, Seoul",
+    initialPreferences: "Private: vegetarian and quiet",
+    name: "Friday",
+    displayName: "Alice",
+    targetMemberCount: 2,
+    depositUsdc: 15,
+    slot,
+    acknowledgeDemo: true,
+  };
+  assert.ok(livePlanRequestSchema.safeParse(request).success);
+  assert.equal(
+    livePlanRequestSchema.safeParse({ ...request, location: "" }).success,
+    false,
+  );
+  assert.equal(
+    livePlanRequestSchema.safeParse({ ...request, depositUsdc: 21 }).success,
+    false,
+  );
+  assert.equal(
+    livePlanRequestSchema.safeParse({ ...request, searchId: request.requestId })
+      .success,
+    false,
+  );
+  assert.equal(
+    livePlanRequestSchema.safeParse({ ...request, merchant: members[0] })
+      .success,
+    false,
+  );
+  const html = renderToStaticMarkup(
+    createElement(GroupFirstForm, {
+      wallet: members[0]!,
+      sessionLoading: false,
+      onSignIn() {},
+    }),
+  );
+  assert.match(html, /Save group &amp; invite friends/);
+  assert.doesNotMatch(html, /Find restaurants|Compare selected/);
+  assert.match(html, /Saved privately/);
 });

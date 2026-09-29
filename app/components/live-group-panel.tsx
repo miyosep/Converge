@@ -254,6 +254,12 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
               Interpretation failed. Your text is saved; submit again to retry.
             </p>
           )}
+          {preference?.status === "draft" && (
+            <p role="status">
+              Your private note was saved when you created the group. Review it
+              above, then interpret and confirm your preferences.
+            </p>
+          )}
           {preference?.status === "extracting" && (
             <p role="status">
               Interpretation is pending. If it was interrupted, submit your text

@@ -10,22 +10,34 @@ import { reservationSlotSchema } from "../schemas/decision.js";
 import { policySchema, hashPolicy } from "../signing-policy.js";
 import type { GroupPolicyConfig } from "../group-policy.js";
 
+const livePlanDetails = {
+  requestId: z.string().uuid(),
+  name: z.string().trim().min(1).max(100),
+  displayName: z.string().trim().min(1).max(80),
+  targetMemberCount: groupSizeSchema,
+  depositUsdc: z.number().int().min(1).max(60),
+  slot: reservationSlotSchema,
+  acknowledgeDemo: z.literal(true),
+};
+
 export const livePlanRequestSchema = z
-  .strictObject({
-    requestId: z.string().uuid(),
-    searchId: z.string().uuid(),
-    placeIds: z
-      .array(z.string().min(1).max(100))
-      .min(1)
-      .max(5)
-      .refine((ids) => new Set(ids).size === ids.length),
-    name: z.string().trim().min(1).max(100),
-    displayName: z.string().trim().min(1).max(80),
-    targetMemberCount: groupSizeSchema,
-    depositUsdc: z.number().int().min(1).max(60),
-    slot: reservationSlotSchema,
-    acknowledgeDemo: z.literal(true),
-  })
+  .union([
+    z.strictObject({
+      ...livePlanDetails,
+      searchId: z.string().uuid(),
+      placeIds: z
+        .array(z.string().min(1).max(100))
+        .min(1)
+        .max(5)
+        .refine((ids) => new Set(ids).size === ids.length),
+    }),
+    z.strictObject({
+      ...livePlanDetails,
+      category: z.enum(["restaurant", "stay", "space", "sport", "class"]),
+      location: z.string().trim().min(2).max(160),
+      initialPreferences: z.string().trim().max(2000).default(""),
+    }),
+  ])
   .refine(
     (input) => input.depositUsdc <= input.targetMemberCount * 10,
     "Deposit exceeds the group's contributions",

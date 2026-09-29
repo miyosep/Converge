@@ -108,20 +108,14 @@ async function main() {
       });
       cookies[index] = response.headers.get("set-cookie")!.split(";")[0]!;
     }
-    const { data: search } = await request("/api/discover", {
-      category: "restaurant",
-      scope: "general",
-      location: "Gangnam Station, Seoul",
-      text: "Japanese restaurants near Gangnam Station, Seoul",
-    });
-    assert.ok(search.places.length, "Live discovery returned no candidates");
-    searchId = search.searchId;
     const { data: created } = await request(
       "/api/groups/live",
       {
         requestId: randomUUID(),
-        searchId,
-        placeIds: [search.places[0].id],
+        category: "restaurant",
+        location: "Gangnam Station, Seoul",
+        initialPreferences:
+          "I prefer Japanese food near Gangnam Station, Seoul. I have no required restrictions.",
         name: "Friends live integration rehearsal",
         displayName: "Alice",
         targetMemberCount: 2,
@@ -139,6 +133,17 @@ async function main() {
     );
     groupId = created.groupId;
     const base = `/api/groups/${groupId}`;
+    const { data: savedGroup } = await request(`${base}/overview`);
+    assert.equal(savedGroup.livePlan.places.length, 0);
+    assert.equal(savedGroup.livePlan.recommendationReady, false);
+    assert.doesNotMatch(
+      JSON.stringify(savedGroup),
+      /I prefer|rawText|extraction/,
+    );
+    const { data: draft } = await request(`${base}/live-preferences`);
+    assert.equal(draft.preference.status, "draft");
+    assert.equal(draft.preference.confirmed, false);
+    await request(`${base}/recommend`, {}, 0, 409);
     await request(`${base}/live-preferences`, undefined, 1, 403);
     const { data: invite } = await request(`${base}/invite`, {}, 0, 201);
     await request(
@@ -153,13 +158,17 @@ async function main() {
     for (const index of [0, 1]) {
       const { data } = await request(
         `${base}/live-preferences`,
-        { text: texts[index], expectedRevisionId: null },
+        {
+          text: texts[index],
+          expectedRevisionId: index === 0 ? draft.preference.revisionId : null,
+        },
         index,
       );
       assert.equal(data.preference.status, "review");
       assert.equal(data.preference.confirmed, false);
       assert.equal(data.preference.extraction.clarifications.length, 0);
       assert.ok(data.preference.extraction.requirements.length);
+      await request(`${base}/recommend`, {}, 0, 409);
       await request(
         `${base}/live-confirm`,
         { revisionId: data.preference.revisionId },
@@ -195,7 +204,7 @@ async function main() {
       policy.signingPolicy.policyHash,
     );
     console.log(
-      `PASS live HTTP: two SIWE sessions, saved xAPI search, invitation, two confirmed Kiln preferences, ${result.livePlan.places.length} group candidates, unanimous choice and one immutable shared policy. No chain transactions.`,
+      `PASS live HTTP: two SIWE sessions, group created before any search, private draft, invitation, two confirmed Kiln preferences, ${result.livePlan.places.length} group candidates, unanimous choice and one immutable shared policy. No chain transactions.`,
     );
     if (preview) {
       console.log(

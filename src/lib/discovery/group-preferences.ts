@@ -21,7 +21,7 @@ export type LivePreference = {
   rawText: string;
   extraction: z.infer<typeof livePreferenceSchema> | null;
   confirmed: boolean;
-  status: "extracting" | "review" | "failed";
+  status: "draft" | "extracting" | "review" | "failed";
 };
 
 export function interpretLivePreference(

@@ -124,29 +124,57 @@ export class LivePlanRepository {
           throw new LivePlanError("NOT_MEMBER");
         return existing.id as string;
       }
-      const row = (
-        await db.query(
-          "SELECT request,result FROM converge_discovery_searches WHERE id=$1 AND owner_wallet=$2",
-          [input.searchId, creator],
+      let searchId: string | null = null;
+      let snapshot: Omit<LivePlan, "votes">;
+      if ("searchId" in input) {
+        searchId = input.searchId;
+        const row = (
+          await db.query(
+            "SELECT request,result FROM converge_discovery_searches WHERE id=$1 AND owner_wallet=$2",
+            [input.searchId, creator],
+          )
+        ).rows[0];
+        if (!row) throw new LivePlanError("SEARCH_NOT_FOUND");
+        const result = row.result as DiscoveryResult;
+        const places = input.placeIds.map((id) =>
+          result.places.find((place) => place.id === id),
+        );
+        if (
+          result.intent.clarifications.length ||
+          places.some((place) => !place)
         )
-      ).rows[0];
-      if (!row) throw new LivePlanError("SEARCH_NOT_FOUND");
-      const result = row.result as DiscoveryResult;
-      const places = input.placeIds.map((id) =>
-        result.places.find((place) => place.id === id),
-      );
-      if (result.intent.clarifications.length || places.some((place) => !place))
-        throw new LivePlanError("INVALID_SHORTLIST");
-      const snapshot: Omit<LivePlan, "votes"> = {
-        recommendationReady: false,
-        category: row.request.category,
-        places: places as LivePlan["places"],
-        intent: result.intent,
-        source: result.source,
-        searchedAt: result.searchedAt,
-        depositUsdc: input.depositUsdc,
-        merchant,
-      };
+          throw new LivePlanError("INVALID_SHORTLIST");
+        snapshot = {
+          recommendationReady: false,
+          category: row.request.category,
+          places: places as LivePlan["places"],
+          intent: result.intent,
+          source: result.source,
+          searchedAt: result.searchedAt,
+          depositUsdc: input.depositUsdc,
+          merchant,
+        };
+      } else {
+        snapshot = {
+          recommendationReady: false,
+          category: input.category,
+          places: [],
+          intent: {
+            area: input.location,
+            cuisine: "",
+            koreanQuery: "",
+            budget: null,
+            people: input.targetMemberCount,
+            facilities: [],
+            otherRequirements: [],
+            clarifications: [],
+          },
+          source: "xAPI (Google Maps)",
+          searchedAt: "",
+          depositUsdc: input.depositUsdc,
+          merchant,
+        };
+      }
       const groupId = input.requestId;
       await db.query(
         "INSERT INTO converge_groups(id,name,reservation_starts_at,reservation_time_zone,creator_wallet,target_member_count) VALUES($1,$2,$3,$4,$5,$6)",
@@ -165,8 +193,14 @@ export class LivePlanRepository {
       );
       await db.query(
         "INSERT INTO converge_live_plans(group_id,search_id,snapshot) VALUES($1,$2,$3::jsonb)",
-        [groupId, input.searchId, JSON.stringify(snapshot)],
+        [groupId, searchId, JSON.stringify(snapshot)],
       );
+      if ("initialPreferences" in input && input.initialPreferences) {
+        await db.query(
+          "INSERT INTO converge_live_preferences(group_id,wallet_address,revision_id,raw_text,status) VALUES($1,$2,$3,$4,'draft')",
+          [groupId, creator, randomUUID(), input.initialPreferences],
+        );
+      }
       return groupId;
     });
   }
