@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ExploreRun, ExploreCommand } from "../../src/lib/explore/types";
+import type { DemoReview } from "../../src/lib/explore/preference-review";
 
 export function LiveDemoSearch({
   run,
@@ -19,11 +20,61 @@ export function LiveDemoSearch({
   const [deposit, setDeposit] = useState("45");
   const [accepted, setAccepted] = useState(false);
   const [reviewedText, setReviewedText] = useState<string | null>(null);
+  const [summary, setSummary] = useState<DemoReview | null>(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const reviewSequence = useRef(0);
+  useEffect(
+    () => () => {
+      reviewSequence.current++;
+    },
+    [],
+  );
+  function clearReview() {
+    reviewSequence.current++;
+    setReviewedText(null);
+    setSummary(null);
+    setReviewError("");
+    setReviewing(false);
+  }
+  async function review() {
+    const sequence = ++reviewSequence.current;
+    const requestText = text.trim();
+    setReviewing(true);
+    setSummary(null);
+    setReviewedText(null);
+    setReviewError("");
+    try {
+      const response = await fetch("/api/demo/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ runId: run.id, text: requestText }),
+      });
+      if (!response.ok) throw new Error("REVIEW_FAILED");
+      const data = (await response.json()) as {
+        text: string;
+        summary: DemoReview;
+      };
+      if (sequence !== reviewSequence.current) return;
+      setSummary(data.summary);
+      setReviewedText(data.text);
+    } catch {
+      if (sequence === reviewSequence.current)
+        setReviewError(
+          "We couldn’t review your preferences. Please try again.",
+        );
+    } finally {
+      if (sequence === reviewSequence.current) setReviewing(false);
+    }
+  }
   const searching = run.command?.action === "search" || run.searchInFlight;
   useEffect(() => {
     setPlaceId("");
     setAccepted(false);
     setReviewedText(null);
+    setSummary(null);
+    reviewSequence.current++;
+    setReviewing(false);
   }, [run.revision]);
   const result = run.discovery;
   const amount = Number(deposit);
@@ -46,7 +97,7 @@ export function LiveDemoSearch({
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          setReviewedText(text.trim());
+          void review();
         }}
       >
         <label htmlFor="demo-live-request">
@@ -58,7 +109,7 @@ export function LiveDemoSearch({
           disabled={disabled}
           onChange={(event) => {
             setText(event.target.value);
-            setReviewedText(null);
+            clearReview();
           }}
           required
           minLength={3}
@@ -79,7 +130,7 @@ export function LiveDemoSearch({
               disabled={disabled}
               onClick={() => {
                 setText(example);
-                setReviewedText(null);
+                clearReview();
               }}
             >
               {example}
@@ -96,19 +147,30 @@ export function LiveDemoSearch({
           className="primary"
           disabled={
             disabled ||
+            reviewing ||
             !configured ||
             (run.searchCalls ?? 0) >= 3 ||
             text.trim().length < 3
           }
         >
-          {searching ? "Searching Gangnam Station…" : "Review preferences"}
+          {reviewing
+            ? "Understanding your preferences…"
+            : searching
+              ? "Searching Gangnam Station…"
+              : "Review preferences"}
         </button>
         <p>
           {run.searchCalls ?? 0} of 3 searches used. Results stay fixed until
           you search again.
         </p>
       </form>
-      {reviewedText !== null && !searching && (
+      {reviewing && (
+        <p role="status">
+          Organizing your cuisine, budget and other preferences…
+        </p>
+      )}
+      {reviewError && <p role="alert">{reviewError}</p>}
+      {reviewedText !== null && summary && !searching && (
         <section
           className="demo-request-review"
           aria-label="Review your request"
@@ -116,13 +178,42 @@ export function LiveDemoSearch({
           <h3>
             Sound like <em>your kind of evening?</em>
           </h3>
-          <blockquote>{reviewedText}</blockquote>
+          <ul className="demo-interpreted-preferences">
+            {summary.requirements.map((requirement, index) => (
+              <li key={index}>
+                <span>{requirement.text}</span>
+                <small>
+                  {requirement.importance === "required"
+                    ? "Must have"
+                    : "Preferred"}
+                </small>
+              </li>
+            ))}
+          </ul>
+          {!summary.requirements.length && <p>No specific requirements.</p>}
+          {summary.notes.map((note, index) => (
+            <p className="demo-review-note" key={index}>
+              {note}
+            </p>
+          ))}
+          {!!summary.clarifications.length && (
+            <div className="demo-clarifications" role="status">
+              <h4>A little more detail</h4>
+              <ul>
+                {summary.clarifications.map((question, index) => (
+                  <li key={index}>{question}</li>
+                ))}
+              </ul>
+              <p>Update your request above, then review again.</p>
+            </div>
+          )}
           <p>For six people near Gangnam Station. No payment at this step.</p>
           <button
             type="button"
             className="primary"
             disabled={
               disabled ||
+              summary.clarifications.length > 0 ||
               !configured ||
               (run.searchCalls ?? 0) >= 3 ||
               reviewedText !== text.trim()
