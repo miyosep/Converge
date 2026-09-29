@@ -29,11 +29,23 @@ minter, and the wallet's configured token before recording a public manifest.
 pnpm deploy:sepolia
 ```
 
-The script requires a matching chain ID and Sepolia genesis hash. It saves
-transaction hashes immediately to an ignored
-`contracts/deployments/11155111.pending.json`, so a restarted run waits for
-the already submitted transaction instead of submitting it again. After
-verifying both receipts and contracts, it writes the nonsecret
+The script requires a matching chain ID and Sepolia genesis hash. Before each
+deployment broadcast, it signs the contract-creation transaction and atomically
+saves the signed bytes, hash, and expected intent to the ignored
+`contracts/deployments/11155111.pending.json`. A restarted run checks that
+journal and resends only the identical signed transaction if no receipt exists;
+it never prepares a second nonce for the same pending contract. The pending
+file contains replayable signed transactions and must remain private. A local
+deployment lock prevents two copies of the script from running at once. If a
+crash leaves `11155111.pending.lock`, inspect the pending journal and on-chain
+transaction before removing the stale lock and rerunning.
+
+The script does not accept a receipt after only one block as final evidence. It
+checks that the deployment block remains canonical and is at or below the RPC's
+`finalized` block. A reorganization, unsupported finalized-block RPC, or
+30-minute finality timeout leaves the private journal for inspection and retry;
+it does not write a final manifest. After both deployments are finalized and
+their bytecode and configuration are checked, it atomically writes the nonsecret
 `contracts/deployments/11155111.json` manifest. The manifest records each
 address, transaction hash, block number, block hash, deployed code hash,
 chain ID, and deployer address. Review these against the explorer and the RPC
@@ -161,8 +173,12 @@ The contract suite passed locally on Windows, and both contracts were deployed
 and verified on Ethereum Sepolia. The public deployment manifest is
 [`contracts/deployments/11155111.json`](../contracts/deployments/11155111.json).
 The local Windows `.env` uses the public PublicNode Sepolia RPC and contains
-the deployed contract addresses. All six demo participants are funded. No group
-decision, payment, or refund has been performed yet; those transactions must be
-recorded after the remaining workflow is implemented. Executor and merchant
-configuration is ready; the successful blockchain-only preflight is recorded
-in `docs/evidence/sepolia-preflight.json`.
+the deployed contract addresses. Executor and merchant configuration is ready.
+After an authorized additional 0.003 ETH per participant, the direct-contract
+baseline completed 60 MockUSDC in contributions, a 45 MockUSDC payment, and
+six 2.5 MockUSDC refunds. The initial allocation table above is historical;
+participants now hold 22.5 MockUSDC each and have spent some ETH on gas.
+See [CHAIN_REHEARSAL.md](CHAIN_REHEARSAL.md), the
+[baseline evidence](evidence/baseline-001.json), and
+[gas top-up record](evidence/gas-topup-baseline-001.json). The application and
+Kiln acceptance workflows remain pending.

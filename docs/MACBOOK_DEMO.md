@@ -19,7 +19,7 @@ pnpm check
 
 An existing checkout should use `git pull --ff-only` from a clean main branch before installation. Reuse the same lockfile on all platforms. Never copy `node_modules`, Windows executables, or another machine's `.env` into the Mac checkout. pnpm installs the appropriate native dependency binaries on each machine.
 
-The current foundation needs no database, RPC, API key, Docker, wallet extension, or Foundry installation. It has no web server or runnable purchasing demo yet. Follow the README for available commands rather than assuming that `pnpm dev` or `pnpm demo:baseline` exists.
+The offline foundation checks need no database, RPC, API key, Docker, wallet extension, or Foundry installation. The first web workflow now has `pnpm dev` and `pnpm build`; it requires Neon development credentials and a browser wallet for interactive testing. It is not yet a runnable purchasing demo. See [the web setup](WEB_APP.md).
 
 ## Install Foundry for Contract Work
 
@@ -66,8 +66,8 @@ manifest or repeat the one-off funding commands during routine setup.
 - Write setup and demo orchestration in portable TypeScript/Node code or the chosen contract toolchain. Do not require PowerShell, drive-letter paths, Windows-only executables, or shell-specific environment assignments inside package scripts.
 - Use `node:path` for filesystem paths, match filename casing exactly, and keep external paths/configuration in environment variables.
 - Add dependencies supporting native macOS arm64 and x64, and keep optional platform packages in the shared lockfile. Do not hard-code a Windows esbuild or compiler package.
-- Sage must verify Foundry v1.8.3 on the presentation MacBook. Contract tests are configured for macOS arm64 and Intel CI; confirm the first CI results before treating that coverage as verified.
-- The application implementation must add real dev/build/start commands and verify the chosen browser and wallet extension on the demo MacBook.
+- Sage must verify Foundry v1.8.3 on the presentation MacBook. Hosted macOS arm64 and Intel contract tests passed for `ec4feb3` in CI run `36450489300`; this does not replace testing on the actual demo machine.
+- The application has dev/build/start commands; verify the browser, wallet extension, and complete workflow on the actual demo MacBook before presentation.
 - Select persistence that is reachable from the MacBook. If a local database or container is chosen, document its macOS installation and architecture support; it is not an existing prerequisite of the foundation.
 - Kiln inference runs through the remote API; the MacBook does not need a local Furiosa NPU or model download. The selected demo chain is Ethereum Sepolia (`11155111`). Confirm Kiln and Sepolia RPC connectivity from the demo venue, and fund the six participant accounts plus the executor/deployer with Sepolia ETH for gas.
 

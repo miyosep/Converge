@@ -1,6 +1,6 @@
 export const MVP_PARTICIPANT_COUNT = 6;
 export const MOCK_USDC_DECIMALS = 6;
-export const KILN_MODEL = "gpt-oss-120b";
+export const KILN_MODEL = "qwen3-32b";
 export const CONSTRAINT_SCHEMA_VERSION = 1;
 export const DISPLAY_TIME_ZONE = "Asia/Seoul";
 export const DEMO_CHAIN_ID = 11155111; // Ethereum Sepolia

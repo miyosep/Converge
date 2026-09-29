@@ -4,7 +4,7 @@
 
 Converge helps a group choose a restaurant from private preferences, approve one shared spending policy, and pay a reservation deposit through a policy-bound group wallet.
 
-> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented and tested locally. Both contracts are deployed on Ethereum Sepolia. The web application, Kiln integration, and end-to-end demo are still pending. This README remains a draft and will be updated with live evidence.
+> **Project status:** The shared TypeScript foundation and MockUSDC/group-wallet contracts are implemented. Both contracts are deployed on Ethereum Sepolia, and the direct-contract baseline completed six contributions, a bounded payment, and six refunds. A first Next.js group/preference workflow now runs against a Neon development branch with wallet-signature login and live Kiln extraction. Proposal, on-chain UI, and full end-to-end demo remain pending. This README remains a draft and will be updated with live evidence.
 
 For the implementation specification and self-assignment task register, see [project_guideline.md](project_guideline.md).
 
@@ -25,7 +25,7 @@ Choosing and paying for a group reservation requires people to coordinate budget
 The proposed MVP supports **six participants** and one restaurant reservation deposit:
 
 1. Each person submits a private natural-language preference and confirms the structured interpretation.
-2. Kiln `gpt-oss-120b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
+2. Kiln `qwen3-32b` interprets the inputs. Application code filters and ranks a small, versioned catalog of synthetic restaurants.
 3. The group reviews an immutable policy binding the participants, token, merchant, exact deposit, spending ceilings, executor, and expiry.
 4. All six approve and contribute mock USDC. The decision becomes active only after six distinct approved contributions are confirmed on-chain.
 5. The execution agent requests one deposit payment. The smart contract enforces the approved policy and rejects invalid attempts.
@@ -54,7 +54,7 @@ The $45 deposit is credited toward the synthetic $192 meal estimate. The balance
 
 ## Architecture
 
-The planned application architecture is TypeScript with server-side Kiln calls, a persistent database, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use; Next.js and wagmi remain proposed for the application.
+The application uses Next.js, TypeScript, server-side Kiln calls, Neon PostgreSQL, and deterministic decision logic. Solidity contracts are implemented and deployed on Ethereum Sepolia. Foundry v1.8.3, Solc 0.8.24, OpenZeppelin Contracts v5.4.0, Zod, and viem are in use. Wallet browser integration currently uses the EIP-1193 provider; wagmi remains optional for later transaction UI.
 
 ```text
 Private input -> Kiln extraction -> participant confirmation
@@ -70,7 +70,7 @@ The policy will have a canonical, versioned ABI encoding and a `decisionHash` ca
 
 | Layer | Planned responsibility |
 | --- | --- |
-| Kiln `gpt-oss-120b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
+| Kiln `qwen3-32b` | Extract structured constraints from private natural language and explain a sanitized recommendation. Clarification is optional; analysis of already structured merchant fixtures is normally unnecessary. |
 | Application code | Validate model output, enforce participant access, filter mandatory constraints, calculate weighted scores, freeze policy inputs, track workflow state, and record evidence. |
 | Smart contract | Verify membership and approvals, hold contributions, enforce the immutable merchant/amount/expiry policy, execute one permitted payment, and make unused funds claimable. |
 
@@ -78,7 +78,11 @@ The contract is the final authority for token movement. It cannot verify restaur
 
 ## Kiln Integration
 
-**Planned model:** `gpt-oss-120b` through the NPU-based Kiln API. The API key will stay on the server. Model output will be checked against a restricted schema and confirmed by the submitting participant before evaluation.
+**Selected model:** `qwen3-32b` through Kiln, following the organizer update reported by the project owner on September 29, 2026 (KST). The server-side adapter has passed two live synthetic extraction checks with schema validation and provider usage records. Participant confirmation and the web workflow remain pending. NPU execution and energy are not independently attested by these responses.
+
+The deterministic decision engine selects A/B/B for the three offline fixture scenarios. These fixtures use synthetic confirmations; they are separate from the live extraction smoke test and the earlier chain rehearsal. See [decision engine details](docs/DECISION_ENGINE.md), [Kiln integration](docs/KILN.md), and [live smoke evidence](docs/evidence/kiln-smoke.json).
+
+Preference revision transitions now enforce explicit confirmation, stale-result rejection, correction reset, and proposal-lock checks. The [PostgreSQL workflow](docs/PREFERENCE_WORKFLOW.md) was tested with six synthetic participants on an isolated Neon development branch. A no-match result does not freeze the group; a ready evaluation saves the confirmed snapshot. [Database setup](docs/DATABASE_SETUP.md) describes both branches. The first [web workflow](docs/WEB_APP.md) includes EOA SIWE sessions, capped invitations, scoped APIs, live extraction, and per-attempt usage storage. Proposal and payment routes are not connected yet.
 
 | Flow | Purpose | Planned usage |
 | --- | --- | --- |
@@ -91,7 +95,7 @@ These are proposed call counts, not observed measurements. Final acceptance runs
 
 ## Kiln Token Usage by Flow
 
-No Kiln requests have been made for this repository yet. The table will be filled from provider usage records after live runs. Unknown values will remain unknown rather than be reported as zero.
+Earlier synthetic Kiln smoke checks and one live web extraction have succeeded. The table below is reserved for the final acceptance runs and will be filled from their provider usage records. Unknown values will remain unknown rather than be reported as zero.
 
 | Flow | Calls | Input tokens | Output tokens | Total tokens | Evidence |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -132,11 +136,17 @@ The wallet rejects the wrong caller or merchant, insufficient approval/funding, 
 
 ## On-chain Transactions
 
-The two deployment transactions above succeeded and were checked against their receipts and deployed bytecode; see the [public deployment manifest](contracts/deployments/11155111.json). No decision, contribution, payment, or refund transaction has been produced yet. The final README will list the Ethereum Sepolia decision hash, six approval/contribution transactions, successful payment transaction and decoded event, and refund transactions for each complete run. A transaction hash will be reported as successful only after checking its receipt and matching event.
+The two deployment transactions above succeeded and were checked against their receipts and deployed bytecode; see the [public deployment manifest](contracts/deployments/11155111.json).
+
+The [blockchain-only baseline](docs/evidence/baseline-001.json) completed 20 successful Sepolia transactions: one decision creation, six token allowances, six contributions, one payment, and six refunds. Six 10 MockUSDC contributions funded the policy. An 80 MockUSDC `eth_call` simulation was rejected with `MaxDepositExceeded`; no invalid transaction was broadcast. The [45 MockUSDC payment](https://sepolia.etherscan.io/tx/0x62e3f93d6b868e5742778cc18c3d28d079cfd1288d5184463ee974c075af4ef5) then succeeded, and each participant claimed 2.5 MockUSDC. Receipts, matching wallet/token events, final decision accounting, and balance changes were verified. Each participant finished with 22.5 MockUSDC and the escrow retained none of this decision's funds.
+
+Decision ID: `0xfe4303ad9410db46828e983ed1c13cb2656b35264ca575fd81d332b2dc551abe`.
+Policy hash: `0xf5c21e9945568ab0bfcb51998257f9465f151a9636db050b71ca3614ba453a4d`.
+This direct-contract rehearsal used one operator and synthetic inputs; it did not call Kiln or exercise the web application. See [rehearsal instructions](docs/CHAIN_REHEARSAL.md).
 
 ## Condition Check Experiments
 
-The challenge requires the baseline plus two complete reruns with changed conditions. The following are expected results from the proposed fixtures, not completed experiments.
+The challenge requires the baseline plus two complete reruns with changed conditions. The following full application experiments remain pending. The separately recorded blockchain-only baseline does not complete them.
 
 | Run | Changed condition | Expected recommendation | Required chain and log evidence |
 | --- | --- | --- | --- |
@@ -165,20 +175,30 @@ The shared foundation runs with Node.js 24.19.0 and pnpm 11.19.0:
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
+pnpm demo:decision
+pnpm db:migrate:dev
+pnpm db:rehearse:dev
 pnpm contracts:build
 pnpm contracts:test
 pnpm contracts:abi
 ```
 
-`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. The web application is not scaffolded yet: there is no `dev`, app `build`, or end-to-end demo command. See [the deployment guide](docs/DEPLOYMENT.md).
+`pnpm check` runs TypeScript validation, formatting checks, and foundation tests. `pnpm dev` starts the first web workflow; `pnpm build` checks its production build. The application needs an initialized development database and Kiln key to submit preferences. Contract commands require Foundry v1.8.3 and no external credentials. `pnpm deploy:sepolia` has been used for the current deployment and refuses to replace its completed manifest. `pnpm demo:wallets` reuses or creates local demo keys; `pnpm demo:fund` records and confirms the authorized allocation of 30 MockUSDC and 0.001 Sepolia ETH per demo account, reusing recorded transactions on reruns. `pnpm mint:mock` performs an additional explicit mint. See [the web setup](docs/WEB_APP.md) and [deployment guide](docs/DEPLOYMENT.md).
 
 Expected external prerequisites are Kiln credentials, a persistent database, an Ethereum Sepolia RPC, test accounts funded with Sepolia ETH for gas, and a dedicated agent executor account. Keep all secrets outside Git.
+
+With `KILN_API_KEY`, `KILN_BASE_URL`, and `KILN_MODEL=qwen3-32b` in the ignored `.env`, run `pnpm kiln:check` for two live synthetic extractions. Each invocation consumes provider usage and replaces the latest smoke evidence. It neither confirms preferences nor sends blockchain transactions.
 
 The six demo accounts and dedicated executor are now funded, and the five
 synthetic merchant recipients are configured. Run `pnpm demo:preflight` to
 check the deployed blockchain setup, or `pnpm demo:preflight --check-signers`
 to check local demo keys as well. This is a read-only check; it does not run the
 application or complete the payment/refund workflow.
+
+`pnpm demo:chain baseline-001` runs or resumes the direct-contract baseline.
+For the already completed run, use `pnpm demo:chain baseline-001 --verify-only`
+to check its evidence without preparing or broadcasting transactions. A new
+run ID creates a fresh decision and spends another allocation of mock funds.
 
 ## Environment Variables
 

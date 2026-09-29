@@ -1,20 +1,31 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createPublicClient,
   createWalletClient,
   http,
   isAddress,
+  encodeDeployData,
   keccak256,
+  TransactionReceiptNotFoundError,
   type Abi,
   type Address,
   type Hex,
+  type TransactionReceipt,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
+import { waitUntilFinalized } from "./lib/deployment-finality.js";
+import { atomicWrite } from "./lib/atomic-file.js";
+import {
+  executeJournaled,
+  type TransactionIntent,
+} from "./lib/transaction-journal.js";
 
 type ContractRecord = {
   transactionHash: Hex;
+  signedTransaction?: Hex;
+  intent?: TransactionIntent;
   address?: Address;
   blockNumber?: string;
   blockHash?: Hex;
@@ -49,6 +60,7 @@ const sepoliaGenesisHash =
 const deploymentDir = join("contracts", "deployments");
 const pendingPath = join(deploymentDir, "11155111.pending.json");
 const finalPath = join(deploymentDir, "11155111.json");
+const lockPath = join(deploymentDir, "11155111.pending.lock");
 
 async function artifactFor(name: string): Promise<Artifact> {
   const artifact = JSON.parse(
@@ -78,25 +90,29 @@ async function readRecord(path: string): Promise<DeploymentRecord | undefined> {
 }
 
 async function savePending(record: DeploymentRecord): Promise<void> {
-  await mkdir(deploymentDir, { recursive: true });
-  await writeFile(pendingPath, `${JSON.stringify(record, null, 2)}\n`);
+  await atomicWrite(pendingPath, `${JSON.stringify(record, null, 2)}\n`);
 }
 
 async function confirmContract(
   record: ContractRecord,
+  receipt: TransactionReceipt,
 ): Promise<ContractRecord> {
-  const receipt = await publicClient.waitForTransactionReceipt({
-    hash: record.transactionHash,
-    confirmations: 1,
-    timeout: 120_000,
-  });
   if (receipt.status !== "success" || !receipt.contractAddress) {
     throw new Error(
       `Deployment transaction ${record.transactionHash} did not create a contract`,
     );
   }
+  await waitUntilFinalized({
+    blockNumber: receipt.blockNumber,
+    blockHash: receipt.blockHash,
+    finalizedBlockNumber: async () =>
+      (await publicClient.getBlock({ blockTag: "finalized" })).number,
+    canonicalBlockHash: async (number) =>
+      (await publicClient.getBlock({ blockNumber: number })).hash,
+  });
   const code = await publicClient.getBytecode({
     address: receipt.contractAddress,
+    blockNumber: receipt.blockNumber,
   });
   if (!code || code === "0x")
     throw new Error("Deployment receipt has no contract bytecode");
@@ -107,6 +123,95 @@ async function confirmContract(
     blockHash: receipt.blockHash,
     deployedCodeHash: keccak256(code),
   };
+}
+
+async function deployOrRecover(
+  record: DeploymentRecord,
+  key: "mockUSDC" | "convergeGroupWallet",
+  artifact: Artifact,
+  args: readonly unknown[],
+): Promise<ContractRecord> {
+  const data = encodeDeployData({
+    abi: artifact.abi,
+    bytecode: artifact.bytecode.object,
+    args,
+  });
+  const intent: TransactionIntent = {
+    chainId: sepolia.id,
+    from: account.address,
+    to: null,
+    data,
+    valueWei: "0",
+  };
+  let pending = record[key];
+  let receipt: TransactionReceipt;
+  if (pending && !pending.signedTransaction) {
+    // Older pending records contain only a hash. Wait for that exact transaction;
+    // never prepare a replacement without its signed journal.
+    receipt = await publicClient.waitForTransactionReceipt({
+      hash: pending.transactionHash,
+      confirmations: 1,
+      timeout: 120_000,
+    });
+  } else {
+    const result = await executeJournaled<TransactionReceipt>({
+      intent,
+      load: async () =>
+        pending
+          ? {
+              intent: pending.intent ?? intent,
+              hash: pending.transactionHash,
+              ...(pending.signedTransaction
+                ? { serialized: pending.signedTransaction }
+                : {}),
+            }
+          : undefined,
+      prepare: async () => {
+        const request = await walletClient.prepareTransactionRequest({
+          to: null,
+          data,
+          value: 0n,
+        });
+        return walletClient.signTransaction(request);
+      },
+      save: async (transaction) => {
+        const next: ContractRecord = {
+          transactionHash: transaction.hash,
+          intent: transaction.intent,
+          ...(transaction.serialized
+            ? { signedTransaction: transaction.serialized }
+            : {}),
+        };
+        pending = next;
+        record[key] = next;
+        await savePending(record);
+      },
+      findReceipt: async (hash) => {
+        try {
+          return await publicClient.getTransactionReceipt({ hash });
+        } catch (error) {
+          if (error instanceof TransactionReceiptNotFoundError)
+            return undefined;
+          throw error;
+        }
+      },
+      broadcast: (serialized) =>
+        publicClient.sendRawTransaction({ serializedTransaction: serialized }),
+      waitReceipt: (hash) =>
+        publicClient.waitForTransactionReceipt({
+          hash,
+          confirmations: 1,
+          timeout: 120_000,
+        }),
+    });
+    receipt = result.receipt;
+    pending = record[key];
+  }
+  if (!pending) throw new Error("Missing deployment transaction journal");
+  const confirmed = await confirmContract(pending, receipt);
+  record[key] = confirmed;
+  await savePending(record);
+  return confirmed;
 }
 
 async function main(): Promise<void> {
@@ -147,17 +252,12 @@ async function main(): Promise<void> {
     throw new Error("Pending deployment belongs to another chain or deployer");
   }
 
-  if (!record.mockUSDC) {
-    const transactionHash = await walletClient.deployContract({
-      abi: tokenArtifact.abi,
-      bytecode: tokenArtifact.bytecode.object,
-      args: [],
-    });
-    record.mockUSDC = { transactionHash };
-    await savePending(record);
-  }
-  record.mockUSDC = await confirmContract(record.mockUSDC);
-  await savePending(record);
+  record.mockUSDC = await deployOrRecover(
+    record,
+    "mockUSDC",
+    tokenArtifact,
+    [],
+  );
   const tokenAddress = record.mockUSDC.address;
   if (!tokenAddress || !isAddress(tokenAddress))
     throw new Error("MockUSDC address is invalid");
@@ -170,21 +270,14 @@ async function main(): Promise<void> {
     throw new Error("MockUSDC minter does not match the deployer");
   }
 
-  if (!record.convergeGroupWallet) {
-    if ((await publicClient.getChainId()) !== sepolia.id)
-      throw new Error("RPC chain changed during deployment");
-    const transactionHash = await walletClient.deployContract({
-      abi: walletArtifact.abi,
-      bytecode: walletArtifact.bytecode.object,
-      args: [tokenAddress],
-    });
-    record.convergeGroupWallet = { transactionHash };
-    await savePending(record);
-  }
-  record.convergeGroupWallet = await confirmContract(
-    record.convergeGroupWallet,
+  if ((await publicClient.getChainId()) !== sepolia.id)
+    throw new Error("RPC chain changed during deployment");
+  record.convergeGroupWallet = await deployOrRecover(
+    record,
+    "convergeGroupWallet",
+    walletArtifact,
+    [tokenAddress],
   );
-  await savePending(record);
   const walletAddress = record.convergeGroupWallet.address;
   if (!walletAddress || !isAddress(walletAddress))
     throw new Error("Group wallet address is invalid");
@@ -196,15 +289,32 @@ async function main(): Promise<void> {
   if (String(configuredToken).toLowerCase() !== tokenAddress.toLowerCase()) {
     throw new Error("Group wallet points to an unexpected token");
   }
-  await writeFile(finalPath, `${JSON.stringify(record, null, 2)}\n`, {
-    flag: "wx",
-  });
+  await atomicWrite(finalPath, `${JSON.stringify(record, null, 2)}\n`);
   process.stdout.write(
     `Verified Ethereum Sepolia deployment:\nMockUSDC: ${tokenAddress}\nGroup wallet: ${walletAddress}\nRecord: ${finalPath}\n`,
   );
 }
 
-main().catch((error: unknown) => {
+async function lockedMain() {
+  await mkdir(deploymentDir, { recursive: true });
+  const lock = await open(lockPath, "wx").catch(
+    (error: NodeJS.ErrnoException) => {
+      if (error.code === "EEXIST")
+        throw new Error(
+          `Deployment lock exists at ${lockPath}; inspect the journal before removing it`,
+        );
+      throw error;
+    },
+  );
+  try {
+    await main();
+  } finally {
+    await lock.close();
+    await unlink(lockPath);
+  }
+}
+
+lockedMain().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(
     `${message.replaceAll(rpcUrl, "[RPC_URL]").replaceAll(privateKey, "[PRIVATE_KEY]")}\n`,

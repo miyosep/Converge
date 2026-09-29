@@ -16,7 +16,7 @@ The challenge brief in `hackathon_descrip.txt` is the source of truth for compet
 
 At the initial architecture review, repository inspection found the challenge brief and an empty `New folder` directory. No application, dependency manifest, or smart contracts were present then. Subsequent implementation created tooling, schemas, locally tested contracts, and a verified Ethereum Sepolia deployment. Planned flows and measurements remain proposals until supported by evidence.
 
-The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, and a verified Ethereum Sepolia deployment. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. The application, database, and live integrations remain subsequent work.
+The current deliverables include this guideline, a draft `README.md`, a shared TypeScript foundation, locally tested blockchain contracts, a verified Ethereum Sepolia deployment, and a partial Next.js/Neon/Kiln group workflow. See `docs/FOUNDATION.md` for tooling and schemas, `docs/BLOCKCHAIN.md` for contract behavior, the [deployment manifest](contracts/deployments/11155111.json), and `CONTRIBUTING.md` before creating feature branches. The README must be revised as implementation and evidence become available. Proposal, financial UI, and full acceptance runs remain subsequent work.
 
 ### 1.1 Required README Declaration
 
@@ -29,7 +29,7 @@ Use this exact sentence prominently in the README:
 | Requirement | Implementation outcome | Required evidence |
 | --- | --- | --- |
 | User need and workflow | At least six participants move from private preferences to an approved restaurant reservation deposit | Full workflow demonstration and clear AI/code boundaries |
-| Kiln integration | Real server-side Kiln calls using `gpt-oss-120b` influence the recommendation | Request metadata, validated outputs, and per-flow usage |
+| Kiln integration | Real server-side Kiln calls using `qwen3-32b` influence the recommendation | Request metadata, validated outputs, and per-flow usage |
 | Efficiency | Limit unnecessary inference and disclose measurement limits | Calls and input/output tokens by flow; measured metrics or explicit assumptions |
 | Blockchain | Execute the selected workflow on a devnet or testnet | Successful transaction hash with matching contract event and application history |
 | Selected function | Declare the purchasing-agent and programmable-wallet function | Exact README declaration above |
@@ -116,12 +116,12 @@ These are design selections for an empty repository, not claims that dependencie
 | --- | --- | --- |
 | Web and server | Next.js with TypeScript | One application with server-side routes |
 | Shared validation | Zod | Validate all external inputs and model outputs |
-| Database | PostgreSQL | Use a managed instance if available; choose one persistence strategy before implementation |
-| Local-only alternative | SQLite | Acceptable only with a persistent single-instance runtime; do not put it on ephemeral serverless storage |
+| Database | PostgreSQL on Neon Free, confirmed by the project owner on September 29, 2026 (KST) | Project `rough-cake-92709912` linked to `production`; no-change deploy and read-only connection verified; see `docs/DATABASE_SETUP.md` |
+| Local-only alternative | SQLite, not selected | Do not introduce a second persistence strategy into this implementation |
 | EVM interaction | viem; wagmi for browser wallet state | Share generated ABI and network configuration |
 | Smart contracts | Solidity and Foundry | Hardhat is acceptable if the team's environment makes it more reliable |
 | Token and transfer helpers | Established OpenZeppelin ERC-20 and safety utilities | Pin compatible versions during setup |
-| AI | Kiln, `gpt-oss-120b` | Verify the actual organizer-provided API contract before integration |
+| AI | Kiln, `qwen3-32b` | Verify the actual organizer-provided API contract before integration |
 
 Avoid introducing a separate backend service, message broker, vector database, or agent framework unless a concrete requirement cannot be met within the application.
 
@@ -337,7 +337,7 @@ participantScore = sum(weight * satisfaction) / sum(weight)
 groupScore = mean(participantScore for participants with positive soft weights)
 ```
 
-A participant with no positive soft weights is omitted from the soft-score average; their mandatory constraints still apply. If nobody supplies positive soft weights, all candidates have score zero and the documented tie-breakers decide. Implement a consistent rounding policy for stored scores. Replaying the same structured inputs and fixture version must produce the same result.
+A participant with no positive soft weights is omitted from the soft-score average; their mandatory constraints still apply. If nobody supplies positive soft weights, all candidates have score zero and the documented tie-breakers decide. Store `scoreMicros = Math.round(groupScore * 1_000_000)` and rank by that stored integer, then meal price ascending, then stable candidate ID ascending. Replaying the same structured inputs and fixture version must produce the same result. See `docs/DECISION_ENGINE.md` for implemented boundaries and fixture evidence.
 
 This normalizes each participant's influence so adding more soft-preference fields does not automatically provide more voting power. It is a pragmatic ranking rule, not a claim of mathematically optimal group fairness.
 
@@ -401,7 +401,7 @@ type KilnUsageRecord = {
   providerRequestId: string | null;
   flow: "constraint_extraction" | "candidate_analysis"
       | "decision_explanation" | "clarification";
-  model: "gpt-oss-120b";
+  model: "qwen3-32b";
   attempt: number;
   status: "success" | "provider_error" | "validation_error";
   inputTokens: number | null;
@@ -841,7 +841,7 @@ Do not call a stage complete based only on a screenshot. Contract behavior requi
 ```dotenv
 KILN_API_KEY=
 KILN_BASE_URL=
-KILN_MODEL=gpt-oss-120b
+KILN_MODEL=qwen3-32b
 DATABASE_URL=
 SESSION_SECRET=
 APP_ORIGIN=
@@ -883,6 +883,11 @@ The presentation machine is a MacBook. Shared scripts must work in macOS Termina
 Currently available: `pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm format:check`, `pnpm check`, `pnpm contracts:build`, `pnpm contracts:test`, `pnpm contracts:abi`, `pnpm deploy:sepolia`, `pnpm mint:mock`, `pnpm demo:wallets`, and `pnpm demo:fund`. `pnpm check` combines type checking, formatting checks, and foundation tests. Install with `pnpm install --frozen-lockfile` using Node.js 24.19.0 and pnpm 11.19.0. Contract commands require Foundry v1.8.3; live deployment and minting require an RPC and funded deployer. The web app and live integrations are still pending.
 
 The table below is the remaining target command contract. `test` and `typecheck` currently cover the foundation and deployment scripts; contract checks have separate implemented commands:
+
+Additional implemented blockchain preparation and rehearsal commands are
+`pnpm demo:roles`, `pnpm demo:fund-executor`, `pnpm demo:preflight`,
+`pnpm demo:gas-topup`, and `pnpm demo:chain`. See `docs/CHAIN_REHEARSAL.md`
+for the completed baseline, read-only verification, and exact resume behavior.
 
 | Script | Intended behavior |
 | --- | --- |
@@ -953,24 +958,24 @@ Use `Unclaimed`, `Claimed`, `In progress`, `In review`, `Blocked`, or `Done`. If
 | T06 | Payment enforcement | Shared validation, custom errors, one-payment execution, events | T05 | Sage | | In review |
 | T07 | Cancellation and refunds | Partial funding recovery, expiry, terminal entitlements, repeat-claim prevention | T05, T06 | Sage | | In review |
 | T08 | Contract verification | Unit and invariant tests for the Section 16 contract matrix | T05-T07 | Sage | | In review |
-| T09 | Database and migrations | Core entities, revisioning, unique event identities, integer amounts | T02 | | | Unclaimed |
-| T10 | Identity and privacy | Wallet-bound sessions, invitations, scoped reads/writes, privacy tests | T09 | | | Unclaimed |
-| T11 | Kiln adapter | Real provider call, timeout/retry handling, schema validation | T02 | | | Unclaimed |
-| T12 | Usage and efficiency | Per-attempt and per-flow records with unknown/missing usage handling | T09, T11 | | | Unclaimed |
-| T13 | Restaurant fixtures | Merchant A-E address mapping ready in the demo role manifest; five versioned candidate records remain | T02 | | | Unclaimed |
-| T14 | Decision engine | Deterministic A/B/B selection, no-match handling, documented ties | T13 | | | Unclaimed |
-| T15 | Preference workflow | Private submission, extraction, correction, confirmation, revisions | T10, T11 | | | Unclaimed |
+| T09 | Database and migrations | Four versioned migrations for groups, preferences, evaluations, EOA sessions, invites, and Kiln attempt metadata tested on Neon dev branch; chain event and financial entities remain | T02 | | | In progress |
+| T10 | Identity and privacy | EOA SIWE nonce/session and capped invites implemented; signed HTTP login, replay, Origin, and outsider access tested; contract-wallet and deployment hardening remain | T09 | | | In progress |
+| T11 | Kiln adapter | Implemented server-side `qwen3-32b` adapter; two live synthetic extractions passed; app integration pending | T02 | | | In review |
+| T12 | Usage and efficiency | Per-attempt usage persisted for live web extraction; final per-flow aggregation, cache accounting, and efficiency comparison pending | T09, T11 | | | In progress |
+| T13 | Restaurant fixtures | Five versioned synthetic candidates implemented with merchant A-E mapping and explicit unknown safety metadata | T02 | | | In review |
+| T14 | Decision engine | Offline A/B/B, no-match, confirmation gates, public projection, and deterministic ties tested; API integration pending | T13 | | | In review |
+| T15 | Preference workflow | Revision transitions, PostgreSQL persistence, stale-result/confirmation/privacy checks, six-person dev rehearsal, and authenticated submission/correction/confirmation APIs implemented; proposal API pending | T10, T11 | | | In progress |
 | T16 | Explanation flow | Privacy-safe Kiln explanation and labeled deterministic fallback | T12, T14 | | | Unclaimed |
 | T17 | Proposal APIs | Frozen revision snapshot and immutable policy with stale-state protection | T03, T14, T15 | | | Unclaimed |
-| T18 | Group and input UI | Group creation/lobby plus private preference confirmation | T10, T15 | | | Unclaimed |
+| T18 | Group and input UI | First Next.js group creation, invite join, member progress, private input, interpretation review, and confirmation UI implemented; usability and MacBook checks remain | T10, T15 | | | In progress |
 | T19 | Results and policy UI | Candidate outcomes, no-match state, complete spending-policy review | T16, T17 | | | Unclaimed |
-| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata | T08 | Sage | | In review |
+| T20 | Deployment | Real contract addresses, ABI export, chain config, receipt metadata; future deploys journal signed transactions before broadcast and require finalized canonical blocks | T08 | Sage | | In review |
 | T21 | Wallet contribution UI | Account/network checks, allowance step, confirmed contribution progress | T19, T20 | | | Unclaimed |
 | T22 | Agent execution | Bounded executor requests, idempotency, invalid/valid attempt records | T06, T12, T17, T20 | | | Unclaimed |
 | T23 | Chain reconciliation | Receipt/event ingestion, restart recovery, no duplicate credit | T09, T20 | | | Unclaimed |
 | T24 | Execution and refund UI | Policy enforcement display, transaction history, claims and settlement | T07, T21-T23 | | | Unclaimed |
 | T25 | Evidence view/export | Run comparison, per-flow usage, real receipts, redacted artifacts | T12, T23, T24 | | | Unclaimed |
-| T26 | Baseline demo script | Real Kiln, invalid attempt, 45 USDC payment, six 2.5 USDC refunds | T15, T17, T20, T22, T23 | | | Unclaimed |
+| T26 | Baseline demo script | Direct-contract payment/refund rehearsal verified in `docs/evidence/baseline-001.json`; real Kiln and full application workflow remain | T15, T17, T20, T22, T23 | | | Unclaimed |
 | T27 | Changed-condition scripts | Complete lower-budget and changed-merchant runs with comparison | T26 | | | Unclaimed |
 | T28 | Integration and privacy QA | Cross-session tests, failure recovery, access-control verification | T18-T27 | | | Unclaimed |
 | T29 | README and submission | Accurate setup, architecture, evidence, limitations, prior-work disclosure | T25-T28 | | | Unclaimed |
@@ -1029,7 +1034,7 @@ No Git history was available during this review. Do not infer that every future 
 
 - [ ] A user can create a group and at least six participants can join through verified identities.
 - [ ] Private input and structured constraints are inaccessible to other participants.
-- [ ] Live Kiln `gpt-oss-120b` parses actual submitted preferences.
+- [ ] Live Kiln `qwen3-32b` parses actual submitted preferences.
 - [ ] Parsed output is schema-validated and participant-confirmed.
 - [ ] Deterministic evaluation selects A/B/B for the defined fixture scenarios.
 - [ ] No-match and unresolved-constraint cases cannot create a fundable policy.
@@ -1060,14 +1065,14 @@ These prerequisites are tracked separately from completed integration work. Reso
 
 | Prerequisite | Current status | Required resolution |
 | --- | --- | --- |
-| Kiln endpoint and authentication details | Not supplied in reviewed files | Obtain organizer documentation and verify with a real call |
-| Kiln API key and model availability | Not verified | Configure server secret and confirm `gpt-oss-120b` |
-| Provider usage and NPU metrics | Unknown | Inspect real response fields and units |
+| Kiln endpoint and authentication details | Official endpoint verified by two successful live extraction calls | Recheck credentials on the demo MacBook; see `docs/KILN.md` |
+| Kiln API key and model availability | `qwen3-32b` verified; project owner reported updated model announcement on September 29, 2026 (KST) | Use this model throughout; original pasted competition brief is historical, not the current model requirement |
+| Provider usage and NPU metrics | Token counts, cached/reasoning tokens, latency, and USD cost captured; energy unavailable | Keep unknown energy null; do not claim measured NPU efficiency without evidence |
 | Selected chain and RPC | Ethereum Sepolia `11155111`; public PublicNode endpoint configured locally and genesis verified for deployment | Recheck RPC availability and chain identity on the demo MacBook |
 | Funded deployer/executor/participant accounts | Deployer, dedicated executor, and six single-operator demo accounts funded; public manifests record allocations and the A-E merchant map | Run `pnpm demo:preflight --check-signers` on the MacBook before rehearsal |
-| Runtime and persistent database | Not selected | Choose deployment-compatible persistence |
+| Runtime and persistent database | Neon Free project linked; no-change config deploy and read-only SQL connection verified; server-only connection strings in ignored `.env` | Implement and verify migrations, authenticated access controls, and preference persistence |
 | Solidity toolchain | Foundry v1.8.3 verified on Windows; presentation MacBook pending | Run the contract suite on the actual MacBook |
 | Event date and demo expiry | Run-dependent | Use explicit future values and test expiry boundaries |
 | Submission timing and prior-work records | Not supplied | Confirm organizer rules and document actual work history |
 
-The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. Until the acceptance runs exist, keep decision/payment/refund transaction hashes, token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.
+The verified contract addresses and deployment transaction hashes are recorded in `contracts/deployments/11155111.json`. A completed blockchain-only baseline, including decision/payment/refund transactions, is recorded in `docs/evidence/baseline-001.json`; it does not complete the full application acceptance runs. Keep missing acceptance evidence, inference token counts, and energy values explicitly marked as pending. Replace them only with captured evidence.

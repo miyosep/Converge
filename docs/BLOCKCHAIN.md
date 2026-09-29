@@ -84,5 +84,8 @@ authorization, six-person activation, payment rejection order, events,
 cancellation, expiry, partial and completed refunds, decision isolation,
 failed token transfers, reentrancy, fuzzed rounding, and randomized state
 sequences. The separate TypeScript test verifies the same policy hash vector.
-The macOS CI contract jobs are configured, but their first hosted results and
-the presentation MacBook remain to be verified.
+The hosted Apple Silicon and Intel macOS contract jobs passed for commit
+`ec4feb3` in [CI run 36450489300](https://github.com/miyosep/Converge/actions/runs/36450489300).
+The presentation MacBook still needs its own rehearsal. See
+[CHAIN_REHEARSAL.md](CHAIN_REHEARSAL.md) for the direct-contract baseline command,
+which is separate from the full application acceptance workflow.

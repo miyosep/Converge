@@ -13,4 +13,8 @@ contracts/out/
 contracts/cache/
 contracts/broadcast/
 contracts/deployments/*.pending.json
+contracts/deployments/*.pending.json.tmp-*
+contracts/deployments/*.pending.lock
+contracts/deployments/11155111.json.tmp-*
 docs/evidence/private/
+.neon
