@@ -5,6 +5,105 @@ import type { ExploreRun, ExploreCommand } from "../../src/lib/explore/types";
 import { demoMembers } from "../../src/lib/explore/demo-members";
 import type { DemoReview } from "../../src/lib/explore/preference-review";
 
+function DemoBookingTerms({
+  run,
+  disabled,
+  onCommand,
+}: {
+  run: ExploreRun;
+  disabled: boolean;
+  onCommand: (command: ExploreCommand) => void;
+}) {
+  const [deposit, setDeposit] = useState("45");
+  const [accepted, setAccepted] = useState(false);
+  const amount = Number(deposit);
+  const validAmount = Number.isInteger(amount) && amount >= 1 && amount <= 60;
+  const place = run.selectedPlace!;
+  return (
+    <section className="explore-section demo-booking-terms">
+      <h2>{place.name}</h2>
+      <p>{run.groupDecision?.rationale}</p>
+      <div className="demo-chosen-venue">
+        <p>{place.address}</p>
+        <a href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
+          View selected venue ↗
+        </a>
+      </div>
+      {!!run.groupDecision?.uncertainties?.length && (
+        <details className="demo-chosen-reason">
+          <summary>What remains unverified</summary>
+          <ul>
+            {run.groupDecision.uncertainties.map((note, index) => (
+              <li key={index}>{note}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <form
+        className="demo-request-review"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (disabled || !validAmount || !accepted) return;
+          onCommand({
+            action: "select_place",
+            revision: run.revision,
+            placeId: place.id,
+            depositUsdc: amount,
+            acknowledgeDemo: true,
+          });
+        }}
+      >
+        <h3>
+          Before you <em>approve together</em>
+        </h3>
+        <p>
+          Set the test deposit for this plan. This is not a restaurant quote.
+        </p>
+        <label htmlFor="demo-deposit">Group test deposit (MockUSDC)</label>
+        <input
+          id="demo-deposit"
+          type="number"
+          min={1}
+          max={60}
+          step={1}
+          required
+          value={deposit}
+          disabled={disabled}
+          aria-describedby="demo-payment-summary"
+          onChange={(event) => {
+            setDeposit(event.target.value);
+            setAccepted(false);
+          }}
+        />
+        <p id="demo-payment-summary">
+          Each person contributes 10 MockUSDC, for a total of 60.
+          {validAmount &&
+            ` The group can claim back the remaining ${60 - amount} after payment.`}
+        </p>
+        <label className="demo-consent">
+          <input
+            type="checkbox"
+            checked={accepted}
+            disabled={disabled}
+            onChange={(event) => setAccepted(event.target.checked)}
+          />
+          I understand this is a simulated booking on Sepolia. The test deposit
+          goes to a demo recipient, not the restaurant.
+        </label>
+        <button
+          className="primary"
+          disabled={disabled || !validAmount || !accepted}
+        >
+          {run.command?.action === "select_place"
+            ? "Saving booking terms…"
+            : "Confirm booking terms"}
+        </button>
+        <p>No payment now. You’ll approve in your wallet next.</p>
+      </form>
+    </section>
+  );
+}
+
 export function LiveDemoSearch({
   run,
   disabled,
@@ -17,8 +116,6 @@ export function LiveDemoSearch({
   onCommand: (command: ExploreCommand) => void;
 }) {
   const [text, setText] = useState(run.text ?? "");
-  const [deposit, setDeposit] = useState("45");
-  const [accepted, setAccepted] = useState(false);
   const [reviewedText, setReviewedText] = useState<string | null>(null);
   const [summary, setSummary] = useState<DemoReview | null>(null);
   const [reviewing, setReviewing] = useState(false);
@@ -35,7 +132,6 @@ export function LiveDemoSearch({
     setReviewedText(null);
     setSummary(null);
     setReviewError("");
-    setAccepted(false);
     setReviewing(false);
   }
   async function review() {
@@ -73,13 +169,11 @@ export function LiveDemoSearch({
     run.command?.action === "search" ||
     run.searchInFlight;
   useEffect(() => {
-    setAccepted(false);
     setReviewedText(null);
     setSummary(null);
     reviewSequence.current++;
     setReviewing(false);
   }, [run.revision]);
-  const amount = Number(deposit);
   if (searching)
     return (
       <section
@@ -109,6 +203,10 @@ export function LiveDemoSearch({
         </ol>
         <p>Your wallet will ask for approval later. No payment is made now.</p>
       </section>
+    );
+  if (run.groupDecision?.stage === "ready" && run.selectedPlace && !run.policy)
+    return (
+      <DemoBookingTerms run={run} disabled={disabled} onCommand={onCommand} />
     );
   return (
     <section className="explore-section demo-live-search">
@@ -250,53 +348,21 @@ export function LiveDemoSearch({
             Qwen will combine all six opinions, search real places with xAPI,
             and choose one restaurant.
           </p>
-          <label htmlFor="demo-deposit">Test booking deposit (MockUSDC)</label>
-          <input
-            id="demo-deposit"
-            type="number"
-            min={1}
-            max={60}
-            step={1}
-            value={deposit}
-            disabled={disabled}
-            onChange={(event) => {
-              setDeposit(event.target.value);
-              setAccepted(false);
-            }}
-          />
-          <label className="demo-consent">
-            <input
-              type="checkbox"
-              checked={accepted}
-              disabled={disabled}
-              onChange={(event) => setAccepted(event.target.checked)}
-            />
-            I understand this is a simulated booking. Each person contributes 10
-            MockUSDC on Sepolia; the deposit goes to a demo recipient, not the
-            restaurant. Approval and payment happen later.
-          </label>
           <button
             type="button"
             className="primary"
             disabled={
               disabled ||
               summary.clarifications.length > 0 ||
-              !accepted ||
-              !Number.isInteger(amount) ||
-              amount < 1 ||
-              amount > 60 ||
               !configured ||
               (run.searchCalls ?? 0) >= 3 ||
               reviewedText !== text.trim()
             }
             onClick={() => {
-              setAccepted(false);
               onCommand({
                 action: "group_search",
                 text: reviewedText,
                 preference: summary,
-                depositUsdc: amount,
-                acknowledgeDemo: true,
               });
             }}
           >

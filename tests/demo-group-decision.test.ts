@@ -3,7 +3,7 @@ import test from "node:test";
 import { ExploreWorker } from "../scripts/lib/explore-worker";
 import { demoMembers } from "../src/lib/explore/demo-members";
 import { assembleDemoMembers } from "../src/lib/explore/group-decision";
-import { validateLiveCommand } from "../src/lib/explore/store";
+import { commandSchema, validateLiveCommand } from "../src/lib/explore/store";
 import type { ExploreRun } from "../src/lib/explore/types";
 
 const address = (n: number) =>
@@ -33,8 +33,6 @@ function fixture(): ExploreRun {
       action: "group_search",
       text: "Korean barbecue, under $40",
       preference,
-      depositUsdc: 45,
-      acknowledgeDemo: true,
     },
   };
 }
@@ -96,7 +94,7 @@ test("all five configured addresses are required and unresolved user preferences
   );
 });
 
-test("Qwen aggregates all opinions, xAPI searches, Qwen picks exactly one, and policy binds that place without payment", async () => {
+test("group search selects one restaurant without payment terms; later confirmation binds the chosen deposit", async () => {
   const oldFetch = globalThis.fetch,
     oldKey = process.env.KILN_API_KEY,
     oldXapi = process.env.XAPI_KEY;
@@ -157,13 +155,36 @@ test("Qwen aggregates all opinions, xAPI searches, Qwen picks exactly one, and p
     });
   };
   try {
+    assert.ok(commandSchema.safeParse(run.command).success);
     await worker(saved).tick(run);
     assert.equal(calls, 3);
     assert.equal(run.restaurant, "Group choice");
     assert.equal(run.selectedPlace?.id, "202");
     assert.equal(run.groupDecision?.stage, "ready");
+    assert.equal(run.phase, "review");
+    assert.equal(Boolean(run.policy), false);
+    assert.equal(run.reservation, undefined);
+    assert.equal(run.transactions.length, 0);
+    assert.equal(run.command, undefined);
+    assert.ok(
+      !commandSchema.safeParse({
+        action: "select_place",
+        revision: run.revision,
+        placeId: "202",
+        depositUsdc: 32,
+      }).success,
+      "booking confirmation must still explicitly acknowledge the demo",
+    );
+    run.command = {
+      action: "select_place",
+      revision: run.revision,
+      placeId: "202",
+      depositUsdc: 32,
+      acknowledgeDemo: true,
+    };
+    await worker(saved).tick(run);
     assert.equal(run.phase, "proposal");
-    assert.equal(run.policy?.paymentAmount, "45000000");
+    assert.equal(run.policy?.paymentAmount, "32000000");
     assert.deepEqual(
       run.policy?.participants.map((p) => p.toLowerCase()),
       [run.judge, ...demoMembers.map((m) => m.address)].map((p) =>
@@ -283,7 +304,8 @@ test("saved candidates resume selection without xAPI and invented winners or omi
       assert.equal(run.searchCalls, 3);
       if (mode === "valid") {
         assert.equal(run.selectedPlace?.id, "202");
-        assert.equal(run.phase, "proposal");
+        assert.equal(run.phase, "review");
+        assert.equal(run.policy, undefined);
       } else {
         assert.equal(run.policy, undefined);
         assert.equal(run.error, "GROUP_DECISION_FAILED");

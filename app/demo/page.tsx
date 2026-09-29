@@ -382,7 +382,9 @@ export default function ExploreDemo() {
                     ? "Bringing all six opinions together…"
                     : state.discovery &&
                         ["preferences", "review"].includes(state.phase)
-                      ? "Review your search results"
+                      ? state.groupDecision?.stage === "ready"
+                        ? "Review your shared plan"
+                        : "Review your search results"
                       : phaseNames[state.phase]
                   : "Ready when you are"
                 : "The live demo is currently paused"}
@@ -799,19 +801,24 @@ export default function ExploreDemo() {
                           void run(() => command({ action: "prepare" }))
                         }
                       >
-                        Prepare my test funds
+                        Prepare group payment
                       </button>
                     )}
                     {state.phase === "preparing" && (
                       <p>
-                        Preparing your USDC, gas allowance, and group policy...
+                        Preparing test funds and the group policy. Next, approve
+                        your contribution in your wallet; the other five
+                        participants will then approve and contribute
+                        automatically.
                       </p>
                     )}
                     {state.phase === "approval" && (
                       <div className="explore-actions">
                         <p>
-                          Review the policy before signing. Your wallet may
-                          request two confirmations: token allowance, then
+                          Your approval comes first. Once your contribution is
+                          confirmed, the other five participants automatically
+                          approve and contribute to the same plan. Your wallet
+                          may request two confirmations: token allowance, then
                           contribution. Changing policy terms requires a new
                           decision and fresh approvals.
                         </p>

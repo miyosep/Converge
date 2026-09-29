@@ -21,8 +21,8 @@ export const commandSchema = z.discriminatedUnion("action", [
     action: z.literal("group_search"),
     text: z.string().trim().min(3).max(2000),
     preference: demoReviewSchema,
-    depositUsdc: z.number().int().min(1).max(60),
-    acknowledgeDemo: z.literal(true),
+    depositUsdc: z.number().int().min(1).max(60).optional(),
+    acknowledgeDemo: z.literal(true).optional(),
   }),
   z.strictObject({
     action: z.literal("search"),

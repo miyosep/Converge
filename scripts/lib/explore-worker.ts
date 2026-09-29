@@ -471,6 +471,8 @@ export class ExploreWorker {
           delete run.discovery;
           delete run.extraction;
           delete run.evaluation;
+          delete run.selectedPlace;
+          delete run.restaurant;
           await this.store.save(run);
         }
         try {
@@ -544,26 +546,12 @@ export class ExploreWorker {
             run.phase = "review";
           } else {
             decision.selectedId = choice.placeId;
-            proposeLivePlace(
-              run,
-              {
-                action: "select_place",
-                revision: run.revision,
-                placeId: choice.placeId,
-                depositUsdc: command.depositUsdc,
-                acknowledgeDemo: command.acknowledgeDemo,
-              },
-              {
-                escrow: this.escrow,
-                token: this.token,
-                merchant: this.roles.merchants.A,
-                executor: this.executor.address,
-                participants: decision.members.map((member) => member.address),
-                blockTimestamp: Number(
-                  (await this.client.getBlock()).timestamp,
-                ),
-              },
-            );
+            const place = run.discovery!.places.find(
+              (candidate) => candidate.id === choice.placeId,
+            )!;
+            run.selectedPlace = structuredClone(place);
+            run.restaurant = place.name;
+            run.phase = "review";
             decision.stage = "ready";
           }
         } catch (error) {

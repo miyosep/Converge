@@ -9,8 +9,9 @@ export type ExploreCommand =
       action: "group_search";
       text: string;
       preference: import("./preference-review").DemoReview;
-      depositUsdc: number;
-      acknowledgeDemo: true;
+      /** Accepted from older clients; booking terms are confirmed after selection. */
+      depositUsdc?: number | undefined;
+      acknowledgeDemo?: true | undefined;
     }
   | { action: "search"; text: string }
   | {
