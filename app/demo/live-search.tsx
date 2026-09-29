@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { ExploreRun, ExploreCommand } from "../../src/lib/explore/types";
-import { EXPLORE_SEARCH_LOCATION } from "../../src/lib/discovery/types";
 
 export function LiveDemoSearch({
   run,
@@ -27,13 +26,9 @@ export function LiveDemoSearch({
   const amount = Number(deposit);
   return (
     <section className="explore-section demo-live-search">
-      <span className="eyebrow">LET’S FIND YOUR TABLE</span>
       <h2>
         What sounds <em>good to you?</em>
       </h2>
-      <p>
-        <strong>{EXPLORE_SEARCH_LOCATION}</strong> · Six participants
-      </p>
       <p>
         Tell us the cuisine, budget and atmosphere you have in mind. Write in
         English.

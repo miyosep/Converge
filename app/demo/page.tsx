@@ -296,7 +296,9 @@ export default function ExploreDemo() {
             ? 2
             : 3;
   return (
-    <div className="shell plans-shell explore-shell demo-redesign">
+    <div
+      className={`shell plans-shell explore-shell demo-redesign ${entered ? "demo-in-session" : ""}`}
+    >
       <AppHeader
         active="demo"
         action={
@@ -622,12 +624,22 @@ export default function ExploreDemo() {
                 <div className="explore-members" aria-label="Six participants">
                   {["You", "Bob", "Charlie", "Dana", "Erin", "Farah"].map(
                     (name, index) => (
-                      <div key={name}>
+                      <div
+                        key={name}
+                        title={
+                          index === 0
+                            ? `You · ${short(state.judge)}`
+                            : `${name} · Automated participant`
+                        }
+                      >
                         <span
                           className={`explore-avatar ${index === 0 ? "judge" : ""}`}
                         >
                           {state.contributions[index] === "10000000" ? (
-                            <Check size={19} />
+                            <Check
+                              size={19}
+                              aria-label="Contribution received"
+                            />
                           ) : (
                             name[0]
                           )}
@@ -655,7 +667,6 @@ export default function ExploreDemo() {
                   ["preferences", "review"].includes(state.phase) &&
                   state.extraction && (
                     <section className="explore-section demo-preferences">
-                      <span className="eyebrow">YOUR SEAT AT THE TABLE</span>
                       <h2>
                         Make it <em>your kind of evening</em>
                       </h2>
@@ -700,7 +711,6 @@ export default function ExploreDemo() {
                       </button>
                       {showPreferenceReview && (
                         <div className="explore-review">
-                          <span className="eyebrow">HERE’S WHAT WE HEARD</span>
                           <h3>
                             Your preferences, <em>at a glance</em>
                           </h3>
@@ -955,64 +965,92 @@ export default function ExploreDemo() {
               </>
             )}
           </div>
-          <aside className="demo-aside">
-            <div className="demo-guide">
-              <span className="eyebrow">YOUR CALL, AT EVERY STEP</span>
-              <h2>
-                You stay <em>in control</em>
-              </h2>
+          {entered ? (
+            <details className="demo-help">
+              <summary>
+                How this demo works <span>Test tokens · Simulated booking</span>
+              </summary>
               <div>
-                <LockKeyhole size={20} />
-                <section>
-                  <h3>Your preferences are private</h3>
-                  <p>
-                    Tell us what matters. Your original preferences stay
-                    private.
-                  </p>
-                </section>
-              </div>
-              <div>
-                <Users size={20} />
-                <section>
-                  <h3>One shared set of terms</h3>
-                  <p>
-                    See the restaurant, contribution, and spending limit before
-                    you approve.
-                  </p>
-                </section>
-              </div>
-              <div>
-                <ShieldCheck size={20} />
-                <section>
-                  <h3>Only the approved payment</h3>
-                  <p>
-                    The contract enforces the policy. Any unused funds can be
-                    claimed back.
-                  </p>
-                </section>
-              </div>
-              <details className="demo-scope">
-                <summary>About this demo</summary>
                 <p>
-                  Live restaurant search around Gangnam Station. Describe your
-                  preferences in English. Venue conditions and availability are
-                  unverified.
+                  Your preferences stay private. Five automated participants
+                  join the decision. You review the restaurant and payment terms
+                  before approving.
                 </p>
                 <p>
-                  Booking and the reservation time are simulated. Sepolia test
-                  tokens go to a demo recipient, not the real restaurant.
+                  Search covers Gangnam Station. Venue conditions and
+                  availability are unverified. Booking is simulated; Sepolia
+                  test tokens go to a demo recipient, not the restaurant. Unused
+                  funds can be claimed back.
                 </p>
-              </details>
-              <Link href="/evidence">
-                Explore the recorded evidence
-                <ExternalLink size={15} aria-hidden="true" />
-              </Link>
-            </div>
-            <p className="demo-aside-note">
-              You'll need a browser wallet on Ethereum Sepolia. Test funds are
-              prepared during the guided flow.
-            </p>
-          </aside>
+                <p>
+                  You’ll need a browser wallet on Sepolia. Test funds are
+                  prepared during the flow.
+                </p>
+                <Link href="/evidence">
+                  View recorded runs <ExternalLink size={14} />
+                </Link>
+              </div>
+            </details>
+          ) : (
+            <aside className="demo-aside">
+              <div className="demo-guide">
+                <span className="eyebrow">YOUR CALL, AT EVERY STEP</span>
+                <h2>
+                  You stay <em>in control</em>
+                </h2>
+                <div>
+                  <LockKeyhole size={20} />
+                  <section>
+                    <h3>Your preferences are private</h3>
+                    <p>
+                      Tell us what matters. Your original preferences stay
+                      private.
+                    </p>
+                  </section>
+                </div>
+                <div>
+                  <Users size={20} />
+                  <section>
+                    <h3>One shared set of terms</h3>
+                    <p>
+                      See the restaurant, contribution, and spending limit
+                      before you approve.
+                    </p>
+                  </section>
+                </div>
+                <div>
+                  <ShieldCheck size={20} />
+                  <section>
+                    <h3>Only the approved payment</h3>
+                    <p>
+                      The contract enforces the policy. Any unused funds can be
+                      claimed back.
+                    </p>
+                  </section>
+                </div>
+                <details className="demo-scope">
+                  <summary>About this demo</summary>
+                  <p>
+                    Live restaurant search around Gangnam Station. Describe your
+                    preferences in English. Venue conditions and availability
+                    are unverified.
+                  </p>
+                  <p>
+                    Booking and the reservation time are simulated. Sepolia test
+                    tokens go to a demo recipient, not the real restaurant.
+                  </p>
+                </details>
+                <Link href="/evidence">
+                  Explore the recorded evidence
+                  <ExternalLink size={15} aria-hidden="true" />
+                </Link>
+              </div>
+              <p className="demo-aside-note">
+                You'll need a browser wallet on Ethereum Sepolia. Test funds are
+                prepared during the guided flow.
+              </p>
+            </aside>
+          )}
         </div>
       </main>
     </div>
