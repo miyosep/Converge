@@ -23,6 +23,10 @@ GROUP_EXECUTION_ENABLED=true
 ```
 
 Retain `APP_ORIGIN`, database, session, RPC, Kiln and demo access-code configuration.
+For live place search, configure `XAPI_KEY` and `KILN_API_KEY` on both the web
+deployment (general `/discover` search) and the PC's `.env.hybrid` (queued Explore
+Demo searches). Keep `RESTAURANT_SEARCH_PROVIDER=xapi`. The PC does not inherit
+the web deployment's credentials; see `LIVE_DEMO_BOOKING.md` for the booking flow.
 Google connection/callback flows still require the Google settings on Vercel.
 **Do not put operator private keys on Vercel in hybrid mode.** Inngest functions
 are disabled in this mode, and hybrid execution is rejected inside Vercel.
