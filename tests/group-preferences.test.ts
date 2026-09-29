@@ -61,6 +61,8 @@ test("group search includes every confirmed member, reuses xAPI and keeps privat
           preferences.flatMap((p) => p.requirements.map((r) => r.text)),
         );
         assert.match(body.messages[0].content, /ALL members/);
+        assert.match(body.messages[0].content, /ONE shared restaurant/);
+        assert.match(body.messages[0].content, /Preserve allergies/);
       },
     ),
     fetchImpl: async (url, init) => {
@@ -88,7 +90,7 @@ test("group search includes every confirmed member, reuses xAPI and keeps privat
     /Vegetarian|Wheelchair|Quiet atmosphere/,
   );
 });
-test("missing opinions, omitted requirements and conflicts cannot silently produce a group search", async () => {
+test("missing opinions and omitted requirements cannot silently produce a group search", async () => {
   const neverSearch = async () => {
     assert.fail("No paid search permitted");
   };
@@ -111,17 +113,28 @@ test("missing opinions, omitted requirements and conflicts cannot silently produ
     }),
     /PREFERENCES_NOT_CONFIRMED/,
   );
+});
+test("conflicting tastes still search for one shared place without exposing private conditions", async () => {
+  let searched = false;
   const result = await recommendForGroup({
     ...base,
-    fetchImpl: neverSearch,
+    fetchImpl: async () => {
+      searched = true;
+      return Response.json({
+        success: true,
+        data: { places: [{ title: "Shared restaurant", address: "Seoul" }] },
+      });
+    },
     client: client({
       query: "restaurants",
       consideredIds: [0, 1, 2],
       conflicts: ["PRIVATE conflicting conditions"],
     }),
   });
-  assert.equal(result.places.length, 0);
-  assert.equal(result.conflicts.length, 1);
+  assert.equal(searched, true);
+  assert.equal(result.places.length, 1);
+  assert.equal(result.conflicts.length, 0);
+  assert.match(result.places[0]!.evidence[0]!.detail, /compromise/);
   assert.doesNotMatch(JSON.stringify(result), /PRIVATE/);
 });
 test("individual interpretation preserves the request and fixed group context for member confirmation", async () => {
