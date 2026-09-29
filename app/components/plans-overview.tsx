@@ -111,9 +111,9 @@ export function PlansOverview({
                 height={1024}
               />
               <div className="plans-photo-caption">
-                <span>LESS ORGANISING.</span>
+                <span>FROM ‘WE SHOULD.’</span>
                 <strong>
-                  More of <em>this.</em>
+                  To <em>‘see you there.’</em>
                 </strong>
               </div>
             </div>
