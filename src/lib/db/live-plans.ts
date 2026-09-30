@@ -1,3 +1,4 @@
+import { estimateGroupDeposit } from "../discovery/deposit-estimate";
 import { randomUUID, createHash } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { z } from "zod";
@@ -479,6 +480,7 @@ export class LivePlanRepository {
     actor: string,
     config: GroupPolicyConfig,
     rawTerms?: unknown,
+    automatic = false,
   ) {
     return transaction(this.pool, async (db) => {
       const group = await this.lock(db, groupId, actor);
@@ -501,7 +503,9 @@ export class LivePlanRepository {
       if (group.creator_wallet !== wallet(actor))
         throw new LivePlanError("NOT_CREATOR");
       if (group.preferences_locked) throw new LivePlanError("GROUP_LOCKED");
-      const terms = livePaymentTermsSchema.parse(rawTerms);
+      const request = automatic
+        ? livePaymentTermsSchema.omit({ amount: true }).parse(rawTerms)
+        : livePaymentTermsSchema.parse(rawTerms);
       const confirmed = await this.confirmedPreferences(
         db,
         groupId,
@@ -511,7 +515,7 @@ export class LivePlanRepository {
         (group.snapshot as LivePlan).places.length !== 1 ||
         !group.snapshot.recommendationReady ||
         group.snapshot.recommendationRevision !==
-          terms.recommendationRevision ||
+          request.recommendationRevision ||
         group.snapshot.preferenceRevision !== confirmed.revision
       )
         throw new LivePlanError("STALE_RECOMMENDATION");
@@ -526,8 +530,26 @@ export class LivePlanRepository {
         members,
         group.target_member_count,
       );
-      if (!place || place.id !== terms.placeId)
+      if (!place || place.id !== request.placeId)
         throw new LivePlanError("UNANIMOUS_CHOICE_REQUIRED");
+      let depositEstimate;
+      if (automatic) {
+        try {
+          depositEstimate = await estimateGroupDeposit({
+            price: place.price,
+            preferences: confirmed.preferences,
+            people: members.length,
+          });
+        } catch (error) {
+          throw new LivePlanError(
+            error instanceof Error ? error.message : "PAYMENT_BASIS_MISSING",
+          );
+        }
+      }
+      const terms = livePaymentTermsSchema.parse({
+        ...request,
+        ...(depositEstimate ? { amount: depositEstimate.amount } : {}),
+      });
       let saved;
       try {
         saved = buildLivePayment({
@@ -551,7 +573,11 @@ export class LivePlanRepository {
         "UPDATE converge_live_plans SET snapshot=snapshot || $2::jsonb WHERE group_id=$1",
         [
           groupId,
-          JSON.stringify({ merchant: terms.recipient, testPayment: true }),
+          JSON.stringify({
+            merchant: terms.recipient,
+            testPayment: true,
+            ...(depositEstimate ? { depositEstimate } : {}),
+          }),
         ],
       );
       await db.query(

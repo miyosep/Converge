@@ -86,7 +86,12 @@ function repository(mode: string) {
               preferences_locked: false,
               reservation_starts_at: new Date(input.startsAt),
               snapshot: {
-                places: [{ id: "place" }],
+                places: [
+                  {
+                    id: "place",
+                    price: mode === "missing-price" ? null : "$30 per person",
+                  },
+                ],
                 recommendationReady: true,
                 recommendationRevision: "revision",
                 preferenceRevision:
@@ -172,7 +177,7 @@ test("group grants use actual member wallets and chosen shares, skip paid member
   assert.equal(calls.length, 0);
 });
 
-test("server prepares group-sized test terms and rejects client-selected amounts or recipients", async () => {
+test("automatic payment uses 30 percent of source price and rejects client overrides", async () => {
   const { automaticGroupPaymentTerms } =
     await import("../src/lib/server/group-config");
   const request = {
@@ -180,31 +185,22 @@ test("server prepares group-sized test terms and rejects client-selected amounts
     recommendationRevision: "revision",
     acknowledgeTestPayment: true,
   };
-  const prepared = automaticGroupPaymentTerms(request, 2, {});
-  assert.equal(prepared.amount, "20");
-  assert.equal(automaticGroupPaymentTerms(request, 3, {}).amount, "30");
-  assert.equal(
-    automaticGroupPaymentTerms(request, 3, {
-      GROUP_TEST_PAYMENT_PER_PERSON_USDC: "2.5",
-    }).amount,
-    "7.5",
+  const prepared = automaticGroupPaymentTerms(request, {});
+  assert.equal("amount" in prepared, false);
+  assert.throws(() =>
+    automaticGroupPaymentTerms({ ...request, amount: "999" }, {}),
   );
   assert.throws(() =>
-    automaticGroupPaymentTerms({ ...request, amount: "999" }, 2, {}),
+    automaticGroupPaymentTerms({ ...request, recipient: address(9) }, {}),
   );
-  assert.throws(() =>
-    automaticGroupPaymentTerms({ ...request, recipient: address(9) }, 2, {}),
+  const { repo } = repository("valid");
+  const saved = await repo.prepare("group", address(1), config, prepared, true);
+  assert.equal(saved.policy.paymentAmount, "27000000");
+  assert.equal(saved.policy.contributionPerParticipant, "9000000");
+  const missing = repository("missing-price");
+  await assert.rejects(
+    missing.repo.prepare("group", address(1), config, prepared, true),
+    /PAYMENT_BASIS_MISSING/,
   );
-  assert.throws(() =>
-    automaticGroupPaymentTerms(request, 2, {
-      GROUP_TEST_PAYMENT_PER_PERSON_USDC: "0",
-    }),
-  );
-  const saved = buildLivePayment({
-    ...input,
-    members: members.slice(0, 2),
-    terms: prepared,
-  });
-  assert.equal(saved.policy.contributionPerParticipant, "10000000");
-  assert.equal(saved.policy.approvalThreshold, 2);
+  assert.ok(missing.statements.includes("ROLLBACK"));
 });

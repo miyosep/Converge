@@ -108,6 +108,10 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
       refreshVersion.current++;
       if (!response.ok) {
         const messages: Record<string, string> = {
+          PAYMENT_BASIS_MISSING:
+            "No usable restaurant price or confirmed budget is available. Include a budget and currency in your preferences, then confirm and search again.",
+          PAYMENT_RATE_UNAVAILABLE:
+            "The currency rate could not be verified. Please try again; no payment terms were created.",
           PREFERENCES_NOT_CONFIRMED:
             "Everyone must join and confirm their own interpreted requirements first.",
           PREFERENCES_NOT_READY:

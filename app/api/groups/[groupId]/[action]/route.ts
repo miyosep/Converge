@@ -257,7 +257,8 @@ export async function POST(request: NextRequest, context: Context) {
           groupId,
           actor,
           currentGroupPolicyConfig(),
-          automaticGroupPaymentTerms(body, overview.group.targetMemberCount),
+          automaticGroupPaymentTerms(body),
+          true,
         );
       else {
         z.strictObject({}).parse(body);

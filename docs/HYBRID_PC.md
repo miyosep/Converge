@@ -180,10 +180,13 @@ The worker sends a heartbeat every 20 seconds during long jobs. Idle demo sessio
 The current product contract rejects fixed per-person test-payment defaults.
 Use supported selected-restaurant pricing or confirmed participant budgets;
 GROUP_TEST_PAYMENT_PER_PERSON_USDC is a legacy implementation setting, not the
-accepted pricing rule. See PRODUCT_RULES.md and root AGENTS.md. The existing fixed
-amount code has not yet been replaced. The owner confirmed a partial reservation
-deposit, never the full meal price/budget. The percentage still needs confirmation,
-and source currencies/units must be handled explicitly.
+accepted pricing rule. See PRODUCT_RULES.md and root AGENTS.md. New decisions collect 30% of the supported price or confirmed budget. Restaurant
+price ranges use the upper bound as a clearly labelled estimate; when no usable
+restaurant price exists, use the lowest confirmed group-equivalent budget. Non-USD
+amounts use a verified Frankfurter rate with its date shown before approval; USD
+equivalents map to MockUSDC for this test only. Missing prices/budgets or an
+unavailable/stale exchange rate stop preparation instead of creating a fixed amount.
+The remaining 70% is not collected automatically.
 
 GROUP_TEST_PAYMENT_RECIPIENT still configures the Sepolia test recipient; its
 fallback is the existing public merchant A test wallet, not a verified venue wallet.

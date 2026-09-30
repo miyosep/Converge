@@ -131,6 +131,26 @@ export function GroupPolicyPanel({
                 : "Not calculated yet"}
           </strong>
           <span>Test tokens on Sepolia · No real booking</span>
+          {overview.livePlan?.depositEstimate && (
+            <p>
+              30% of{" "}
+              {overview.livePlan.depositEstimate.source === "restaurant_price"
+                ? "the listed meal estimate"
+                : "the confirmed group budget"}
+              : {overview.livePlan.depositEstimate.currency}{" "}
+              {overview.livePlan.depositEstimate.basisAmount}{" "}
+              {overview.livePlan.depositEstimate.unit === "per_person"
+                ? "per person"
+                : "for the group"}
+              .
+              {overview.livePlan.depositEstimate.rangeUpperBound &&
+                " Uses the upper end of the listed range; this is an estimate, not a venue quote."}
+              {overview.livePlan.depositEstimate.rateDate &&
+                ` Converted at ${overview.livePlan.depositEstimate.usdRate} USD per ${overview.livePlan.depositEstimate.currency} (Frankfurter, ${overview.livePlan.depositEstimate.rateDate}).`}{" "}
+              Group deposit: {overview.livePlan.depositEstimate.amount}{" "}
+              MockUSDC. The remaining meal cost is not collected.
+            </p>
+          )}
         </div>
         <div className="panel-heading">
           <h2>{policy ? "Your shared spending plan" : "Spending terms"}</h2>

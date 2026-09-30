@@ -44,6 +44,7 @@ export const livePlanRequestSchema = z
 
 export type LivePlan = {
   testPayment?: boolean;
+  depositEstimate?: import("./deposit-estimate").DepositEstimate;
   recommendationReady?: boolean;
   recommendationStatus?:
     "idle" | "searching" | "ready" | "empty" | "blocked" | "failed";
