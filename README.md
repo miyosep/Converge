@@ -1,138 +1,135 @@
 # Converge
 
-Current product contract: [Converge product rules](docs/PRODUCT_RULES.md). Coding agents must follow [AGENTS.md](AGENTS.md).
-
 ### AI proposes. Humans approve. Smart contracts enforce.
 
-Six friends want dinner together. Their budgets differ, some preferences are private, and someone still has to collect the money. Converge helps them agree on one plan—and gives an agent permission to pay exactly what they approved.
+> Converge is a multi-user purchasing agent and programmable wallet that converts private group preferences into a jointly approved purchase and allows an AI agent to execute it only within smart-contract-enforced spending conditions.
 
-> **Selected function:** Converge is a multi-user purchasing agent and programmable wallet that converts private group preferences into a jointly approved purchase and allows an AI agent to execute it only within smart-contract-enforced spending conditions.
+Six friends want to have dinner together. One wants something affordable. Another needs a dairy-free option. Someone would love a quiet place where everyone can catch up.
 
-[Try the demo](https://converge-iota-seven.vercel.app/demo) · [Plan with friends](https://converge-iota-seven.vercel.app/discover) · [Inspect the evidence](https://converge-iota-seven.vercel.app/evidence) · [Run locally](#how-to-run)
+Finding a place is only the beginning. Everyone still needs to agree, work out the payment and trust that the plan will stay within what they approved.
 
-**GWDC 2026 · Track A** &nbsp;|&nbsp; **Kiln `qwen3-32b` · Ethereum Sepolia** &nbsp;|&nbsp; [Built during the event](#pre-built-vs-hackathon-built-work)
+**Converge helps the group get there, one shared decision at a time.**
 
-## 30-Second Pitch
+[Try it on your own →](https://converge-iota-seven.vercel.app/demo) · [Start a plan with friends](https://converge-iota-seven.vercel.app/discover) · [View recorded runs](https://converge-iota-seven.vercel.app/evidence)
 
-**The problem.** Choosing a place, agreeing on costs and pooling money are parts of the same group decision. Personal requirements get lost in chat, plans change, and one person ends up coordinating everything.
-
-**The solution.** Each friend privately submits requirements and confirms Kiln's interpretation. Converge searches for places, collects agreement on one candidate and freezes a shared spending policy. After every member approves and contributes, an executor requests the permitted deposit payment. The contract enforces the terms and makes unused funds claimable.
-
-**The key idea.** Group consent becomes part of payment authorization. An AI recommendation can become an action only after everyone approves its terms; a changed plan requires renewed agreement.
-
-> **Demo scope:** real Kiln calls, real place listings and testnet transactions; **a testnet USDC token, a demo payment recipient and simulated booking confirmation**. The test token has no claim on real USDC. Venue availability and USDC acceptance are assumed for the hackathon; Converge does not currently book a real venue.
-
-## What to Look For
-
-| Judging criterion | What Converge demonstrates | Where to verify |
-| --- | --- | --- |
-| **Technical** | Kiln interpretation and search-tool calls; contract-enforced payments and refunds; recovery without duplicate payment. | [Architecture](#architecture) · [Kiln usage](#kiln-integration-and-measured-usage) · [Execution evidence](#per-flow-on-chain-proof-and-kiln-logs) |
-| **Task fit** | Private requirements lead to a jointly approved policy and a bounded deposit payment. | [User flow](#how-it-works) · [Verification scope](#verification-and-evidence) |
-| **Innovation** | The agent coordinates interpretation, search and execution around versioned group agreement and a fixed spending authority. | [AI, code and contract responsibilities](#what-the-agent-does) · [Changed conditions](#when-conditions-change) |
-| **Usability** | A shared planning workflow for friends, plus a guided demo that one reviewer can try. | [Live demo](https://converge-iota-seven.vercel.app/demo) · [Friends planning](docs/LIVE_GROUP_PLANS.md) |
-| **Presentation** | A running app, an explorable evidence page and per-flow receipts linked to Kiln records. | [Public evidence](https://converge-iota-seven.vercel.app/evidence) · [Demo walkthrough](#try-the-demo) |
-
-## Try the Demo
-
-[**Open Explore Demo →**](https://converge-iota-seven.vercel.app/demo)
-
-The guided flow uses **one human reviewer and five disclosed automated participants**. Bring a Sepolia browser wallet; the deployment may request an event access code. The app supplies missing test funds within a bounded session.
-
-1. **Find a place.** Enter English restaurant requirements around Gangnam Station and choose a returned candidate.
-2. **Review the terms.** Select a demo deposit of 1–60 USDC, review unknown venue conditions and acknowledge the demo assumptions.
-3. **Approve your share.** Freeze the policy, prepare test funds, approve the allowance and contribute 10 USDC. The automated participants contribute after you.
-4. **Follow the payment.** Observe the permitted transaction and its receipt, followed by the simulator's reservation confirmation.
-5. **Recover the remainder.** Claim your share of unused funds. Completed, cancelled or expired rounds can be followed by a new round from the same wallet.
-
-Chain confirmations take time. Previous rounds and refund actions remain accessible. [Demo setup, limits and recovery](docs/EXPLORE_DEMO.md).
-
-**Review without connecting a wallet:** open the [public evidence page](https://converge-iota-seven.vercel.app/evidence) or inspect the [recorded runs below](#per-flow-on-chain-proof-and-kiln-logs).
+Built for **GWDC 2026 · Track A**, using **Kiln** and **Ethereum Sepolia**.
 
 ## How It Works
 
-The [friends flow](https://converge-iota-seven.vercel.app/discover) supports **2–100 members** planning a restaurant visit, stay, space booking, sports activity or class.
+### First, everyone gets a say
 
-| Step | What people do | What Converge does |
-| --- | --- | --- |
-| **1. Gather** | Create a group, set outing details and invite friends. | Saves the group before its first search, or starts a plan from a saved search. |
-| **2. Understand** | Privately submit requirements, then correct or confirm the interpretation. | Kiln extracts each member's requirements; the app tracks the confirmed revisions. |
-| **3. Agree** | Review candidates and unanimously choose the same place. | Searches through xAPI using confirmed group requirements; preserves source links and unknown conditions. |
-| **4. Authorize** | Review the shared policy and independently approve and contribute through wallets. | Freezes the participants, recipient, exact deposit, spending limits and expiry. |
-| **5. Execute** | Inspect the receipt and claim eligible refunds. | The executor requests payment; the contract enforces the policy and accounts for the remainder. |
+Start a plan and invite your friends. Each person shares their preferences privately, then reviews how the AI understood them. You can correct the interpretation before confirming it.
 
-After everyone chooses the same place, the organizer sets the total USDC payment and test recipient wallet. The policy divides the total equally among the actual participants, rounding each share up to the token's smallest unit; any rounding remainder is refundable. For example, a 12 USDC payment shared by two people requires 6 each. Every member reviews the fixed terms and signs their own approval and contribution.
+Converge waits for everyone. In a friends group, every participant is a real member with their own wallet.
 
-The hybrid processor supplies missing test tokens for each share and tops up eligible wallets toward 0.001 Sepolia ETH, within the shared group execution budget. Friends groups use their actual members' wallets; the five automated participants belong to Explore Demo. These are test payments, not venue quotes or real bookings. [Friends workflow details](docs/LIVE_GROUP_PLANS.md).
+### Then, find one place together
 
-### When Conditions Change
+Once everyone has confirmed, the agent combines their opinions, searches real place listings through xAPI and proposes **one place for the group**, with a short explanation of its choice.
 
-| Change | Result |
-| --- | --- |
-| A preference, membership or search result changes | Earlier place agreements become invalid. Members must agree on the current result version. |
-| A mandatory conflict remains unresolved | The workflow blocks progress. Missing venue facts remain marked unknown. |
-| The approved recipient or financial terms need to change | A new decision and fresh approvals are required. A locked policy cannot be edited. |
-| A participant cancels before payment, or an unpaid policy expires | Eligible contributions can be recovered under that decision's contract rules. |
+Different tastes call for compromise. Allergies and essential accessibility needs call for care. If a listing cannot establish something important, the proposal leaves it as a question to confirm. Missing information is never a promise of safety.
 
-**Recorded budget adaptation:** six people contribute 60 USDC in total. The baseline fixture run selects Restaurant A and pays 45. In a fresh run, one person reduces their meal budget from $35 to $25; the system selects B, pays 36 and makes 4 refundable to each participant. Both runs include fresh Kiln interpretations, approvals and receipts.
+Each friend decides whether to agree with the proposal. Agreeing on dinner does not yet authorize a payment.
 
-**Track A refusal:** the fixture decision engine has `NO_MATCH` coverage and blocks policy creation for an unmet goal. A recorded live refusal still needs to be added. The excluded-merchant run below finds a valid alternative and therefore demonstrates adaptation, not refusal.
+### Finally, approve what can be spent
+
+After the group agrees, Converge presents the prepared payment terms: who receives the payment, the exact amount and each person's share. Everyone reviews those terms and approves their own contribution through their wallet.
+
+Only then can the agent request payment. The smart contract checks the approved conditions before moving funds, and eligible unused funds can be claimed back.
+
+**Today, this is a testnet experience.** Payments use a test USDC token on Sepolia and a configured test recipient. The token has no claim on real USDC, and booking confirmation is simulated. Converge does not currently reserve or pay a real restaurant.
+
+## Try the Demo
+
+You do not need to gather a group to try Converge.
+
+[**Open Explore Demo →**](https://converge-iota-seven.vercel.app/demo)
+
+You join five clearly identified automated participants, each with their own preferences. Bring a browser wallet that supports Sepolia; the app can supply missing test funds within its funding limits.
+
+1. **Take a seat.** Start a round and share what you would like.
+2. **Check your preferences.** Review the AI's interpretation before confirming.
+3. **Meet the proposal.** See the place selected from all six opinions, its rationale and any facts that still need checking.
+4. **Review and approve.** Inspect the exact test payment terms, then sign for your own share. Automation handles the five demo accounts.
+5. **Follow the outcome.** See the transaction receipt, simulated booking result and any available refund.
+
+Confirmations can take a little time. Your transaction history and eligible refunds remain available, and you can start another round once the current one can safely end.
+
+Prefer to look around first? The [public evidence page](https://converge-iota-seven.vercel.app/evidence) needs no wallet. For setup and recovery details, see the [demo guide](docs/EXPLORE_DEMO.md).
+
+### Bringing your own friends?
+
+[Start a plan](https://converge-iota-seven.vercel.app/discover), then send the invitation to your group. Friends join on their own devices, confirm their own preferences and sign their own approvals. Groups support 2–100 members; automated participants are used only in the solo demo.
+
+The current friends test payment defaults to **10 test USDC per member**, prepared by the server. Operators can configure different test terms, so always review the amount shown before approving. This amount is a test setting, not a restaurant quote. You do not need to enter payment addresses or configure deposits to plan an outing.
+
+[Read the friends guide →](docs/LIVE_GROUP_PLANS.md)
+
+## When Conditions Change
+
+Plans change. Converge needs to keep agreement and spending permission in step with them.
+
+If someone changes a preference, membership changes or the group searches again, earlier proposal agreements are cleared. Everyone reviews the new proposal. If payment terms change, they need a new decision and fresh approvals; an already locked policy cannot be edited.
+
+Ordinary preferences can be balanced. Genuinely incompatible essential needs must stop the proposal. Unknown venue facts remain visible so the group can check them.
+
+A recorded example from our earlier test catalog shows this adaptation: one friend lowers their meal budget from $35 to $25. A fresh run switches from Restaurant A to Restaurant B, reduces the group payment from 45 to 36 USDC and returns the unused contribution. The [receipts and Kiln logs](#per-flow-on-chain-proof-and-kiln-logs) are below.
 
 ## What the Agent Does
 
-| Layer | Responsibility |
-| --- | --- |
-| **Kiln `qwen3-32b`** | Interprets private requirements, combines confirmed requirements for group search, proposes validated `search_places` tool calls and explains sanitized fixture recommendations. |
-| **Application code** | Validates outputs, enforces access and revision rules, tracks unanimous agreement, freezes policy inputs and coordinates execution. The earlier fixture flow uses deterministic filtering and scoring. |
-| **Smart contracts** | Hold contributions, require every member's approval and funding, enforce the immutable payment terms, allow one permitted payment and make eligible refunds claimable. |
+The agent connects three parts of a group decision: understanding what people mean, finding a shared option and carrying out the approved payment.
 
-People choose the place and authorize spending. The model never signs for participants. The contract checks the executor's actual authority before moving tokens.
+**Kiln handles the language and reasoning.** Its `qwen3-32b` model interprets preferences, combines the group's opinions and selects one proposal from the search results. People confirm their own interpretation and decide whether to accept the proposal.
+
+**The application keeps the agreement current.** It protects private inputs, checks model responses, tracks revisions and makes sure the payment terms match the agreed plan.
+
+**The contract enforces spending permission.** It requires the necessary approvals and contributions, permits only the authorized payment and accounts for eligible refunds. The model never signs for a real participant.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    A["Private requirements"] --> B["Kiln interpretation"]
-    B --> C["Each member confirms"]
-    C --> D["Kiln search tool → xAPI candidates"]
-    D --> E["Members agree on place and policy"]
-    E --> F["Wallet approvals and contributions"]
-    F --> G["Executor requests payment"]
-    G --> H["Sepolia contract enforces terms"]
-    H --> I["Receipt and eligible refunds"]
-    C -.-> J["Neon: revisions, agreements and history"]
-    E -.-> J
-    I -.-> J
+    A["Friends share and confirm preferences"] --> B["Kiln combines everyone's opinions"]
+    B --> C["xAPI finds places; Kiln proposes one"]
+    C --> D["Each friend agrees and approves payment terms"]
+    D --> E["Wallet contributions"]
+    E --> F["Executor requests the permitted payment"]
+    F --> G["Sepolia contract checks the terms"]
+    G --> H["Receipt and eligible refunds"]
 ```
 
-The Next.js app handles member interaction and server-side provider calls. Neon persists revisions, agreement and execution state. A background processor submits permitted transactions and reconciles receipts. Payment authority resides in the contract; an application database update cannot change an approved policy.
+The Next.js app handles the shared experience and interactive provider calls. Neon stores preferences, agreements and transaction state. A background PC worker handles long-running demo jobs and payment reconciliation. Credentials and signing keys stay on the server or worker.
 
 <details>
-<summary>Implementation map</summary>
+<summary>Explore the implementation</summary>
 
-| Component | Source |
-| --- | --- |
-| Kiln validation and usage recording | [Kiln client](src/lib/kiln/client.ts) |
-| Search-tool validation and xAPI calls | [Discovery adapter](src/lib/discovery/xapi.ts) |
-| Friends planning and agreement | [Live plans](src/lib/db/live-plans.ts) |
-| Execution and recovery | [Group execution](src/lib/group-execution.ts) |
-| Policy enforcement and refunds | [v1 wallet](contracts/src/ConvergeGroupWallet.sol) · [v2 wallet](contracts/src/ConvergeGroupWalletV2.sol) |
+- [Kiln client](src/lib/kiln/client.ts): validated responses and usage recording.
+- [Discovery adapter](src/lib/discovery/xapi.ts): search-tool validation and xAPI requests.
+- [Friends planning](src/lib/db/live-plans.ts): private inputs, shared proposals and agreement.
+- [Group execution](src/lib/group-execution.ts): payment processing and recovery.
+- [Wallet v1](contracts/src/ConvergeGroupWallet.sol) and [wallet v2](contracts/src/ConvergeGroupWalletV2.sol): spending conditions and refunds.
+
+The earlier catalog-based flow uses deterministic filtering and scoring. Its evidence below should be read separately from the current live-place selection flow.
 
 </details>
 
 ## Verification and Evidence
 
-**Three earlier ordinary-group runs completed the full Kiln → approval → Sepolia payment → refund lifecycle.** Their 45 lifecycle receipts were verified as canonical and finalized. Across those runs, 180 USDC was contributed, 117 paid and 63 refunded. Each record uses synthetic preferences and six distinct keys controlled by one test operator.
+You can follow a payment all the way from the confirmed inputs to its on-chain receipt.
 
-The newer friends flow also passed live-provider and payment integration checks, performed separately. The table identifies the coverage of each record.
+Three earlier group runs completed the Kiln → approval → Sepolia payment → refund lifecycle. Together, they contributed **180 test USDC**, paid **117** and refunded **63**. Their 45 lifecycle receipts were checked as canonical and finalized.
 
-| Flow | Verified in the recorded check | Environment and boundary |
-| --- | --- | --- |
-| **Friends planning** | Two authenticated identities: join, live interpretation, confirmation, five real search candidates, unanimous agreement and matching saved policies. | Production-built local HTTP server, live Kiln/xAPI and an isolated database; no Sepolia payments in this run. [Record](docs/LIVE_GROUP_PLANS.md#recorded-verification--2026-09-30) |
-| **Friends payments** | Generated v2 policy, contributions, payment, refunds, broadcast recovery, cancellation and expiry. | Disposable Anvil chain, separately from the provider run. [Verification](docs/LIVE_GROUP_PLANS.md#verification) |
-| **Earlier ordinary groups** | Baseline and two changed-condition runs, each through payment and six refunds. | Live Kiln and Sepolia; one operator controlled six keys. [Acceptance record](docs/GROUP_ACCEPTANCE.md) |
-| **Guided live-place demo** | Payment, simulated confirmation, refunds, cancellation, expiry and repeated rounds. | Local Anvil rehearsals with fixture search responses; earlier real search and legacy Sepolia evidence are separate. [Verification](docs/LIVE_DEMO_BOOKING.md#verification) |
+These runs use a synthetic restaurant catalog and six distinct wallets controlled by one test operator. They show the payment and adaptation behavior of that recorded flow.
 
-The September 30 friends record reports 151 application tests, TypeScript/format checks, a production build, database privacy/stale-result checks and browser inspection of the two-member policy screen. These are dated results. A continuous latest-flow walkthrough with two independently operated browser wallets through live search and Sepolia refunds is not established by those records.
+<details>
+<summary>What the newer workflow checks establish</summary>
+
+The September 30 [friends verification record](docs/LIVE_GROUP_PLANS.md#recorded-verification--2026-09-30) covers two authenticated test identities through live Kiln/xAPI planning and policy creation on a local production build. Payment, refund and recovery checks ran separately on a disposable Anvil chain.
+
+The record also reports 151 application tests, TypeScript/format checks, a production build and database privacy checks. These are dated results for the version tested, including an older candidate-selection interface. They do not establish a continuous walkthrough of today's flow by two independent human browser wallets through Sepolia refunds.
+
+The [guided demo record](docs/LIVE_DEMO_BOOKING.md#verification) covers local payment, cancellation, expiry and repeat-round rehearsals. Its real-provider and earlier Sepolia evidence are separate records.
+
+</details>
 
 ### Per-Flow On-chain Proof and Kiln Logs
 
@@ -158,17 +155,25 @@ Merchant excluded:
 
 </details>
 
+<details>
+<summary>Spending controls, retry recovery and refusal coverage</summary>
+
 **Spending controls:** an 80 USDC request was rejected in the first two runs; a payment to A under B's policy was rejected in the third. These were read-only `eth_call` rejections, not mined failed transactions.
 
 **Recovery:** lost-broadcast and database-confirmation failures recovered across separate processes, retaining the original payment hash without duplicate payment. [Recovery checks](docs/GROUP_ACCEPTANCE.md#recovery-and-privacy-checks).
 
 **Refusal coverage:** [decision tests](tests/decision-engine.test.ts) cover `NO_MATCH`; [policy tests](tests/group-policy.test.ts) block no-match or unresolved input from creating a payable policy. These tests do not substitute for the required live refusal recording.
 
+</details>
+
 ## Kiln Integration and Measured Usage
 
-Converge calls **Kiln `qwen3-32b` server-side**. Adapters validate outputs, bound timeouts and repair attempts, and record provider usage. Participants confirm interpretations because schema-valid output can still misunderstand their intent.
+Kiln runs on the server. Converge validates its responses, limits repair attempts and records usage. When a provider call fails, the app reports the error instead of inventing a result. Participants review interpretations because even a valid response can misunderstand a person's intent.
 
-A normal successful xAPI search uses one model call and one provider request. Ambiguity can stop search for clarification. Invalid model output has a bounded repair attempt; provider errors remain visible and never become invented places. [Integration details](docs/KILN.md).
+[Read the Kiln integration guide →](docs/KILN.md)
+
+<details>
+<summary>Measured usage for the three recorded acceptance runs</summary>
 
 Measured usage below covers **only the three ordinary-group acceptance runs**, including failures and retries.
 
@@ -183,11 +188,18 @@ Measured usage below covers **only the three ordinary-group acceptance runs**, i
 
 Structured state, bounded calls, cached explanations and deterministic arithmetic limit unnecessary inference. Energy consumption and NPU execution are not independently measured or attested by these responses; token counts are not energy measurements. The selected model reflects the owner's confirmed update to the original brief, as documented in [Kiln setup](docs/KILN.md#selected-model).
 
+</details>
+
 ## Blockchain and Privacy
 
-The contracts bind participant membership, token, recipient, executor, exact payment, spending limits and expiry. They reject unauthorized callers, insufficient funding, wrong recipients or amounts, expired/inactive decisions and duplicate payments. Decision balances are accounted for separately.
+The approved policy fixes the participants, recipient, payment amount, spending limits and expiry. The contract rejects requests outside those terms and prevents a second payment for the same decision. There is no administrator withdrawal or policy-editing path. Eligible refunds can also be claimed directly from the contract.
 
-There is no administrator withdrawal or policy-editing path. Eligible participants can claim their refunds directly through the contract if the app is unavailable. Solidity and TypeScript use matching, versioned policy hashes. [Contract behavior](docs/BLOCKCHAIN.md) · [Policy encoding](docs/POLICY_ENCODING.md).
+Private preferences are scoped to the submitting member and authorized server processing. Kiln and search providers process the requirements sent to them. Other members see progress, the shared proposal and public payment terms. Wallet activity remains public, and a small group may infer a preference from the result.
+
+Place listings do not prove availability, allergy safety or acceptance of USDC. Those facts need their own confirmation; a successful blockchain transaction cannot establish them.
+
+<details>
+<summary>Sepolia contracts and deployment records</summary>
 
 | Contract on Ethereum Sepolia (`11155111`) | Address |
 | --- | --- |
@@ -197,9 +209,9 @@ There is no administrator withdrawal or policy-editing path. Eligible participan
 
 Deployment records: [v1](contracts/deployments/11155111.json) · [v2](contracts/deployments/11155111-v2.json). The v2 deployment record used two confirmations and did not assert finality; this is distinct from the finalized earlier lifecycle receipts.
 
-**Privacy boundary.** Raw preferences and individual interpretations are scoped to the submitting participant and authorized server processing. Kiln and search services process requirements supplied to them. Other group members see progress, shared candidates and public plan terms. This is application-level privacy: wallet activity is public, and a small group may infer a preference from the outcome.
+[Contract behavior](docs/BLOCKCHAIN.md) · [Policy encoding](docs/POLICY_ENCODING.md)
 
-**Real-world boundary.** Listings do not verify venue availability, USDC acceptance, allergy safety or service delivery. Unknown facts stay labelled; on-chain payment enforcement does not verify those facts.
+</details>
 
 ## How to Run
 
@@ -222,7 +234,7 @@ For connected development, create an ignored `.env.development` from [`.env.exam
 | Wallet actions | Sepolia RPC, the deployed contract addresses above, a browser wallet, USDC and Sepolia gas. |
 | Payment execution | A running processor with test executor/signers. Follow [processor setup](docs/HYBRID_PC.md). |
 
-The migration command expects an isolated branch named `dev-preferences` and matching `NEON_BRANCH=dev-preferences`. Apply all checked-in migrations through **`0018_group_before_search.sql`** before running the current web app and processor:
+The migration command expects an isolated branch named `dev-preferences` and matching `NEON_BRANCH=dev-preferences`. Apply all checked-in migrations before running the current web app and processor:
 
 ```sh
 pnpm db:migrate:dev
@@ -249,6 +261,7 @@ This reads existing evidence and chain records; it needs no participant keys, da
 
 ## Further Reading
 
-[Demo operation](docs/EXPLORE_DEMO.md) · [Friends planning](docs/LIVE_GROUP_PLANS.md) · [Live search](docs/LIVE_RESTAURANT_SEARCH.md) · [v2 wallet](docs/GROUP_WALLET_V2.md) · [Contributing](CONTRIBUTING.md)
-
-Historical fixture data remains in the [200-example catalog](data/demo/catalog-archive.json), with its planner at `/demo/catalog`. The [direct-contract baseline](docs/evidence/baseline-001.json) and legacy KAGAMI sessions remain evidence for their original flows.
+- [Product rules](docs/PRODUCT_RULES.md) — the current intended experience.
+- [Friends planning](docs/LIVE_GROUP_PLANS.md) and [demo operation](docs/EXPLORE_DEMO.md) — setup, behavior and recovery.
+- [Group acceptance record](docs/GROUP_ACCEPTANCE.md) — the published runs in detail.
+- [Contributing](CONTRIBUTING.md) and [agent instructions](AGENTS.md) — working on the project.
