@@ -227,3 +227,20 @@ export function groupChainTransaction(
     }),
   };
 }
+
+// Read/simulate only. This function never signs or submits a transaction.
+export async function prepareGroupChainAction(
+  client: PublicClient,
+  saved: SigningPolicy,
+  config: GroupPolicyConfig,
+  actor: Address,
+  action: GroupChainAction,
+) {
+  const state = await readGroupChain(client, saved, config, actor, 1);
+  const tx = groupChainTransaction(saved, config, actor, state, action);
+  const estimate = await client.estimateGas({ ...tx, account: actor });
+  const gas = estimate + estimate / 5n;
+  if (gas <= 0n || gas > 16_000_000n) throw new Error("GAS_LIMIT_EXCEEDED");
+  await client.call({ ...tx, account: actor, gas });
+  return { state, gas: String(gas) };
+}

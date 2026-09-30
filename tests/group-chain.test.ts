@@ -5,6 +5,7 @@ import { hashPolicy, policySchema } from "../src/lib/policy.js";
 import {
   readGroupChain,
   groupChainTransaction,
+  prepareGroupChainAction,
   type GroupChainState,
 } from "../src/lib/group-chain.js";
 
@@ -51,6 +52,81 @@ const state: GroupChainState = {
   allowance: "10000000",
   refund: "0",
 };
+
+test("server preflight simulates exact policy calldata and cannot submit transactions", async () => {
+  const calls: unknown[] = [];
+  const client = {
+    getChainId: async () => 11155111,
+    getBlockNumber: async () => 10n,
+    getBlock: async () => ({ hash: "stable", timestamp: 1900000000n }),
+    readContract: async ({ functionName }: { functionName: string }) => {
+      if (functionName === "token") return policy.token;
+      if (functionName === "getDecision")
+        return [saved.policyHash, 0, 0n, 0n, 0n, 0n];
+      if (functionName === "balanceOf") return 10000000n;
+      return 0n;
+    },
+    estimateGas: async (tx: unknown) => {
+      calls.push(tx);
+      return 100000n;
+    },
+    call: async (tx: unknown) => {
+      calls.push(tx);
+      return {};
+    },
+    sendTransaction: async () => {
+      assert.fail("preflight must never submit");
+    },
+  } as unknown as PublicClient;
+  const prepared = await prepareGroupChainAction(
+    client,
+    saved,
+    policy,
+    address(1),
+    "allowance",
+  );
+  const tx = groupChainTransaction(
+    saved,
+    policy,
+    address(1),
+    prepared.state,
+    "allowance",
+  );
+  assert.equal(prepared.gas, "120000");
+  assert.deepEqual(calls, [
+    { ...tx, account: address(1) },
+    { ...tx, account: address(1), gas: 120000n },
+  ]);
+  await assert.rejects(
+    prepareGroupChainAction(client, saved, policy, address(99), "allowance"),
+    /NOT_POLICY_PARTICIPANT/,
+  );
+  await assert.rejects(
+    prepareGroupChainAction(
+      { ...client, estimateGas: async () => 16000000n } as PublicClient,
+      saved,
+      policy,
+      address(1),
+      "allowance",
+    ),
+    /GAS_LIMIT_EXCEEDED/,
+  );
+  await assert.rejects(
+    prepareGroupChainAction(
+      {
+        ...client,
+        call: async () => {
+          throw new Error("simulation failed");
+        },
+      } as unknown as PublicClient,
+      saved,
+      policy,
+      address(1),
+      "allowance",
+    ),
+    /simulation failed/,
+  );
+});
 
 test("group transactions reject changed actors, deployment, expired policies and altered chain identity", () => {
   assert.throws(

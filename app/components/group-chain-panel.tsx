@@ -13,7 +13,6 @@ import { sepolia } from "viem/chains";
 import type { SigningPolicy } from "../../src/lib/group-policy";
 import {
   groupChainTransaction,
-  readGroupChain,
   type GroupChainAction,
   type GroupChainState,
 } from "../../src/lib/group-chain";
@@ -35,6 +34,12 @@ const labels: Record<GroupChainAction, string> = {
   refund: "Claim your refund",
 };
 const messages: Record<string, string> = {
+  CHAIN_PREFLIGHT_FAILED:
+    "The network could not verify this transaction. No wallet request was sent. Refresh the chain status and try again.",
+  POLICY_CHANGED:
+    "The saved payment terms changed. Reload this page before continuing.",
+  REGISTRATION_UNAVAILABLE:
+    "Registration is no longer available. The policy may be registered already or expired; refresh the chain status.",
   WALLET_READ_TIMEOUT:
     "Your wallet's network check timed out before submission. Check MetaMask's Sepolia connection, then try again.",
   WRONG_WALLET:
@@ -224,17 +229,19 @@ export function GroupChainPanel({
       );
       await ensureSepolia(provider);
       setStage("Checking the policy and estimating the network fee…");
-      const reader = createPublicClient({
-        chain: sepolia,
-        transport: custom(provider, { retryCount: 0 }),
-      });
-      const fresh = await readGroupChain(
-        reader,
-        saved,
-        groupPolicyConfigFor(saved.policy),
-        actor,
-        1,
+      const preparation = await fetch(
+        `/api/groups/${encodeURIComponent(groupId)}/chain-transaction`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, policyHash: saved.policyHash }),
+          signal: AbortSignal.timeout(60_000),
+        },
       );
+      const prepared = await preparation.json();
+      if (!preparation.ok)
+        throw new Error(prepared.error ?? "CHAIN_PREFLIGHT_FAILED");
+      const fresh = prepared.state as GroupChainState;
       const tx = groupChainTransaction(
         saved,
         groupPolicyConfigFor(saved.policy),
@@ -242,18 +249,14 @@ export function GroupChainPanel({
         fresh,
         action,
       );
-      // Simulation catches concurrent registration/contribution and token failures before signing.
-      const estimate = await reader.estimateGas({
-        ...tx,
-        account: actor,
-        gas: 16_000_000n,
-      });
-      const gas = estimate + estimate / 5n;
-      if (gas > 16_000_000n)
+      // Encode locally from the saved policy; the server cannot substitute calldata.
+      const gas = BigInt(prepared.gas);
+      if (gas <= 0n || gas > 16_000_000n)
         throw new Error("Transaction exceeds the supported gas limit.");
-      await reader.call({ ...tx, account: actor, gas });
       await checkAccount();
-      if ((await reader.getChainId()) !== sepolia.id)
+      if (
+        Number(await provider.request({ method: "eth_chainId" })) !== sepolia.id
+      )
         throw new Error("WRONG_CHAIN");
       const wallet = createWalletClient({
         account: actor,

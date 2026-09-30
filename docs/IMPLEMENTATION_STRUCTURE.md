@@ -91,6 +91,12 @@ The worker funds actual policy shares where applicable. Funding assistance never
 
 Keep wallet errors visible across background status polling, distinguish cancellation and an already-open wallet request, and explain automatic test funding consistently. These limits/progress stages are implementation choices, not changes to authorization or contract terms.
 
+### Server preflight before browser signing
+
+Friends actions POST to `/api/groups/:groupId/chain-transaction` with only the action and expected policy hash. Require the same-origin JSON request, authenticated membership and the current saved hash. `prepareGroupChainAction` uses the configured server RPC to read canonical state, validate action eligibility, estimate gas and simulate the transaction. Return state and the bounded gas estimate; never sign, broadcast or mutate payment terms. RPC details/credentials are not returned. The browser allows 60 seconds for this read-only preparation.
+
+The browser independently encodes transaction destination/calldata from its saved immutable policy and the verified actor/state. It validates the gas bound, rechecks wallet account and Sepolia, then requests MetaMask approval. Do not perform the full contract-reading preflight through an injected wallet provider: server RPC success does not imply the extension's RPC handles contract errors identically. Browser submission/receipt tracking and separate human approval remain mandatory. Tests of server simulation do not establish that a user's wallet popup or transaction succeeded.
+
 ## Demo separation
 
 Explore demo retains one real user plus five distinct automated wallets/opinions. All six opinions feed the shared decision. The user signs only for themselves; automation handles the five disclosed demo accounts. Keep the explicit Take a seat start screen and repeat-session history/refund rights.

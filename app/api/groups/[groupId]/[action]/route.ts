@@ -3,7 +3,10 @@ import { notifyJob } from "../../../../../src/lib/jobs/client.js";
 import { z } from "zod";
 import { createPublicClient, getAddress, http } from "viem";
 import { sepolia } from "viem/chains";
-import { readGroupChain } from "../../../../../src/lib/group-chain.js";
+import {
+  readGroupChain,
+  prepareGroupChainAction,
+} from "../../../../../src/lib/group-chain.js";
 import {
   createKilnClient,
   KilnError,
@@ -95,6 +98,59 @@ export async function POST(request: NextRequest, context: Context) {
     verifyOrigin(request);
     const { groupId, action } = await context.params;
     const actor = await sessionWallet(request);
+    if (action === "chain-transaction") {
+      const body = z
+        .strictObject({
+          action: z.enum([
+            "register",
+            "allowance",
+            "contribute",
+            "cancel",
+            "refund",
+          ]),
+          policyHash: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+        })
+        .parse(await request.json());
+      const overview = await services().preferences.getOverview(groupId, actor);
+      const saved = overview.signingPolicy;
+      if (!saved || saved.policyHash !== body.policyHash)
+        return apiFailure(409, "POLICY_CHANGED");
+      if (!process.env.RPC_URL) return apiFailure(503, "CHAIN_UNAVAILABLE");
+      try {
+        const client = createPublicClient({
+          chain: sepolia,
+          transport: http(process.env.RPC_URL, {
+            timeout: 15000,
+            retryCount: 0,
+          }),
+        });
+        return NextResponse.json(
+          await prepareGroupChainAction(
+            client,
+            saved,
+            groupPolicyConfigFor(saved.policy),
+            getAddress(actor),
+            body.action,
+          ),
+        );
+      } catch (error) {
+        const code = error instanceof Error ? error.message : "";
+        const safe = [
+          "REGISTRATION_UNAVAILABLE",
+          "CONTRIBUTION_UNAVAILABLE",
+          "INSUFFICIENT_MOCKUSDC",
+          "ALLOWANCE_REQUIRED",
+          "ALLOWANCE_ALREADY_SUFFICIENT",
+          "REFUND_UNAVAILABLE",
+          "CANCELLATION_UNAVAILABLE",
+          "GAS_LIMIT_EXCEEDED",
+        ];
+        return apiFailure(
+          409,
+          safe.includes(code) ? code : "CHAIN_PREFLIGHT_FAILED",
+        );
+      }
+    }
     if (action === "live-preferences") {
       const body = z
         .strictObject({
