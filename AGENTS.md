@@ -2,6 +2,17 @@
 
 Before planning or editing project code, read [docs/PRODUCT_RULES.md](docs/PRODUCT_RULES.md). Follow this mandatory product contract throughout implementation and review.
 
+## Record design and structure decisions
+
+- Also read [docs/IMPLEMENTATION_STRUCTURE.md](docs/IMPLEMENTATION_STRUCTURE.md) before changing a flow or architecture.
+- Record every new or changed agent design decision in the same change as its implementation: user flows, component responsibilities, API contracts, stored state, money formulas, source precedence, validation, retries/failures, privacy projections and compatibility.
+- Keep mandatory behavior in AGENTS.md and PRODUCT_RULES.md; keep detailed structures and file maps in IMPLEMENTATION_STRUCTURE.md. Chat messages and code comments alone are not sufficient documentation.
+- Distinguish owner-confirmed requirements from agent implementation choices. Record assumptions and unresolved decisions; never present an agent choice as an owner-approved requirement.
+- Update all affected friends/demo paths and their documentation together. Check that code and documents agree before reporting completion. Historical evidence remains historical, not proof of the current implementation.
+- Never record secrets, signing keys or identifiable private preferences/health details in design documentation.
+
+## General implementation rules
+
 - Follow the owner's latest explicit decisions. When they change a product rule, update PRODUCT_RULES.md and affected behavior together.
 - PRODUCT_RULES.md takes precedence over conflicting historical product descriptions in project_guideline.md, archived flows, examples and verification records. Preserve the technical specification's privacy, authentication and contract invariants.
 - Current code is not proof of intended behavior. Identify all user paths affected by a rule and check them. Never substitute candidate browsing for one AI-selected proposal.

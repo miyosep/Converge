@@ -4,6 +4,8 @@ Status: mandatory product contract, confirmed by the owner on 2026-09-30.
 
 ## Authority
 
+Implementation structures, file responsibilities, calculation choices and failure handling are maintained in [IMPLEMENTATION_STRUCTURE.md](IMPLEMENTATION_STRUCTURE.md). Update that document alongside each design change; distinguish owner requirements from agent implementation choices.
+
 Read this document before project work. Root AGENTS.md establishes it as a standing instruction for coding agents. The owner's latest explicit decisions supersede this document; update the contract and affected implementation together when decisions change.
 
 This is the source of truth for current product behavior, not evidence that everything has been verified in production. Historical specifications, fixtures, screenshots and acceptance records do not override it. project_guideline.md remains the technical specification for privacy, authentication, contracts and execution. Identify unresolved conflicts instead of inventing a new product flow.
