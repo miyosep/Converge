@@ -37,3 +37,9 @@ Before planning or editing project code, read [docs/PRODUCT_RULES.md](docs/PRODU
 - Preserve the source, currency and per-person/group unit. A price range is not an exact payable quote, and a meal budget is not automatically a reservation deposit. Do not invent a price, exchange rate, deposit percentage or an amount when data is missing.
 - Show the calculated total, individual share and whether it is a price-based estimate or budget-based test payment before wallet approval. Each participant still approves separately.
 - Keep manual amount/recipient setup forms removed. Existing signed policies remain immutable; new calculation rules apply to new decisions. Collect only a PARTIAL reservation deposit derived from the supported restaurant price or confirmed budget, never the full meal price/budget. The owner confirmed a 30% deposit. Collect exactly 30% of the supported price/budget basis, subject only to token precision rounding. Never automatically collect the remaining 70%.
+
+## Reported allergy: stop automated planning
+
+- Latest owner decision: any explicitly reported allergy in confirmed group preferences blocks automated venue search/selection and new payment preparation, in BOTH friends and demo. This supersedes the former allergy-compatible-alternative rule.
+- Do not treat no-allergy statements, ordinary dislikes or non-allergic food avoidance as a reported allergy. Never suggest removing a genuine allergy to proceed.
+- Keep the shared blocking message private: do not identify the member or allergen. Existing immutable policies and refund rights must not be rewritten.

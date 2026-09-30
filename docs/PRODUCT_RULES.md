@@ -35,7 +35,9 @@ A group plans to eat together at one restaurant. Ordinary taste differences requ
 
 Words such as must, only, never or need do not make an ordinary wish Required. Do not infer an allergy from a dislike, or a medical restriction from liking vegetables. Preserve amounts, units and currencies without conversion. A preferred meal budget is not authorization to charge any amount.
 
-An allergy alone does not prevent dining together: seek an alternative that accommodates it. For example, a milk allergy means looking for dairy-free options, not abandoning the outing. Missing menu/allergen evidence must remain an explicit confirmation item on a provisional proposal, not be treated as proof that every venue is incompatible. If indispensable conditions genuinely cannot coexist, stop the proposal rather than silently relaxing them. Unknown venue evidence proves neither safety nor incompatibility. Do not claim verified allergy safety, accessibility, price or availability from incomplete listings.
+Latest owner decision: if any confirmed member preference reports an allergy, stop automated planning for the entire group before xAPI search or Qwen venue selection. Do not seek an allergy-compatible alternative in this product flow. Block new payment preparation from such preferences, including proposals saved before this rule changed. This applies to friends and demo. Explicit absence of allergies, ordinary dislikes and non-allergic avoidance are not allergy reports. Never encourage deleting or weakening an actual health requirement. Shared messages must not expose the member or allergen.
+
+For groups without a reported allergy, continue to compromise on ordinary preferences. Unknown venue evidence proves neither safety nor incompatibility; medically necessary restrictions and essential access still require honest evidence handling. Preserve existing immutable policies and refund rights.
 
 Apply this rule to friends, demo interpretation, search and final selection, including older saved preference labels. Never silently rewrite approved financial policies. Actual payment terms always need explicit approval.
 

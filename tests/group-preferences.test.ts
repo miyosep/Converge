@@ -6,6 +6,7 @@ import {
   recommendForGroup,
   recommendOneForGroup,
   choicePlaceIdSchema,
+  hasReportedAllergy,
 } from "../src/lib/discovery/group-preferences.js";
 const preferences = [
   {
@@ -31,6 +32,56 @@ const base = {
   startsAt: "2030-01-05T10:00:00Z",
   preferences,
 };
+
+test("reported allergies block the whole group before planner or search; absence and dislikes do not", async () => {
+  for (const text of [
+    "Milk allergy",
+    "Allergic to peanuts",
+    "우유 알레르기",
+    "새우 알러지",
+  ]) {
+    assert.equal(hasReportedAllergy({ requirements: [{ text }] }), true);
+    const result = await recommendForGroup({
+      ...base,
+      preferences: [
+        {
+          requirements: [{ text, importance: "required" }],
+          clarifications: [],
+        },
+        preferences[1]!,
+      ],
+      client: { complete: async () => assert.fail("must not plan") } as any,
+      fetchImpl: async () => {
+        assert.fail("must not search");
+      },
+    });
+    assert.deepEqual(result.places, []);
+    assert.equal(result.conflicts.length, 1);
+    assert.equal(result.query, "");
+    assert.equal(JSON.stringify(result).includes(text), false);
+  }
+  for (const text of [
+    "No allergies",
+    "No specific allergy",
+    "No milk allergy",
+    "Not allergic to milk",
+    "Dislike milk",
+    "Lactose intolerance",
+    "알레르기 없음",
+  ]) {
+    assert.equal(hasReportedAllergy({ requirements: [{ text }] }), false, text);
+  }
+  assert.equal(
+    hasReportedAllergy({ hasAllergy: true, requirements: [] }),
+    true,
+  );
+  assert.equal(
+    hasReportedAllergy({
+      requirements: [{ text: "No milk allergy but peanut allergy" }],
+    }),
+    true,
+  );
+});
 function client(output: unknown, inspect: (body: any) => void = () => {}) {
   return createKilnClient({
     apiKey: "test",

@@ -10,7 +10,7 @@ Read [PRODUCT_RULES.md](PRODUCT_RULES.md) and [AGENTS.md](../AGENTS.md) first. T
 
 - Collect all group opinions before searching; Qwen selects one shared proposal from internal xAPI candidates.
 - My plans serves actual friends. Explore demo serves one human and five automated participants.
-- Only indispensable safety/access needs are Required; ordinary preferences and budgets are Preferred. Allergies call for suitable alternatives, not automatic cancellation.
+- Only indispensable safety/access needs are Required; ordinary preferences and budgets are Preferred. A confirmed allergy blocks automated planning under the latest owner decision.
 - Each real participant separately agrees and authorizes payment.
 - No manual payment amount or recipient forms. Preserve the My plans photo welcome even when saved plans exist.
 - Friends use Sepolia test payments with a server-configured test recipient. Derive the amount from restaurant pricing or confirmed budgets; collect a 30% partial deposit. Never automatically collect the remaining 70%.
@@ -48,7 +48,7 @@ Membership, preference and search changes invalidate stale agreements. Legacy mu
 ### Evidence, privacy and failure states
 
 - `choicePlaceIdSchema` permits a null choice only when every candidate has explicit conflicting evidence. Unknown evidence cannot itself justify rejecting every place. Invalid model output fails validation rather than becoming a fabricated safety conflict.
-- Unknown allergen/menu/access facts remain verification items; a provisional proposal is not a claim of verified safety.
+- An explicit allergy now blocks the whole group before search; unknown menu/access facts for other groups remain verification items. A provisional proposal is not a claim of verified safety.
 - `publicReasonsSchema` and `publicChoiceExplanation` map allowlisted reason codes to neutral public text. Raw model rationale must not expose an individual's private preferences or health information.
 - Recommendation states distinguish idle, searching, ready, empty, blocked and failed. Persisted search token/start time drive the active-search projection, with a 240-second window. Hide stale no-result/conflict messages while searching.
 - Provider failure, no search results and genuine indispensable incompatibility are different outcomes. Do not label them all as conflicting preferences.
@@ -124,3 +124,9 @@ Use Home/My plans styling, concise copy and existing approved visuals. Keep impl
 - Update focused tests for meaningful behavior and run relevant type/format checks.
 - State whether verification was local, mocked, provider-backed or an actual production wallet transaction. A successful build/deployment is not payment verification.
 - Commit and deploy using the prescribed worktrees; preserve Desktop files, worker configuration and unrelated changes.
+
+## Reported-allergy stop rule (supersedes alternative-venue behavior)
+
+Friends and demo interpretation request a private `hasAllergy` boolean and preserve the reported allergy as a Required condition. The field is optional for compatibility with old saved extractions. `hasReportedAllergy` accepts a positive flag and also detects explicit allergy text in older confirmed requirements, excluding absence statements. Do not infer an allergy from a dislike or non-allergic intolerance.
+
+`recommendForGroup` returns no places and a neutral blocking message before calling the search planner or xAPI. Both friends and demo use this gate. `chooseDemoPlace` also rejects allergy-bearing input before selection for previously obtained candidates. Friends repository `prepare` rejects new payment terms with `ALLERGY_REPORTED`, so a historical proposal cannot bypass the rule. Previously saved immutable policies are returned unchanged; do not rewrite approvals, completed payments or refund rights. No private member/allergen details are returned in the group message.

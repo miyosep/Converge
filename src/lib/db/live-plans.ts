@@ -16,6 +16,7 @@ import type { GroupPolicyConfig } from "../group-policy.js";
 import { hashPolicy, policySchema } from "../signing-policy.js";
 import {
   livePreferenceSchema,
+  hasReportedAllergy,
   type LivePreference,
 } from "../discovery/group-preferences.js";
 
@@ -511,6 +512,8 @@ export class LivePlanRepository {
         groupId,
         group.target_member_count,
       );
+      if (confirmed.preferences.some(hasReportedAllergy))
+        throw new LivePlanError("ALLERGY_REPORTED");
       if (
         (group.snapshot as LivePlan).places.length !== 1 ||
         !group.snapshot.recommendationReady ||

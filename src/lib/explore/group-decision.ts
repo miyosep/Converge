@@ -9,6 +9,8 @@ import {
   publicReasonsSchema,
   PUBLIC_REASON_RULE,
   publicChoiceExplanation,
+  hasReportedAllergy,
+  ALLERGY_BLOCK_MESSAGE,
 } from "../discovery/group-preferences";
 import type { DiscoveredPlace } from "../discovery/types";
 import { EXPLORE_SEARCH_LOCATION } from "../discovery/types";
@@ -65,6 +67,15 @@ export async function chooseDemoPlace(
   members: DemoGroupMember[],
   places: DiscoveredPlace[],
 ) {
+  if (members.some((member) => hasReportedAllergy(member.preference))) {
+    return {
+      placeId: null,
+      consideredMembers: members.map((member) => member.address),
+      rationale: ALLERGY_BLOCK_MESSAGE,
+      uncertainties: [],
+      publicReasons: [],
+    };
+  }
   if (!places.length) throw new Error("NO_GROUP_CANDIDATES");
   const schema = choiceSchema.extend({ placeId: choicePlaceIdSchema(places) });
   const choice = await client.complete({

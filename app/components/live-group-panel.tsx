@@ -110,6 +110,8 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
         const messages: Record<string, string> = {
           PAYMENT_BASIS_MISSING:
             "No usable restaurant price or confirmed budget is available. Include a budget and currency in your preferences, then confirm and search again.",
+          ALLERGY_REPORTED:
+            "This group cannot continue automated planning under the current safety rule. Keep your confirmed health requirements unchanged.",
           PAYMENT_RATE_UNAVAILABLE:
             "The currency rate could not be verified. Please try again; no payment terms were created.",
           PREFERENCES_NOT_CONFIRMED:
