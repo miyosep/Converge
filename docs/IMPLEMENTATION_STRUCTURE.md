@@ -134,3 +134,7 @@ Friends and demo interpretation request a private `hasAllergy` boolean and prese
 ## Submission evidence organization
 
 README is the judge-facing entry point; EVIDENCE_INDEX.md maps paired historical Kiln/Sepolia flows and separate provider/code checks. `scripts/verify-submission-proof.ts` reads only published synthetic artifacts and Sepolia RPC, verifies three payment receipts/events against canonical blocks and finalized height, and outputs a summary. It never signs, calls Kiln again, edits original artifacts or reads private participant data. The saved report is a dated recheck, not evidence of new application executions. Keep current product behavior and historical evidence scope explicitly separate in submission documentation.
+
+### README presentation
+
+The judge-facing README uses a repository-owned SVG banner (`docs/assets/readme-hero.svg`) with Home's cream/brick palette, static technology badges, a three-column flow summary and one consolidated architecture section. Keep per-flow transaction hashes and Kiln call logs directly reachable from the header; keep historical evidence boundaries intact. Do not add allergy-blocking policy copy to README (owner request). The banner is illustrative, not a product screenshot or evidence of a completed run.

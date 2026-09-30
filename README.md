@@ -1,49 +1,44 @@
-# Converge
+<h1 align="center">
+  <img src="docs/assets/readme-hero.svg" alt="Converge — Different people. One shared plan." width="1200" />
+</h1>
 
-### AI proposes. Humans approve. Smart contracts enforce.
+<p align="center">
+  Private preferences become one shared decision.<br />
+  Everyone has a say. Every payment needs approval.
+</p>
 
-> Converge is a multi-user purchasing agent and programmable wallet that converts private group preferences into a jointly approved purchase and allows an AI agent to execute it only within smart-contract-enforced spending conditions.
+<p align="center">
+  <img alt="GWDC 2026 — Track A" src="https://img.shields.io/badge/GWDC_2026-Track_A-a6403c?style=flat-square&amp;labelColor=292d28" />
+  <img alt="Kiln — Qwen3 32B" src="https://img.shields.io/badge/Kiln-Qwen3_32B-a6403c?style=flat-square&amp;labelColor=292d28" />
+  <img alt="Search — xAPI" src="https://img.shields.io/badge/Search-xAPI-697969?style=flat-square&amp;labelColor=292d28" />
+  <img alt="Ethereum — Sepolia" src="https://img.shields.io/badge/Ethereum-Sepolia-697969?style=flat-square&amp;labelColor=292d28" />
+</p>
 
-Friends want to have dinner together. One wants something affordable. Another prefers Japanese food. Someone would love a quiet place where everyone can catch up.
+<p align="center">
+  <a href="https://converge-iota-seven.vercel.app/demo"><strong>Try the demo →</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://converge-iota-seven.vercel.app/discover">Plan with friends</a>
+  &nbsp; · &nbsp;
+  <a href="#per-flow-on-chain-proof-and-kiln-logs">On-chain proof &amp; Kiln logs</a>
+</p>
 
-Finding a place is only the beginning. Everyone still needs to agree, work out the payment and trust that the plan will stay within what they approved.
-
-**Converge helps the group get there, one shared decision at a time.**
-
-[Try it on your own →](https://converge-iota-seven.vercel.app/demo) · [Start a plan with friends](https://converge-iota-seven.vercel.app/discover) · [View recorded runs](https://converge-iota-seven.vercel.app/evidence)
-
-Built for **GWDC 2026 · Track A**, using **Kiln** and **Ethereum Sepolia**.
+---
 
 ## For Judges
 
-1. [Try Explore demo](https://converge-iota-seven.vercel.app/demo): one human plus five disclosed automated participants.
-2. [Inspect paired on-chain proof and Kiln logs](#per-flow-on-chain-proof-and-kiln-logs): three recorded acceptance flows, with full hashes below.
-3. [Verify the published receipts](#verify-the-submission-proof) without signing keys or new payments.
-4. [Review evidence scope and code](docs/EVIDENCE_INDEX.md): historical recordings and current implementation are clearly separated.
+| Experience it                                                                                             | Inspect the proof                                                                                              | Review the code                                                                                      |
+| :-------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| [**Explore demo →**](https://converge-iota-seven.vercel.app/demo)<br />You + five automated participants. | [**Transactions + Kiln logs →**](#per-flow-on-chain-proof-and-kiln-logs)<br />Three recorded acceptance flows. | [**Evidence & implementation →**](docs/EVIDENCE_INDEX.md)<br />Scope, source files and verification. |
 
-## How It Works
+## From “we should” to one shared plan
 
-### First, everyone gets a say
+| 01 · Everyone gets a say                                                  | 02 · Find one place                                                                  | 03 · Approve together                                                          |
+| :------------------------------------------------------------------------ | :----------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| Share preferences privately. Review the AI interpretation and confirm it. | Qwen combines everyone's opinions, searches through xAPI and proposes **one place**. | Agree separately, review exact terms and approve your own wallet contribution. |
 
-Start a plan and invite your friends. Each person shares their preferences privately, then reviews how the AI understood them. You can correct the interpretation before confirming it.
+Converge waits for every expected member. The contract checks the approved payment conditions before funds move, and eligible unused funds can be claimed back. The model never signs for a real participant.
 
-Converge waits for everyone. In a friends group, every participant is a real member with their own wallet.
-
-### Then, find one place together
-
-Once everyone has confirmed, the agent combines their opinions, searches real place listings through xAPI and proposes **one place for the group**, with a short explanation of its choice.
-
-Different tastes call for compromise. Qwen balances the group's preferences to propose one shared place. Unknown venue facts remain unverified.
-
-Each friend decides whether to agree with the proposal. Agreeing on dinner does not yet authorize a payment.
-
-### Finally, approve what can be spent
-
-After the group agrees, Converge presents the prepared payment terms: who receives the payment, the exact amount and each person's share. Everyone reviews those terms and approves their own contribution through their wallet.
-
-Only then can the agent request payment. The smart contract checks the approved conditions before moving funds, and eligible unused funds can be claimed back.
-
-**Today, this is a testnet experience.** Payments use a test USDC token on Sepolia and a configured test recipient. The token has no claim on real USDC, and booking confirmation is simulated. Converge does not currently reserve or pay a real restaurant.
+> **Testnet experience.** Sepolia MockUSDC and a configured test recipient. Booking confirmation is simulated; no real restaurant is booked or paid.
 
 ## Try the Demo
 
@@ -94,14 +89,14 @@ The agent connects three parts of a group decision: understanding what people me
 ## Architecture
 
 ```mermaid
-flowchart TD
-    A["Friends share and confirm preferences"] --> B["Kiln combines everyone's opinions"]
-    B --> C["xAPI finds places; Kiln proposes one"]
-    C --> D["Each friend agrees and approves payment terms"]
-    D --> E["Wallet contributions"]
-    E --> F["Executor requests the permitted payment"]
-    F --> G["Sepolia contract checks the terms"]
-    G --> H["Receipt and eligible refunds"]
+flowchart LR
+    A["Private preferences"] --> B["Kiln + xAPI<br/>One proposal"]
+    B --> C["Individual approvals"]
+    C --> D["Sepolia payment<br/>Eligible refunds"]
+    classDef warm fill:#f8f5ef,stroke:#d9cdbd,color:#292d28;
+    classDef accent fill:#a6403c,stroke:#a6403c,color:#fffaf4;
+    class A,C warm;
+    class B,D accent;
 ```
 
 The Next.js app handles the shared experience and interactive provider calls. Neon stores preferences, agreements and transaction state. A background PC worker handles long-running demo jobs and payment reconciliation. Credentials and signing keys stay on the server or worker.
@@ -119,7 +114,20 @@ The earlier catalog-based flow uses deterministic filtering and scoring. Its evi
 
 </details>
 
-## Verification and Evidence
+### Code map
+
+| Component           | Responsibility / code                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Vercel web/API      | Wallet authentication, private preferences and group actions in `app/`                                                    |
+| Neon Postgres       | Durable groups, revisions, agreements and policies: [live-plans.ts](src/lib/db/live-plans.ts)                             |
+| Kiln + xAPI         | All confirmed opinions → internal search → one proposal: [group-preferences.ts](src/lib/discovery/group-preferences.ts)   |
+| Always-on PC worker | Durable jobs, test funding, execution and reconciliation: [hybrid-worker.ts](scripts/hybrid-worker.ts)                    |
+| Browser wallet      | Each real member signs separately: [GroupChainPanel](app/components/group-chain-panel.tsx)                                |
+| Sepolia contracts   | Approved spending and refunds: [v1](contracts/src/ConvergeGroupWallet.sol), [v2](contracts/src/ConvergeGroupWalletV2.sol) |
+
+The worker never signs for real friends. Users do not operate the worker. Detailed API/state/calculation decisions live in [IMPLEMENTATION_STRUCTURE.md](docs/IMPLEMENTATION_STRUCTURE.md).
+
+## Proof you can inspect
 
 You can follow a payment all the way from the confirmed inputs to its on-chain receipt.
 
@@ -247,19 +255,6 @@ Deployment records: [v1](contracts/deployments/11155111.json) · [v2](contracts/
 [Contract behavior](docs/BLOCKCHAIN.md) · [Policy encoding](docs/POLICY_ENCODING.md)
 
 </details>
-
-## Architecture and Code Map
-
-| Component           | Responsibility / code                                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Vercel web/API      | Wallet authentication, private preferences and group actions in `app/`                                                    |
-| Neon Postgres       | Durable groups, revisions, agreements and policies: [live-plans.ts](src/lib/db/live-plans.ts)                             |
-| Kiln + xAPI         | All confirmed opinions → internal search → one proposal: [group-preferences.ts](src/lib/discovery/group-preferences.ts)   |
-| Always-on PC worker | Durable jobs, test funding, execution and reconciliation: [hybrid-worker.ts](scripts/hybrid-worker.ts)                    |
-| Browser wallet      | Each real member signs separately: [GroupChainPanel](app/components/group-chain-panel.tsx)                                |
-| Sepolia contracts   | Approved spending and refunds: [v1](contracts/src/ConvergeGroupWallet.sol), [v2](contracts/src/ConvergeGroupWalletV2.sol) |
-
-The worker never signs for real friends. Users do not operate the worker. Detailed API/state/calculation decisions live in [IMPLEMENTATION_STRUCTURE.md](docs/IMPLEMENTATION_STRUCTURE.md).
 
 ## How to Run
 

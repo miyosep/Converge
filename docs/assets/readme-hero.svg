@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+  <title id="title">Converge — Different people. One shared plan.</title>
+  <desc id="desc">A warm cream banner with six colored participant circles joining one brick-red shared plan. AI proposes, humans approve, smart contracts enforce.</desc>
+  <rect width="1200" height="400" rx="28" fill="#f8f5ef"/>
+  <rect x="1" y="1" width="1198" height="398" rx="27" fill="none" stroke="#e2d9cd" stroke-width="2"/>
+  <text x="58" y="62" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="3" fill="#a6403c">A LITTLE MORE TOGETHER</text>
+  <text x="54" y="157" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="700" letter-spacing="-4" fill="#292d28">Converge</text>
+  <text x="58" y="215" font-family="Georgia, 'Times New Roman', serif" font-size="33" font-style="italic" fill="#a6403c">Different people. One shared plan.</text>
+  <text x="59" y="258" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#646860">AI proposes. Humans approve. Smart contracts enforce.</text>
+  <path d="M58 296H643" stroke="#ded7cb"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5" fill="#66685f">
+    <text x="59" y="336">PRIVATE PREFERENCES</text>
+    <text x="291" y="336">SHARED AGREEMENT</text>
+    <text x="513" y="336">ON-CHAIN TRUST</text>
+  </g>
+  <g fill="none" stroke="#d7cdbf" stroke-width="2">
+    <path d="M797 82C900 82 865 200 992 200"/>
+    <path d="M797 130C895 130 889 200 992 200"/>
+    <path d="M797 178C900 178 900 200 992 200"/>
+    <path d="M797 226C900 226 900 200 992 200"/>
+    <path d="M797 274C895 274 889 200 992 200"/>
+    <path d="M797 322C900 322 865 200 992 200"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" font-size="17" text-anchor="middle" fill="#494c43">
+    <circle cx="781" cy="82" r="21" fill="#edd1c8"/><text x="781" y="88">01</text>
+    <circle cx="781" cy="130" r="21" fill="#e7d8b9"/><text x="781" y="136">02</text>
+    <circle cx="781" cy="178" r="21" fill="#d5dfd1"/><text x="781" y="184">03</text>
+    <circle cx="781" cy="226" r="21" fill="#d0dce2"/><text x="781" y="232">04</text>
+    <circle cx="781" cy="274" r="21" fill="#ded2e0"/><text x="781" y="280">05</text>
+    <circle cx="781" cy="322" r="21" fill="#e6d9cd"/><text x="781" y="328">06</text>
+  </g>
+  <circle cx="1040" cy="200" r="64" fill="#a6403c"/>
+  <path d="m1013 200 18 18 35-39" fill="none" stroke="#fffaf4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1040" y="296" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-style="italic" fill="#484b42">One plan, together.</text>
+</svg>
