@@ -1,5 +1,7 @@
 # First Web Workflow
 
+**Current flow:** [PRODUCT_RULES.md](PRODUCT_RULES.md) is authoritative. Friends confirm all opinions before search; Qwen selects one shared venue from internal xAPI candidates, and each member agrees separately. Archived comparison flows below are historical compatibility context.
+
 ## Live place search and archived examples
 
 New-plan links at `/group/new` redirect to `/discover`. Kiln Qwen tool calling and

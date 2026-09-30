@@ -1,5 +1,7 @@
 # Converge Project Guideline
 
+**Current product authority:** [PRODUCT_RULES.md](docs/PRODUCT_RULES.md) supersedes historical product-flow descriptions below. Preserve this specification's privacy and contract invariants. Fixed six-person amounts, fixture catalogs and historical manual candidate selection are not the current friends UX.
+
 > AI proposes. Humans approve. Smart contracts enforce.
 
 Document status: implementation specification, not a report of completed work.
@@ -64,11 +66,11 @@ Six friends want to choose a restaurant together without sharing all of their pe
 
 Alice, Bob, Charlie, Dana, Erin, and Farah are demo participant personas, not engineering assignments.
 
-The default new-plan route `/group/new` now redirects to `/discover`. Kiln `qwen3-32b` selects a `search_places` tool call from an English request; the server executes xAPI Places search for restaurants, stays, spaces, sports facilities or classes. Results retain source links and unknown price/facility conditions, with comparison of up to five candidates. Nightly, hourly and total budgets keep their units. See `docs/LIVE_RESTAURANT_SEARCH.md` for configuration and measured verification.
+The default new-plan route `/group/new` redirects to `/discover`. Create the group and collect all confirmed opinions before search. Qwen combines the opinions, xAPI searches real places, and Qwen selects one shared proposal. Candidates stay internal; members agree separately to the proposal. Follow [PRODUCT_RULES.md](docs/PRODUCT_RULES.md) for importance classification and the full flow.
 
 For the hackathon, discovered places are assumed reservable with USDC: booking availability and USDC acceptance are not checked. The friends flow at `/discover` supports groups of 2–100 actual participants. After all members confirm preferences and agree on a place, the organizer sets a total MockUSDC test payment and recipient. The v2 policy divides the amount equally among the actual participants, rounding up to token base units, and requires every member's independent wallet approval and contribution. Any rounding remainder is refundable. The hybrid processor can supply missing test funds within the group execution budget. These test terms are not a venue quote or verified venue payment address. See `docs/LIVE_GROUP_PLANS.md`.
 
-In `/demo`, saved Gangnam Station restaurant candidates can be selected by the judge and bound to an immutable policy with a 1–60 MockUSDC demo deposit and the configured demo booking recipient. No real venue wallet is inferred. Six participants contribute 10 MockUSDC each; the five automated accounts follow disclosed demo terms. See `docs/LIVE_DEMO_BOOKING.md` for local-chain verification and remaining live rehearsal.
+In `/demo`, one user joins five automated participants with distinct opinions. Qwen combines all six opinions, xAPI searches Gangnam Station restaurants, and Qwen selects one shared proposal. The internal default test deposit is 45 MockUSDC, funded by six 10 MockUSDC contributions; the configured recipient is a test recipient, not a verified restaurant wallet. Do not show a deposit setup form; disclose actual terms before approval. Preserve repeat use with the same wallet and refund rights.
 
 The archived planning flow at `/demo/catalog` preserves 200 fictional examples, 40 per category, also saved in `data/demo/catalog-archive.json`. It supports groups of 2–100 with the deployed v2 contract. Explore Demo retains six participants; legacy sessions retain the original five candidates while new sessions use live search. Existing policies and historical acceptance evidence remain unchanged. The six-person specification below describes the original payment demo; see `docs/GROUP_WALLET_V2.md` for variable-size groups.
 

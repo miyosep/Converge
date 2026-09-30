@@ -1,5 +1,7 @@
 # Converge
 
+Current product contract: [Converge product rules](docs/PRODUCT_RULES.md). Coding agents must follow [AGENTS.md](AGENTS.md).
+
 ### AI proposes. Humans approve. Smart contracts enforce.
 
 Six friends want dinner together. Their budgets differ, some preferences are private, and someone still has to collect the money. Converge helps them agree on one plan—and gives an agent permission to pay exactly what they approved.
