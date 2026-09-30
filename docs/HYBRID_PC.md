@@ -170,7 +170,7 @@ all 31 local contract tests, including fuzz and invariant tests, then passed.
 
 ## Shared test payments and readiness
 
-After all real members confirm their preferences and vote for one place, the organizer can set a total Sepolia MockUSDC amount and test recipient. Each member's share is the total divided by the actual participant count, rounded up to the token's smallest unit; any rounding remainder is refundable. The saved policy freezes those terms; every member must review, approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens up to each member's required share and tops up eligible wallets toward a 0.001 Sepolia ETH balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` lifetime budget with group execution; no automated demo participant joins a real group.
+After all real members confirm their preferences and vote for one place, the organizer can continue to review prepared Sepolia test terms without entering an amount or recipient. Each member's share is the total divided by the actual participant count, rounded up to the token's smallest unit; any rounding remainder is refundable. The saved policy freezes those terms; every member must review, approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens up to each member's required share and tops up eligible wallets toward a 0.001 Sepolia ETH balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` lifetime budget with group execution; no automated demo participant joins a real group.
 
 The worker sends a heartbeat every 20 seconds during long jobs. Idle demo sessions without transactions or queued/in-flight work (including an unfunded draft policy) stop consuming admission capacity after 30 minutes. Their history remains available, and resumed work must reacquire capacity under the admission lock.
 
@@ -181,8 +181,9 @@ The current product contract rejects fixed per-person test-payment defaults.
 Use supported selected-restaurant pricing or confirmed participant budgets;
 GROUP_TEST_PAYMENT_PER_PERSON_USDC is a legacy implementation setting, not the
 accepted pricing rule. See PRODUCT_RULES.md and root AGENTS.md. The existing fixed
-amount code has not yet been replaced: the owner must clarify full price versus
-partial deposit, and source currencies/units must be handled explicitly.
+amount code has not yet been replaced. The owner confirmed a partial reservation
+deposit, never the full meal price/budget. The percentage still needs confirmation,
+and source currencies/units must be handled explicitly.
 
 GROUP_TEST_PAYMENT_RECIPIENT still configures the Sepolia test recipient; its
 fallback is the existing public merchant A test wallet, not a verified venue wallet.
