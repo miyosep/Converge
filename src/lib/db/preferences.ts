@@ -250,6 +250,7 @@ export class PreferenceRepository {
       is_creator: boolean;
       live_snapshot?: import("../discovery/live-plan.js").LivePlan;
       live_votes?: Record<string, string>;
+      live_searching?: boolean;
     }>(
       `SELECT g.id, g.name, g.reservation_starts_at, g.reservation_time_zone,
         g.creator_wallet=$2 AS is_creator, g.preferences_locked, g.target_member_count, g.permitted_restaurant_ids, e.id AS evaluation_id, e.created_at AS evaluated_at,
@@ -266,7 +267,8 @@ export class PreferenceRepository {
           )
         ) AS evaluation_current,
         policy.policy AS signing_policy, policy.policy_hash, policy.created_at AS policy_created_at,
-        live.snapshot AS live_snapshot, live.votes AS live_votes
+        live.snapshot AS live_snapshot, live.votes AS live_votes,
+        (live.search_token IS NOT NULL AND live.search_started_at > now() - interval '240 seconds') AS live_searching
        FROM converge_groups g
        JOIN converge_participants p ON p.group_id = g.id AND p.wallet_address = $2
        LEFT JOIN converge_evaluations e ON e.group_id = g.id
@@ -286,7 +288,13 @@ export class PreferenceRepository {
       throw new Error("Stored policy hash mismatch");
     return {
       ...(row.live_snapshot
-        ? { livePlan: { ...row.live_snapshot, votes: row.live_votes ?? {} } }
+        ? {
+            livePlan: {
+              ...row.live_snapshot,
+              searching: row.live_searching === true,
+              votes: row.live_votes ?? {},
+            },
+          }
         : {}),
       group: {
         isCreator: row.is_creator,

@@ -131,6 +131,40 @@ test("friends review unverified venue conditions and separate place choice from 
   assert.match(html, /Agree to this place/);
   assert.match(html, /Needs confirmation/);
   assert.doesNotMatch(html, /type="radio"/);
+  const searching = renderToStaticMarkup(
+    createElement(LiveGroupPanel, {
+      initial: {
+        ...overview,
+        livePlan: {
+          ...plan,
+          recommendationReady: false,
+          searching: true,
+          conflicts: ["Old conflict"],
+        },
+      },
+    }),
+  );
+  assert.match(searching, /Finding one place for your group/);
+  assert.doesNotMatch(
+    searching,
+    /No places found|Old conflict|couldn&#x27;t finish/,
+  );
+  const failed = renderToStaticMarkup(
+    createElement(LiveGroupPanel, {
+      initial: {
+        ...overview,
+        livePlan: {
+          ...plan,
+          recommendationReady: false,
+          recommendationStatus: "failed",
+          conflicts: [],
+        },
+      },
+    }),
+  );
+  assert.match(failed, /finish the recommendation/);
+  assert.doesNotMatch(failed, /No places found|essential needs/);
+
   const legacy = renderToStaticMarkup(
     createElement(LiveGroupPanel, {
       initial: {

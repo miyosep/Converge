@@ -45,6 +45,9 @@ export const livePlanRequestSchema = z
 export type LivePlan = {
   testPayment?: boolean;
   recommendationReady?: boolean;
+  recommendationStatus?:
+    "idle" | "searching" | "ready" | "empty" | "blocked" | "failed";
+  searching?: boolean;
   recommendationRevision?: string;
   conflicts?: string[];
   category: DiscoveryCategory;

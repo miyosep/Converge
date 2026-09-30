@@ -5,6 +5,7 @@ import {
   interpretLivePreference,
   recommendForGroup,
   recommendOneForGroup,
+  choicePlaceIdSchema,
 } from "../src/lib/discovery/group-preferences.js";
 const preferences = [
   {
@@ -247,15 +248,16 @@ test("friends receive exactly the Qwen-selected venue, not the first xAPI result
   const choice = {
     placeId: "202",
     consideredMembers: [0, 1],
-    rationale: "A balanced shared option.",
-    uncertainties: ["Confirm suitability with the venue."],
+    rationale: "PRIVATE member 0 milk allergy",
+    uncertainties: ["PRIVATE milk allergy for member 0"],
   };
   const result = await run(choice);
   assert.deepEqual(
     result.places.map((place) => place.id),
     ["202"],
   );
-  assert.equal(result.places[0]!.evidence[0]!.detail, choice.rationale);
+  assert.match(result.places[0]!.evidence[0]!.detail, /balance/);
+  assert.doesNotMatch(JSON.stringify(result), /PRIVATE|milk allergy|member 0/);
   await assert.rejects(
     run({ ...choice, placeId: "invented" }),
     /UNKNOWN_GROUP_CHOICE/,
@@ -264,7 +266,38 @@ test("friends receive exactly the Qwen-selected venue, not the first xAPI result
     run({ ...choice, consideredMembers: [0, 0] }),
     /INCOMPLETE_GROUP_DECISION/,
   );
-  const blocked = await run({ ...choice, placeId: null });
-  assert.equal(blocked.places.length, 0);
-  assert.equal(blocked.conflicts.length, 1);
+  await assert.rejects(run({ ...choice, placeId: null }));
+});
+
+test("unknown venue evidence cannot justify no choice; explicit conflicts can", () => {
+  const venue = {
+    id: "one",
+    name: "Venue",
+    address: "Seoul",
+    mapsUrl: "https://example.com",
+    websiteUrl: null,
+    price: null,
+    attributions: [],
+    evidence: [
+      {
+        condition: "Dietary suitability",
+        status: "unknown" as const,
+        detail: "Not verified",
+      },
+    ],
+  };
+  assert.equal(choicePlaceIdSchema([venue]).safeParse(null).success, false);
+  assert.equal(choicePlaceIdSchema([venue]).safeParse("one").success, true);
+  const conflicting = {
+    ...venue,
+    evidence: [{ ...venue.evidence[0]!, status: "conflict" as const }],
+  };
+  assert.equal(
+    choicePlaceIdSchema([conflicting]).safeParse(null).success,
+    true,
+  );
+  assert.equal(
+    choicePlaceIdSchema([conflicting, venue]).safeParse(null).success,
+    false,
+  );
 });

@@ -225,7 +225,7 @@ export class LivePlanRepository {
   }
   private async invalidate(db: PoolClient, groupId: string) {
     await db.query(
-      "UPDATE converge_live_plans SET votes='{}',snapshot=jsonb_set(snapshot,'{recommendationReady}','false'),search_token=NULL,search_started_at=NULL WHERE group_id=$1",
+      'UPDATE converge_live_plans SET votes=\'{}\',snapshot=snapshot || \'{"recommendationReady":false,"recommendationStatus":"idle","conflicts":[]}\'::jsonb,search_token=NULL,search_started_at=NULL WHERE group_id=$1',
       [groupId],
     );
   }
@@ -429,6 +429,13 @@ export class LivePlanRepository {
         source: "xAPI (Google Maps)",
         recommendationReady:
           result?.places.length === 1 && !result.conflicts.length,
+        recommendationStatus: !result
+          ? "failed"
+          : result.conflicts.length
+            ? "blocked"
+            : result.places.length === 1
+              ? "ready"
+              : "empty",
         recommendationRevision: token,
         preferenceRevision: revision,
         conflicts: result?.conflicts ?? [],

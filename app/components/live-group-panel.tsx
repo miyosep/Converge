@@ -54,6 +54,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
   );
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [searchPending, setSearchPending] = useState(false);
   const [notice, setNotice] = useState("");
   const [invite, setInvite] = useState("");
   const [copied, setCopied] = useState(false);
@@ -94,6 +95,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
     body: unknown = {},
   ) {
     setBusy(true);
+    setSearchPending(name === "recommend");
     refreshVersion.current++;
     setNotice("");
     try {
@@ -155,8 +157,8 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
         setNotice(
           name === "recommend"
             ? data.livePlan?.recommendationReady
-              ? "Candidates found using every member’s confirmed requirements. Review before agreeing."
-              : "No candidates are ready. Review the group search result below."
+              ? "Your shared place is ready. Review the proposal before agreeing."
+              : "The proposal is not ready. Check the search status below."
             : name === "decisions"
               ? "Payment terms saved. Each person approves separately in their wallet."
               : "Your choice is saved. No payment has been approved.",
@@ -168,6 +170,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
       if (name === "live-preferences" || name === "live-confirm")
         await loadOwn().catch(() => {});
       setBusy(false);
+      setSearchPending(false);
     }
   }
   const plan = overview.livePlan!;
@@ -574,27 +577,39 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
               <button
                 type="button"
                 className="primary"
-                disabled={busy || !ready}
+                disabled={busy || plan.searching || !ready}
                 onClick={() => void action("recommend")}
               >
                 <Search size={16} aria-hidden="true" />{" "}
-                {busy
-                  ? "Working…"
+                {searchPending || plan.searching
+                  ? "Finding your shared place…"
                   : plan.recommendationReady
                     ? "Search again"
                     : "Find our place"}
               </button>
             )}
-            {plan.conflicts?.map((message) => (
-              <p key={message} role="status">
-                {message}
+            {!searchPending &&
+              !plan.searching &&
+              plan.conflicts?.map((message) => (
+                <p key={message} role="status">
+                  {message}
+                </p>
+              ))}
+            {(searchPending || plan.searching) && (
+              <p role="status">
+                Finding one place for your group. Please wait.
               </p>
-            ))}
-            {!plan.recommendationReady &&
+            )}
+            {!searchPending &&
+              !plan.searching &&
+              !plan.recommendationReady &&
               plan.recommendationRevision &&
-              !plan.conflicts?.length && (
+              !plan.conflicts?.length &&
+              plan.recommendationStatus !== "idle" && (
                 <p role="status">
-                  No places found yet. Review your preferences and try again.
+                  {plan.recommendationStatus === "empty"
+                    ? "The place search returned no results. Try another area or search again."
+                    : "We couldn't finish the recommendation. Your preferences are saved. Please try again."}
                 </p>
               )}
           </section>

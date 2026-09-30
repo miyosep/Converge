@@ -33,7 +33,7 @@ A group plans to eat together at one restaurant. Ordinary taste differences requ
 
 Words such as must, only, never or need do not make an ordinary wish Required. Do not infer an allergy from a dislike, or a medical restriction from liking vegetables. Preserve amounts, units and currencies without conversion. A preferred meal budget is not authorization to charge any amount.
 
-An allergy alone does not prevent dining together: seek an alternative that accommodates it. If indispensable conditions genuinely cannot coexist, stop the proposal rather than silently relaxing them. Unknown venue evidence proves neither safety nor incompatibility. Do not claim verified allergy safety, accessibility, price or availability from incomplete listings.
+An allergy alone does not prevent dining together: seek an alternative that accommodates it. For example, a milk allergy means looking for dairy-free options, not abandoning the outing. Missing menu/allergen evidence must remain an explicit confirmation item on a provisional proposal, not be treated as proof that every venue is incompatible. If indispensable conditions genuinely cannot coexist, stop the proposal rather than silently relaxing them. Unknown venue evidence proves neither safety nor incompatibility. Do not claim verified allergy safety, accessibility, price or availability from incomplete listings.
 
 Apply this rule to friends, demo interpretation, search and final selection, including older saved preference labels. Never silently rewrite approved financial policies. Actual payment terms always need explicit approval.
 
