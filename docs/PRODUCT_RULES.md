@@ -43,7 +43,7 @@ Apply this rule to friends, demo interpretation, search and final selection, inc
 - Friends open the invitation on their own computers and connect their own wallets. Authenticate membership and keep raw preferences and interpretations private.
 - Wait for all expected members to join and confirm. Never add automated participants to fill missing places.
 - Search, select one proposal, collect each member's agreement, then set and review exact payment terms.
-- Current payments use Sepolia MockUSDC. The organizer sets the total test amount and test recipient after agreement; the policy determines shares for the actual group size. Do not import demo fixed amounts or wallets.
+- Current payments use Sepolia MockUSDC. Do not show manual amount/deposit or test-recipient inputs, or a Set payment terms form. Prepare terms from an owner-authorized server configuration or verified quote; the policy determines shares for the actual group size. Never invent a venue price or silently copy demo fixed amounts/wallets into friends. Confirm an undecided terms source instead of restoring manual setup.
 - Each real member signs their own approval/contribution. Funding assistance does not grant consent.
 - Membership, preference or search changes invalidate earlier proposal agreements. Changed payment terms require a new immutable decision and fresh approvals.
 
@@ -81,6 +81,7 @@ Current scope is simulated booking with test tokens and a test recipient. A list
 - My plans: no sidebar, rounded top navigation, title "My plans" without a period. Keep "Your people, Your next good memory." in its established right-hand position, green serif italic with a thin vertical divider.
 - Empty-state title: "Something good starts with a plan", with "a plan" italic. CTA: "Start a plan". Preserve the approved layout and restrained pointer interaction.
 - No background photo in the demo. Never turn single-place agreement into a multiple-choice interface.
+- No manual payment configuration form in ANY user flow, including My plans/friend groups. Show prepared payment amounts for review at the approval stage; preserve each user's separate consent.
 
 ## 7. Checkout and deployment boundaries
 

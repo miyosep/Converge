@@ -7,3 +7,10 @@ Before planning or editing project code, read [docs/PRODUCT_RULES.md](docs/PRODU
 - Current code is not proof of intended behavior. Identify all user paths affected by a rule and check them. Never substitute candidate browsing for one AI-selected proposal.
 - Before reporting completion, use the acceptance checks in PRODUCT_RULES.md. State what was verified and what remains unverified; local tests are not evidence of production payments.
 - Follow the checkout and deployment boundaries in PRODUCT_RULES.md. Preserve unrelated changes, active financial work, worker configuration and secrets.
+
+## Payment setup UI: explicit prohibition
+
+- NEVER show manual payment/deposit amount inputs, test-recipient wallet inputs, or a "Set payment terms" form in My plans, Discover, friend groups, or Explore demo. This rule applies to BOTH friends and demo, not just the demo welcome screen.
+- Prepare terms from an authorized server configuration or verified quote. Do not invent a restaurant price, copy demo defaults into friends, or ask users to enter infrastructure values as a workaround.
+- Show exact prepared amounts and test-payment status at wallet review; each real participant still approves separately. Removing configuration forms must not hide payment terms or imply consent.
+- If the source of automatic terms has not been decided, clarify that source; do not silently restore the manual form. Check every affected path before completion.
