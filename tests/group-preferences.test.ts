@@ -53,7 +53,7 @@ test("group search includes every confirmed member, reuses xAPI and keeps privat
   const result = await recommendForGroup({
     ...base,
     client: client(
-      { query, consideredIds: [0, 1, 2], conflicts: [] },
+      { query, consideredIds: [0, 1, 2], blockingConflicts: [], conflicts: [] },
       (body) => {
         const input = JSON.parse(body.messages[1].content);
         assert.deepEqual(
@@ -99,7 +99,12 @@ test("missing opinions and omitted requirements cannot silently produce a group 
       recommendForGroup({
         ...base,
         fetchImpl: neverSearch,
-        client: client({ query: "restaurants", consideredIds, conflicts: [] }),
+        client: client({
+          query: "restaurants",
+          consideredIds,
+          blockingConflicts: [],
+          conflicts: [],
+        }),
       }),
       /INCOMPLETE_GROUP_INTERPRETATION/,
     );
@@ -128,6 +133,7 @@ test("conflicting tastes still search for one shared place without exposing priv
     client: client({
       query: "restaurants",
       consideredIds: [0, 1, 2],
+      blockingConflicts: [],
       conflicts: ["PRIVATE conflicting conditions"],
     }),
   });
@@ -144,6 +150,10 @@ test("individual interpretation preserves the request and fixed group context fo
       assert.equal(input.text, "I need vegetarian food");
       assert.equal(input.people, 2);
       assert.match(body.messages[0].content, /Each member will confirm/);
+      assert.match(
+        body.messages[0].content,
+        /every budget target or ceiling, are preferred/,
+      );
     }),
     {
       runId: "member",
@@ -156,4 +166,26 @@ test("individual interpretation preserves the request and fixed group context fo
     },
   );
   assert.deepEqual(result, preferences[0]);
+});
+
+test("indispensable safety conflicts block searching without exposing private health details", async () => {
+  const result = await recommendForGroup({
+    ...base,
+    client: client({
+      query: "restaurants Seoul",
+      consideredIds: [0, 1, 2],
+      conflicts: [],
+      blockingConflicts: ["PRIVATE unavoidable allergen exposure"],
+    }),
+    fetchImpl: async () => {
+      assert.fail("Unsafe shared plan must not search");
+    },
+  });
+  assert.equal(result.places.length, 0);
+  assert.equal(result.conflicts.length, 1);
+  assert.match(result.conflicts[0]!, /essential safety/);
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /PRIVATE|unavoidable allergen exposure/,
+  );
 });

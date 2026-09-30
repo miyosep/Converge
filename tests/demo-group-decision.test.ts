@@ -125,6 +125,7 @@ test("group search selects one restaurant without payment terms; later confirmat
         consideredIds: input.requirements.map(
           (_: unknown, index: number) => index,
         ),
+        blockingConflicts: [],
         conflicts: [],
       });
     }
@@ -338,6 +339,7 @@ test("a restaurant search timeout preserves all confirmed preferences and stops 
     return completion({
       query: "Japanese restaurants Gangnam",
       consideredIds: input.requirements.map((_: unknown, i: number) => i),
+      blockingConflicts: [],
       conflicts: [],
     });
   };
