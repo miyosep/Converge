@@ -83,6 +83,14 @@ Examples: $30 per person for two people produces an $18 group deposit and $9 eac
 
 The worker funds actual policy shares where applicable. Funding assistance never signs a human's consent. Journal transactions and reconcile retries so a pending transaction cannot create duplicate payment.
 
+### Wallet progress and bounded reads
+
+`GroupChainPanel` distinguishes sign-in/account checks, network switching, policy/gas checks and the final wallet confirmation request. Show the current stage beside the action, with additional guidance after 30 seconds in a stage. Do not assume a disabled registration button means a wallet popup is open: preflight reads happen before signing.
+
+`withWalletReadTimeout` bounds allowlisted read-only wallet RPC calls to 20 seconds; auth/chain HTTP reads also have a 20-second limit. Disable automatic transport retries in this panel. A timed-out read cannot submit a transaction, and a subsequent action rechecks current policy/account/network state. Signing, transaction submission and network-change prompts are never abandoned by this timeout or automatically retried. Persist submitted hashes and reconcile receipts as before; waiting for a receipt is not permission to resend.
+
+Keep wallet errors visible across background status polling, distinguish cancellation and an already-open wallet request, and explain automatic test funding consistently. These limits/progress stages are implementation choices, not changes to authorization or contract terms.
+
 ## Demo separation
 
 Explore demo retains one real user plus five distinct automated wallets/opinions. All six opinions feed the shared decision. The user signs only for themselves; automation handles the five disclosed demo accounts. Keep the explicit Take a seat start screen and repeat-session history/refund rights.

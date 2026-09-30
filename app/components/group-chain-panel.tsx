@@ -20,7 +20,11 @@ import {
 import { groupPolicyConfigFor } from "../../src/lib/server/group-config";
 import { browserWallets } from "../../src/lib/browser-wallet";
 import { getMetaMaskProvider } from "../../src/lib/browser-wallet";
-import { ensureSepolia } from "../../src/lib/wallet-connection";
+import {
+  ensureSepolia,
+  walletErrorCode,
+} from "../../src/lib/wallet-connection";
+import { withWalletReadTimeout } from "../../src/lib/wallet-read-timeout";
 
 const money = (value: string) => `${formatUnits(BigInt(value), 6)} USDC`;
 const labels: Record<GroupChainAction, string> = {
@@ -31,6 +35,8 @@ const labels: Record<GroupChainAction, string> = {
   refund: "Claim your refund",
 };
 const messages: Record<string, string> = {
+  WALLET_READ_TIMEOUT:
+    "Your wallet's network check timed out before submission. Check MetaMask's Sepolia connection, then try again.",
   WRONG_WALLET:
     "Select the wallet used to sign in. Reconnect from the workspace if you want to use another account.",
   WRONG_CHAIN: "Select Ethereum Sepolia in your wallet.",
@@ -50,8 +56,11 @@ export function GroupChainPanel({
 }) {
   const [state, setState] = useState<GroupChainState | null>(null);
   const [error, setError] = useState("");
+  const [chainError, setChainError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState("");
+  const [slow, setSlow] = useState(false);
   const [pending, setPending] = useState<Hex | null>(null);
   const [lastHash, setLastHash] = useState<Hex | null>(null);
   const working = useRef(false);
@@ -60,7 +69,7 @@ export function GroupChainPanel({
   const refresh = useCallback(async () => {
     const response = await fetch(
       `/api/groups/${encodeURIComponent(groupId)}/chain`,
-      { cache: "no-store" },
+      { cache: "no-store", signal: AbortSignal.timeout(20_000) },
     );
     if (!response.ok)
       throw new Error(
@@ -71,9 +80,16 @@ export function GroupChainPanel({
       throw new Error("The saved policy changed. Reload this page.");
     if (mounted.current) {
       setState(next);
-      setError("");
+      setChainError("");
     }
   }, [groupId, saved.policyHash]);
+
+  useEffect(() => {
+    setSlow(false);
+    if (!busy) return;
+    const timer = setTimeout(() => setSlow(true), 30_000);
+    return () => clearTimeout(timer);
+  }, [busy, stage]);
 
   useEffect(() => {
     mounted.current = true;
@@ -86,7 +102,7 @@ export function GroupChainPanel({
       } catch {
         if (mounted.current) {
           setState(null);
-          setError(
+          setChainError(
             "Chain status is unavailable. Transactions are disabled until verification succeeds.",
           );
         }
@@ -123,7 +139,7 @@ export function GroupChainPanel({
       try {
         const reader = createPublicClient({
           chain: sepolia,
-          transport: custom(provider),
+          transport: custom(withWalletReadTimeout(provider), { retryCount: 0 }),
         });
         if ((await reader.getChainId()) !== sepolia.id) return;
         const receipt = await reader.waitForTransactionReceipt({
@@ -182,10 +198,13 @@ export function GroupChainPanel({
     setBusy(true);
     setError("");
     setNotice("");
+    setStage("Checking your wallet and sign-in…");
     try {
-      const provider = await getMetaMaskProvider();
-      if (!provider) return;
-      const session = await fetch("/api/auth/session", { cache: "no-store" });
+      const provider = withWalletReadTimeout(await getMetaMaskProvider());
+      const session = await fetch("/api/auth/session", {
+        cache: "no-store",
+        signal: AbortSignal.timeout(20_000),
+      });
       if (!session.ok)
         throw new Error(
           "Sign in again before requesting a wallet transaction.",
@@ -200,10 +219,14 @@ export function GroupChainPanel({
           throw new Error("WRONG_WALLET");
       };
       await checkAccount();
+      setStage(
+        "Checking Sepolia. If MetaMask asks to switch networks, review that request.",
+      );
       await ensureSepolia(provider);
+      setStage("Checking the policy and estimating the network fee…");
       const reader = createPublicClient({
         chain: sepolia,
-        transport: custom(provider),
+        transport: custom(provider, { retryCount: 0 }),
       });
       const fresh = await readGroupChain(
         reader,
@@ -235,8 +258,11 @@ export function GroupChainPanel({
       const wallet = createWalletClient({
         account: actor,
         chain: sepolia,
-        transport: custom(provider),
+        transport: custom(provider, { retryCount: 0 }),
       });
+      setStage(
+        "Open MetaMask to review and confirm or reject the transaction.",
+      );
       const hash = await wallet.sendTransaction({ ...tx, gas });
       setLastHash(hash);
       setPending(hash);
@@ -248,18 +274,26 @@ export function GroupChainPanel({
       setNotice("Transaction submitted. Waiting for two block confirmations.");
     } catch (failure) {
       const code = failure instanceof Error ? failure.message : "";
+      const walletCode = walletErrorCode(failure);
       try {
         await refresh();
       } catch {
         setState(null);
       }
       setError(
-        messages[code] ??
-          "The wallet request was rejected or could not be verified. Check the selected account, network and refreshed group state before retrying.",
+        walletCode === -32002
+          ? "A request is already open in MetaMask. Open the extension and confirm or reject it before trying again."
+          : walletCode === 4001
+            ? "You cancelled the wallet request. You can try again when ready."
+            : code.includes("WALLET_READ_TIMEOUT")
+              ? messages.WALLET_READ_TIMEOUT!
+              : (messages[code] ??
+                "The wallet request was rejected or could not be verified. Check the selected account, network and refreshed group state before retrying."),
       );
     } finally {
       working.current = false;
       setBusy(false);
+      setStage("");
     }
   }
 
@@ -340,6 +374,19 @@ export function GroupChainPanel({
           {BigInt(state.refund) > 0n && (
             <p>Your available refund: {money(state.refund)}</p>
           )}
+          {busy && (
+            <div role="status" aria-live="polite">
+              <p>{stage}</p>
+              {slow && (
+                <p>
+                  This is taking longer than usual. Open MetaMask to check for a
+                  pending request. A wallet request must finish before another
+                  transaction can start.
+                </p>
+              )}
+            </div>
+          )}
+          {(error || chainError) && <p role="alert">{error || chainError}</p>}
           <div className="group-chain-actions">
             {actions.map((action) => (
               <button
@@ -354,7 +401,7 @@ export function GroupChainPanel({
                 }
                 onClick={() => void transact(action)}
               >
-                {labels[action]}
+                {busy ? "Working…" : labels[action]}
               </button>
             ))}
           </div>
@@ -362,8 +409,9 @@ export function GroupChainPanel({
             BigInt(state.balance) <
               BigInt(saved.policy.contributionPerParticipant) && (
               <p>
-                Your USDC balance is insufficient. Ordinary groups do not
-                receive automatic demo funds.
+                {autoTestFunds
+                  ? "Your test funds are still being prepared. The balance will update automatically."
+                  : "Your USDC balance is insufficient. Add funds before contributing."}
               </p>
             )}
         </>
@@ -376,7 +424,7 @@ export function GroupChainPanel({
         onClick={() =>
           void refresh().catch(() => {
             setState(null);
-            setError("Chain verification failed.");
+            setChainError("Chain verification failed.");
           })
         }
       >
@@ -409,7 +457,7 @@ export function GroupChainPanel({
                 setPending(null);
                 setState(null);
                 void refresh().catch(() =>
-                  setError("Chain verification failed."),
+                  setChainError("Chain verification failed."),
                 );
               }}
             >
@@ -430,7 +478,9 @@ export function GroupChainPanel({
         </p>
       )}
       {notice && <p role="status">{notice}</p>}
-      {error && <p role="alert">{error}</p>}
+      {!state && (error || chainError) && (
+        <p role="alert">{error || chainError}</p>
+      )}
     </div>
   );
 }
