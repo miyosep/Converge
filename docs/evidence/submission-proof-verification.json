@@ -1,0 +1,365 @@
+{
+  "checkedAt": "2026-09-30T02:14:46.473Z",
+  "chainId": 11155111,
+  "scope": "Read-only recheck of three historical payment receipts and saved Kiln call metadata; not a rerun of current application flows or new Kiln calls.",
+  "flows": [
+    {
+      "scenario": "baseline",
+      "source": "docs/evidence/group-acceptance-001-baseline.json",
+      "paymentHash": "0xd24fa24c9a0d84c514330abca00b28ee186e833fddee92e5ef63a4baf7d9a7fd",
+      "blockNumber": "11806148",
+      "canonical": true,
+      "finalized": true,
+      "paymentEvent": {
+        "decisionId": "0xac8fcf3bf5cdf90c11f8259a5e5e6be8a19457b3f1959434c6c4ba913c40623a",
+        "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+        "merchant": "0x740e63371AE217BC0Cd0F6BC785E124e839DaAB8",
+        "amount": "45000000"
+      },
+      "kilnCalls": [
+        {
+          "flow": "constraint_extraction",
+          "requestId": "6cb06037-7e2b-4742-a1e7-4f656588668d",
+          "providerRequestId": "7edd849a-d1e9-4c74-8034-51ac7e3f5c83",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 452
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "34064359-d53f-489a-af05-ba665b7cafd0",
+          "providerRequestId": "b3301b97-c6d5-4803-8fb8-83d5d4e6f9bc",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 209
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "4490e26f-fad9-4e69-a7c0-55e702862ffa",
+          "providerRequestId": "9d22c249-05c0-47f4-b0d1-1e40fffb86c3",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 430
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "4490e26f-fad9-4e69-a7c0-55e702862ffa",
+          "providerRequestId": "b5923ee2-eca0-4ea7-867a-126a2b2938a1",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 342
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "59f65bb1-08f6-497b-864c-aa5f759720aa",
+          "providerRequestId": "981b401e-e725-4a80-9172-b3d570711a08",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 457
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "59f65bb1-08f6-497b-864c-aa5f759720aa",
+          "providerRequestId": "1281cfc4-ce05-4f80-a55f-39ceb23d52a6",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 428
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "0e97dd7a-aec0-4b60-b089-2b4ec8e05e63",
+          "providerRequestId": "cf0fd835-5b89-4d27-a79e-8b980c9fe3d8",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 478
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "0e97dd7a-aec0-4b60-b089-2b4ec8e05e63",
+          "providerRequestId": "e8cc709f-ed63-40cb-ad35-981a9db63537",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 489
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "e7a4cf68-70f3-44eb-a208-4355e7329846",
+          "providerRequestId": "e06075a3-e8ed-4faa-8e74-75dafe0cc49c",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 394
+        },
+        {
+          "flow": "decision_explanation",
+          "requestId": "32271027-45f6-4871-813a-0ca6254783c7",
+          "providerRequestId": "c3018f62-11e1-468e-a011-a75f204b204d",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 196,
+          "outputTokens": 235
+        }
+      ]
+    },
+    {
+      "scenario": "lower-budget",
+      "source": "docs/evidence/group-acceptance-001-lower-budget.json",
+      "paymentHash": "0x3f6a846511de38ad8fabb3486e0fddb032c57ecc0d19d9ddda8692cd462a58a4",
+      "blockNumber": "11806186",
+      "canonical": true,
+      "finalized": true,
+      "paymentEvent": {
+        "decisionId": "0xb909a41635bd8a01a4e211b68521c0bf33f6b829921e5e7f10d602aaf01830df",
+        "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+        "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+        "amount": "36000000"
+      },
+      "kilnCalls": [
+        {
+          "flow": "constraint_extraction",
+          "requestId": "d0572902-61d7-4cf2-9639-e86cc14ac4ae",
+          "providerRequestId": "6d00ab9c-82aa-4325-a69d-13141af1fd1b",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 363
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "16c38307-cf52-4fdb-8414-07fa02d6afb5",
+          "providerRequestId": "a13edf28-be01-4533-9f82-df87cdf33623",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 621
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "16c38307-cf52-4fdb-8414-07fa02d6afb5",
+          "providerRequestId": "fef8c178-4502-41e7-b9dd-bcea600d3482",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 289
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "3cecb569-629a-4828-9f38-7c7481d75c26",
+          "providerRequestId": "dd181f50-ef52-4943-bdef-cccad9008994",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 343
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "dde369b6-cda0-4401-b8db-08ab94e5a7a2",
+          "providerRequestId": "4b67e81c-4adb-4d13-aa29-722e6155d8ce",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 237
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "e783897a-fddd-4432-96d9-9eeff89c107e",
+          "providerRequestId": "c6d43168-0218-4196-a6a9-0291729f2d25",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 495
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "e2f22cd2-a9b3-45b9-b3cd-a1e8f1eda05e",
+          "providerRequestId": "876d3eb2-ed98-45ae-85b5-7c511b720670",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 454
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "e2f22cd2-a9b3-45b9-b3cd-a1e8f1eda05e",
+          "providerRequestId": "2257d53e-3ded-4f7d-9f3e-f5b532678523",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 355
+        },
+        {
+          "flow": "decision_explanation",
+          "requestId": "b63e4459-8fca-4e2e-b58e-7e602267778f",
+          "providerRequestId": "e2fed1e3-8a8e-4358-8592-c0c48c507173",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 195,
+          "outputTokens": 438
+        }
+      ]
+    },
+    {
+      "scenario": "merchant-excluded",
+      "source": "docs/evidence/group-acceptance-001-merchant-excluded.json",
+      "paymentHash": "0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb",
+      "blockNumber": "11806238",
+      "canonical": true,
+      "finalized": true,
+      "paymentEvent": {
+        "decisionId": "0xe16a664c198bf1de268b49d5510a8ef2f5893c148e8f8967b89b4e5163bfc93b",
+        "executor": "0x53E56Ceed40A662e144FD488Afbf11Ed2ed72456",
+        "merchant": "0xc414002Ca1C8f6371D69F527B26Fe62591Bb53Ec",
+        "amount": "36000000"
+      },
+      "kilnCalls": [
+        {
+          "flow": "constraint_extraction",
+          "requestId": "7530a16c-7beb-4b5a-92ce-4b6163a0aad6",
+          "providerRequestId": "20c0f150-6a7b-4db3-9227-b4e3eece2b33",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 521
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "7530a16c-7beb-4b5a-92ce-4b6163a0aad6",
+          "providerRequestId": "1f2b49b1-8ff2-44c0-a6e1-d2658f2c68b4",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 666
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "9b10321a-5871-4c68-8df1-dd2971cc6698",
+          "providerRequestId": "a8323958-0069-40cd-8867-15bc7d5e0ca2",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 368
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "9b10321a-5871-4c68-8df1-dd2971cc6698",
+          "providerRequestId": "348d891e-f06e-4588-950b-6f16dcef0afc",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 322
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "7fe04437-35d9-455d-8c6f-ac0dd6ccb126",
+          "providerRequestId": "1f933029-2686-4216-96fd-601c8f10100a",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 617
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "7fe04437-35d9-455d-8c6f-ac0dd6ccb126",
+          "providerRequestId": "78c733be-0269-448b-96d0-5e5eb2254c96",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 383
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "bf90488f-2129-46d2-a77e-d9a340ffc63d",
+          "providerRequestId": "b2c50c2f-6ca2-4e77-8117-fdd51632ffc0",
+          "status": "validation_error",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 368
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "bf90488f-2129-46d2-a77e-d9a340ffc63d",
+          "providerRequestId": "e126c527-ecb3-4644-82dc-cda06a83387b",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1038,
+          "outputTokens": 325
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "c7008982-4e7c-4bca-a0ba-1c304d3c42ad",
+          "providerRequestId": "a4358fd4-ce72-44dd-95ca-6f4d9b830ef0",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 276
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "1cc641b7-eed4-4018-82d0-c4937e4bfda6",
+          "providerRequestId": "2b700d59-62bb-467c-b4b5-70887dd562bd",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 399
+        },
+        {
+          "flow": "constraint_extraction",
+          "requestId": "e853156d-14bd-4746-a09d-ec2bfe930075",
+          "providerRequestId": "d26497e7-ea95-4084-8922-fdcf8af0555d",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 1008,
+          "outputTokens": 662
+        },
+        {
+          "flow": "decision_explanation",
+          "requestId": "b5dc4f57-6aab-4cf4-887c-d7c87ebe0019",
+          "providerRequestId": "f384d294-19c1-43b5-92e7-9102e56ca65d",
+          "status": "success",
+          "httpStatus": 200,
+          "model": "qwen3-32b",
+          "inputTokens": 206,
+          "outputTokens": 312
+        }
+      ]
+    }
+  ]
+}
