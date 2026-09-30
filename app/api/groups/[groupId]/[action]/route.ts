@@ -11,7 +11,7 @@ import {
 import { extractPreferences } from "../../../../../src/lib/kiln/extraction.js";
 import {
   interpretLivePreference,
-  recommendForGroup,
+  recommendOneForGroup,
 } from "../../../../../src/lib/discovery/group-preferences.js";
 import {
   groupEvaluationOptions,
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest, context: Context) {
       const context = await repository.beginRecommendation(groupId, actor);
       let result;
       try {
-        result = await recommendForGroup({
+        result = await recommendOneForGroup({
           ...context,
           runId: context.token,
           xapiKey: process.env.XAPI_KEY,

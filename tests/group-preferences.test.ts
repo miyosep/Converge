@@ -4,6 +4,7 @@ import { createKilnClient } from "../src/lib/kiln/client.js";
 import {
   interpretLivePreference,
   recommendForGroup,
+  recommendOneForGroup,
 } from "../src/lib/discovery/group-preferences.js";
 const preferences = [
   {
@@ -188,4 +189,82 @@ test("indispensable safety conflicts block searching without exposing private he
     JSON.stringify(result),
     /PRIVATE|unavoidable allergen exposure/,
   );
+});
+
+test("friends receive exactly the Qwen-selected venue, not the first xAPI result", async () => {
+  const run = async (choice: object) => {
+    let calls = 0;
+    const ai = createKilnClient({
+      apiKey: "test",
+      maxAttempts: 1,
+      onAttempt: () => {},
+      fetchImpl: async (_url, init) => {
+        const body = JSON.parse(String(init?.body));
+        const output =
+          ++calls === 1
+            ? {
+                query: "restaurants Seoul",
+                consideredIds: [0, 1, 2],
+                conflicts: [],
+                blockingConflicts: [],
+              }
+            : choice;
+        if (calls === 2) {
+          const input = JSON.parse(body.messages[1].content);
+          assert.equal(input.members.length, 2);
+          assert.equal(input.places.length, 2);
+          assert.match(
+            body.messages[0].content,
+            /without quoting private preferences/,
+          );
+        }
+        return Response.json({
+          model: "qwen3-32b",
+          choices: [
+            {
+              message: { role: "assistant", content: JSON.stringify(output) },
+              finish_reason: "stop",
+            },
+          ],
+        });
+      },
+    });
+    return recommendOneForGroup({
+      ...base,
+      client: ai,
+      fetchImpl: async () =>
+        Response.json({
+          success: true,
+          data: {
+            places: [
+              { cid: "101", title: "First search result", address: "Seoul" },
+              { cid: "202", title: "Better shared fit", address: "Seoul" },
+            ],
+          },
+        }),
+    });
+  };
+  const choice = {
+    placeId: "202",
+    consideredMembers: [0, 1],
+    rationale: "A balanced shared option.",
+    uncertainties: ["Confirm suitability with the venue."],
+  };
+  const result = await run(choice);
+  assert.deepEqual(
+    result.places.map((place) => place.id),
+    ["202"],
+  );
+  assert.equal(result.places[0]!.evidence[0]!.detail, choice.rationale);
+  await assert.rejects(
+    run({ ...choice, placeId: "invented" }),
+    /UNKNOWN_GROUP_CHOICE/,
+  );
+  await assert.rejects(
+    run({ ...choice, consideredMembers: [0, 0] }),
+    /INCOMPLETE_GROUP_DECISION/,
+  );
+  const blocked = await run({ ...choice, placeId: null });
+  assert.equal(blocked.places.length, 0);
+  assert.equal(blocked.conflicts.length, 1);
 });

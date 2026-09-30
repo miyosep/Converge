@@ -39,13 +39,19 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
     void loadOwn(true).catch((error) => setNotice(error.message));
   }, []);
   useEffect(() => {
-    setChoice("");
+    setChoice(
+      overview.livePlan?.places.length === 1
+        ? overview.livePlan.places[0]!.id
+        : "",
+    );
     setAccepted(false);
   }, [
     overview.livePlan?.recommendationRevision,
     overview.livePlan?.recommendationReady,
   ]);
-  const [choice, setChoice] = useState("");
+  const [choice, setChoice] = useState(
+    initial.livePlan?.places.length === 1 ? initial.livePlan.places[0]!.id : "",
+  );
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -121,7 +127,7 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
           GROUP_FULL: "Everyone has joined. You can now agree on a place.",
           GROUP_LOCKED: "The policy is already fixed. Refresh to review it.",
           UNANIMOUS_CHOICE_REQUIRED:
-            "Every invited member must join and choose the same place first.",
+            "Every invited member must join and agree to the proposed place first.",
           RESERVATION_PASSED:
             "This plan is too close or has passed. Create a new plan with a future time.",
         };
@@ -336,98 +342,98 @@ export function LiveGroupPanel({ initial }: { initial: GroupOverview }) {
               )}
             </section>
           )}
-          {!overview.signingPolicy && plan.recommendationReady && (
-            <form
-              className="gathering-card gathering-candidates"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void action("vote", {
-                  placeId: choice,
-                  recommendationRevision: plan.recommendationRevision,
-                  acknowledgeChoice: accepted,
-                });
-              }}
-            >
-              <fieldset disabled={busy || overview.group.locked}>
-                <legend>Find your shared favorite</legend>
-                <p className="gathering-muted">
-                  Places chosen around everyone’s preferences.
+          {!overview.signingPolicy &&
+            plan.recommendationReady &&
+            plan.places.length > 1 && (
+              <section className="gathering-card" role="status">
+                <h2>One place for everyone</h2>
+                <p>
+                  Search again to turn your saved options into one shared
+                  recommendation.
                 </p>
-                {plan.places.map((place) => (
-                  <article className="discovery-card" key={place.id}>
-                    <label>
-                      <input
-                        type="radio"
-                        name="live-place"
-                        value={place.id}
-                        checked={choice === place.id}
-                        onChange={() => {
-                          setChoice(place.id);
-                          setAccepted(false);
-                        }}
-                        required
-                      />
-                      {place.name}
-                    </label>
-                    <p>{place.address}</p>
-                    <p>{place.price ?? "Price not provided"}</p>
-                    <details className="gathering-evidence">
-                      <summary>How it fits your group</summary>
-                      <ul>
-                        {place.evidence.map((fact, index) => (
-                          <li key={index}>
-                            {fact.condition}:{" "}
-                            {fact.status === "reported"
-                              ? "Provider reported"
-                              : fact.status === "conflict"
-                                ? "Does not meet"
-                                : "Needs confirmation"}
-                            . {fact.detail}
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                    <a
-                      href={place.mapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View source and location
-                    </a>
-                  </article>
-                ))}
-                <label className="gathering-choice-consent">
-                  <input
-                    type="checkbox"
-                    required
-                    checked={accepted}
-                    onChange={(event) => setAccepted(event.target.checked)}
-                  />{" "}
-                  I agree to this place. Any payment requires a confirmed amount
-                  and my separate approval.
-                </label>
-                <button
-                  className="primary"
-                  disabled={busy || !choice || !accepted}
-                >
-                  Save my choice
-                </button>
-              </fieldset>
-              <p>
-                {agreed
-                  ? `Everyone chose ${agreed.name}. Review the shared payment terms next.`
-                  : "Everyone must choose the same place. You can change your choice while planning."}
-              </p>
-              {agreed && !overview.signingPolicy && (
-                <LivePaymentSetup
-                  overview={overview}
-                  placeId={agreed.id}
-                  busy={busy}
-                  onSave={(terms) => void action("decisions", terms)}
-                />
-              )}
-            </form>
-          )}
+              </section>
+            )}
+          {!overview.signingPolicy &&
+            plan.recommendationReady &&
+            plan.places.length === 1 && (
+              <form
+                className="gathering-card gathering-candidates"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void action("vote", {
+                    placeId: choice,
+                    recommendationRevision: plan.recommendationRevision,
+                    acknowledgeChoice: accepted,
+                  });
+                }}
+              >
+                <fieldset disabled={busy || overview.group.locked}>
+                  <legend>Your shared place</legend>
+                  <p className="gathering-muted">
+                    One place, chosen around everyone’s preferences.
+                  </p>
+                  {plan.places.map((place) => (
+                    <article className="discovery-card" key={place.id}>
+                      <h3>{place.name}</h3>
+                      <p>{place.address}</p>
+                      <p>{place.price ?? "Price not provided"}</p>
+                      <details className="gathering-evidence">
+                        <summary>How it fits your group</summary>
+                        <ul>
+                          {place.evidence.map((fact, index) => (
+                            <li key={index}>
+                              {fact.condition}:{" "}
+                              {fact.status === "reported"
+                                ? "Provider reported"
+                                : fact.status === "conflict"
+                                  ? "Does not meet"
+                                  : "Needs confirmation"}
+                              . {fact.detail}
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                      <a
+                        href={place.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View source and location
+                      </a>
+                    </article>
+                  ))}
+                  <label className="gathering-choice-consent">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={accepted}
+                      onChange={(event) => setAccepted(event.target.checked)}
+                    />{" "}
+                    I agree to this place. Any payment requires a confirmed
+                    amount and my separate approval.
+                  </label>
+                  <button
+                    className="primary"
+                    disabled={busy || !choice || !accepted}
+                  >
+                    Agree to this place
+                  </button>
+                </fieldset>
+                <p>
+                  {agreed
+                    ? `Everyone chose ${agreed.name}. Review the shared payment terms next.`
+                    : "Everyone reviews this proposal and agrees separately before payment."}
+                </p>
+                {agreed && !overview.signingPolicy && (
+                  <LivePaymentSetup
+                    overview={overview}
+                    placeId={agreed.id}
+                    busy={busy}
+                    onSave={(terms) => void action("decisions", terms)}
+                  />
+                )}
+              </form>
+            )}
           {overview.signingPolicy && (
             <>
               <GroupPolicyPanel overview={overview} busy={busy} />

@@ -428,7 +428,7 @@ export class LivePlanRepository {
         searchedAt: result?.searchedAt ?? row.snapshot.searchedAt,
         source: "xAPI (Google Maps)",
         recommendationReady:
-          !!result?.places.length && !result.conflicts.length,
+          result?.places.length === 1 && !result.conflicts.length,
         recommendationRevision: token,
         preferenceRevision: revision,
         conflicts: result?.conflicts ?? [],
@@ -450,6 +450,7 @@ export class LivePlanRepository {
       const row = await this.lock(db, groupId, actor);
       if (row.preferences_locked) throw new LivePlanError("GROUP_LOCKED");
       if (
+        (row.snapshot as LivePlan).places.length !== 1 ||
         !row.snapshot.recommendationReady ||
         row.snapshot.recommendationRevision !== recommendationRevision
       )
@@ -500,6 +501,7 @@ export class LivePlanRepository {
         group.target_member_count,
       );
       if (
+        (group.snapshot as LivePlan).places.length !== 1 ||
         !group.snapshot.recommendationReady ||
         group.snapshot.recommendationRevision !==
           terms.recommendationRevision ||

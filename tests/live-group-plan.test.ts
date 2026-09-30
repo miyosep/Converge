@@ -128,8 +128,33 @@ test("friends review unverified venue conditions and separate place choice from 
   const html = renderToStaticMarkup(
     createElement(LiveGroupPanel, { initial: overview }),
   );
-  assert.match(html, /Save my choice/);
+  assert.match(html, /Agree to this place/);
   assert.match(html, /Needs confirmation/);
+  assert.doesNotMatch(html, /type="radio"/);
+  const legacy = renderToStaticMarkup(
+    createElement(LiveGroupPanel, {
+      initial: {
+        ...overview,
+        livePlan: {
+          ...plan,
+          places: [
+            ...plan.places,
+            {
+              ...plan.places[0]!,
+              id: "old-second",
+              name: "Old second candidate",
+            },
+          ],
+        },
+      },
+    }),
+  );
+  assert.match(legacy, /Search again to turn your saved options/);
+  assert.doesNotMatch(
+    legacy,
+    /Old second candidate|Agree to this place|type="radio"/,
+  );
+
   assert.match(html, /Your shared payment/);
   assert.match(html, /Your organizer will set the amount/);
   assert.doesNotMatch(
