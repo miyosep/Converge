@@ -10,7 +10,8 @@ For the hackathon, candidates are assumed reservable using USDC; availability is
 not checked. This search/comparison flow does not itself create a group payment policy.
 
 The archived planner at `/demo/catalog` uses 200 fictional examples, 40 per category.
-Apply migrations through `0014_catalog_forty.sql` for its saved shortlists.
+Its saved shortlists use migration `0014_catalog_forty.sql`; current deployments
+must apply all checked-in migrations through `0018_group_before_search.sql`.
 See [archived catalog behavior](MULTI_INDUSTRY.md). The group and payment workflows
 below describe this compatible synthetic merchant flow and existing groups.
 
@@ -20,13 +21,16 @@ below describe this compatible synthetic merchant flow and existing groups.
 New ordinary groups accept `targetMemberCount` from 2 to 100, including the
 creator. Omitted values default to 6 for existing clients. The chosen size is
 fixed for that group. Migration `0009_group_size.sql` adds this field, preserves
-existing six-member groups, and extends invitation capacity. Apply it using
-`pnpm db:migrate:dev` before running the updated app.
+existing six-member groups, and extends invitation capacity. Run
+`pnpm db:migrate:dev` to apply all migrations through `0018_group_before_search.sql`
+before running the updated app.
 
 Invites and joins use the saved capacity while holding the group row lock.
-Every expected member must join and confirm before evaluation. Recommendation
-funding uses the actual member count, with deposit and spending caps limited to
-the group's contribution total and the existing configured caps.
+Every expected member must join and confirm before group search or evaluation.
+The archived fixture flow limits recommendation spending to the group's total
+contribution and its configured caps. In the live friends flow, the organizer
+sets the total test payment after unanimous place choice; the policy divides
+that amount equally among the actual participants, rounding up to token base units.
 
 New ordinary policies use the deployed v2 contract with 2–100 members and
 unanimous approval. Existing v1 policies still use their original contract.
@@ -50,14 +54,16 @@ The Next.js app supports wallet-signature login, group creation, capped invite l
 
 ## Ordinary-group wallet actions
 
-Group creation saves a nonempty, unique list of permitted sample restaurants
+Archived fixture-group creation saves a nonempty, unique list of permitted sample restaurants
 under migration `0008_group_conditions.sql`. Evaluation intersects this list
 with server-side merchant permissions while holding the group lock. Changed
 merchant conditions require a new group and policy. See the
 [three-scenario acceptance runner](GROUP_ACCEPTANCE.md) for full HTTP, Kiln,
 Sepolia, authorization, and process-restart checks using six separate wallets.
 
-After preparing a signing policy, open `/group/:id/approve`. Any of its six participants can register it. Each participant then allows the exact contribution amount and contributes in a separate wallet transaction. The page checks the session wallet, configured deployment, policy hash, chain state, token balance and allowance before simulating and requesting each transaction. Ordinary groups supply their own Sepolia ETH and MockUSDC; no test-funding worker or automated participants are attached.
+Live friends groups first agree on the same xAPI candidate. The organizer then sets the total MockUSDC payment and test recipient. Each member reviews the frozen terms and their equal share, rounded up to the token's smallest unit; any rounding remainder is refundable. See [friends payment and funding details](LIVE_GROUP_PLANS.md).
+
+After preparing a signing policy, open `/group/:id/approve`. Any participant listed in that policy can register it. Every listed participant must allow their exact contribution amount and contribute through their own wallet before payment can execute. The page checks the session wallet, configured deployment, policy hash, chain state, token balance and allowance before simulating and requesting each transaction. For live test-payment policies, the hybrid processor supplies missing MockUSDC for each share and tops up eligible wallets toward 0.001 Sepolia ETH within the group execution budget. Friends groups have no automated participants. Archived fixture groups continue to supply their own funds.
 
 `GET /api/groups/:id/chain` requires a valid session and membership before contacting the configured server-side `RPC_URL`. It reports amounts from one canonical block with two confirmations. RPC errors disable actions rather than showing fabricated zero balances. The client checks fresh wallet-provider state again before signing. Pending hashes survive reload when browser storage is available. Replacements detected by the wallet receipt watcher are tracked; for a replacement or dropped hash missed across reload, the page exposes an explicit stop-tracking action without resubmitting a transaction.
 
@@ -67,7 +73,7 @@ The optional `groups:worker` process scans policies from the configured deployme
 
 ### Worker operations and verified recovery
 
-Apply `pnpm db:migrate:dev`, then run `pnpm groups:worker-check`. The worker needs the direct `DATABASE_URL_UNPOOLED` for its session advisory lock. Keep the executor key in the private worker environment. After setting `GROUP_EXECUTION_ENABLED=true`, run `pnpm groups:worker`. The default `GROUP_EXECUTION_MAX_ETH=0.01` caps the sum of reserved maximum transaction fees in the execution journal, including earlier attempts; it is not a per-transaction limit or an ETH funding mechanism.
+The current hybrid processor setup is documented in [HYBRID_PC.md](HYBRID_PC.md). For the standalone ordinary-group worker, apply `pnpm db:migrate:dev`, then run `pnpm groups:worker-check`. That worker needs the direct `DATABASE_URL_UNPOOLED` for its session advisory lock. Keep the executor key in the private worker environment. After setting `GROUP_EXECUTION_ENABLED=true`, run `pnpm groups:worker`. The default `GROUP_EXECUTION_MAX_ETH=0.01` is a cumulative budget for reserved transaction costs, including earlier attempts. In hybrid mode, the group budget also includes signed test-funding grants; it is not a per-transaction limit.
 
 Run only one signing mode for this executor. The Explore Demo and ordinary-group workers share `.demo/worker.lock`, so stop the Explore worker before starting ordinary-group execution. Keep both modes on the same host and shared demo directory, and do not use this executor key in another signing process. Do not delete transaction journals to retry an uncertain payment: restart recovery checks and reuses its saved hash. History requires the worker to run, uses two block confirmations, and does not imply Ethereum finality. Refund claims remain individual wallet transactions.
 
@@ -92,7 +98,7 @@ the wallet has already granted site access.
 
 Use Node.js 24.19.0 and pnpm 11.19.0 on Windows or macOS. Install with `pnpm install --frozen-lockfile`. Place the **development branch** pooled Neon URL in ignored `.env.development` as `DATABASE_URL`, its direct URL as `DATABASE_URL_UNPOOLED`, and set `NEON_BRANCH=dev-preferences`. Keep `KILN_API_KEY` server-side in ignored `.env`; do not prefix it with `NEXT_PUBLIC_`. Set `APP_ORIGIN=http://localhost:3000` for local use. No secrets belong in Git, screenshots, or chat.
 
-Run `pnpm db:migrate:dev` and `pnpm dev`, then open `http://localhost:3000` in a browser with an EIP-1193 wallet such as MetaMask. The wallet must support Ethereum Sepolia. The login signature is not a transaction. This version verifies signatures from externally owned accounts only. Six independently controlled wallets are required to verify the actual user flow. Dedicated demo keys should never be imported into an everyday wallet profile.
+Run `pnpm db:migrate:dev` and `pnpm dev`, then open `http://localhost:3000` in a browser with an EIP-1193 wallet such as MetaMask. The wallet must support Ethereum Sepolia. The login signature is not a transaction. This version verifies signatures from externally owned accounts only. To verify a friends group, use one independently controlled wallet per actual participant, matching the group's chosen size. The historical six-person acceptance scenario and six-person Explore Demo retain their own documented setup. Dedicated demo keys should never be imported into an everyday wallet profile.
 
 For local checks, run `pnpm db:auth-rehearse:dev` to validate DB replay/invite behavior and `pnpm http:rehearse:dev` while the dev server is running. `pnpm http:kiln-rehearse:dev` additionally spends a live Kiln request, submits and confirms a synthetic preference, and verifies usage persistence. With the local server running, `node --env-file=.env.development --import tsx scripts/group-workflow-rehearsal.ts` checks saved results and policy preparation on `dev-preferences` using synthetic inputs. These scripts generate ephemeral accounts and write synthetic records only to the development branch. They do not submit transactions. `pnpm check` and `pnpm build` validate code; the actual presentation MacBook still needs a manual browser-wallet check.
 
@@ -100,4 +106,4 @@ For local checks, run `pnpm db:auth-rehearse:dev` to validate DB replay/invite b
 
 The production Neon branch remains unmigrated. A production deployment must set an HTTPS `APP_ORIGIN`, apply reviewed migrations to the intended branch, configure Kiln privately, and pass a multi-device access review. A localhost invite link is usable only by browsers on that machine; it is not a public invitation for friends on other devices. The Next.js server, not a browser, owns Neon and Kiln credentials. POST routes require a matching `Origin`, JSON content type, and a valid HttpOnly SameSite session cookie after login. Group APIs derive the actor from that session. The other members' progress response includes only display names, wallet addresses, and submitted/confirmed flags; individual raw text and extracted constraints are not shared.
 
-Challenge messages bind the address, Ethereum Sepolia chain ID, expected origin, nonce, and five-minute expiry. Challenges are consumed atomically; sessions use random hashed tokens and can be revoked. Invite tokens are random, stored only as hashes, expire after 24 hours, and cannot exceed the six-person capacity. These are application controls, not blockchain payment authorization. Rate limiting, contract-wallet signatures, production deployment, and independent security review remain open.
+Challenge messages bind the address, Ethereum Sepolia chain ID, expected origin, nonce, and five-minute expiry. Challenges are consumed atomically; sessions use random hashed tokens and can be revoked. Invite tokens are random, stored only as hashes, expire after 24 hours, and are limited by the group's remaining capacity under its saved `targetMemberCount`. These are application controls, not blockchain payment authorization. Rate limiting, contract-wallet signatures, production deployment, and independent security review remain open.

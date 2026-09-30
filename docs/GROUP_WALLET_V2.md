@@ -10,12 +10,21 @@ The archived planner at `/demo/catalog` has 40 fictional restaurants (A–Z and 
 plus 40 examples in each of four other categories. Search covers name,
 cuisine and area. The selected shortlist is saved with the group. Dietary,
 availability and price metadata are synthetic; no real reservation is made.
-Default new-plan links now open live AI search at `/discover`, which assumes USDC
-reservations for the hackathon without checking availability. Its real candidates
-are not yet connected to this merchant registry and policy flow.
-Each person contributes 10 MockUSDC. Recommendation caps are the smaller of
+In this archived fixture flow, each person contributes 10 MockUSDC.
+Recommendation caps are the smaller of
 actual group funding and the configured 60 MockUSDC cap. A small group can receive
 NO_MATCH if every selected restaurant exceeds its funds or other requirements.
+
+Current new-plan links open `/discover`. After every actual member confirms
+preferences and chooses the same xAPI candidate, the organizer sets the total
+MockUSDC test payment and recipient. A v2 policy divides that total equally
+among the actual participants, rounding up to token base units, and requires
+every member's independent wallet approval and contribution. Rounding remainders
+are refundable. The hybrid processor can supply missing test tokens for each
+share and top up eligible wallets toward 0.001 Sepolia ETH within the shared
+group execution budget. The recipient is entered by the organizer, not inferred
+from a listing. Availability and USDC acceptance remain hackathon assumptions;
+these transactions do not book or pay a real venue. See [friends planning](LIVE_GROUP_PLANS.md).
 
 ## Compatibility and deployment
 
@@ -30,7 +39,7 @@ The manifest records the receipt, canonical block and deployed code hash.
 Deployment was verified at two confirmations; its recorded verification does
 not assert finality. This is a test-token deployment, not a production payment service.
 
-Apply migrations through `0010_restaurant_catalog.sql` with
+Apply all checked-in migrations through `0018_group_before_search.sql` with
 `pnpm db:migrate:dev`. Run `pnpm groups:worker-check` for read-only database,
 signer and both contract-version checks. The ordinary worker dispatches saved
 policies to their respective contract version.
