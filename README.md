@@ -33,7 +33,7 @@ Converge waits for everyone. In a friends group, every participant is a real mem
 
 Once everyone has confirmed, the agent combines their opinions, searches real place listings through xAPI and proposes **one place for the group**, with a short explanation of its choice.
 
-Different tastes call for compromise. Under the current product rule, an explicitly reported allergy in confirmed preferences stops automated group planning and new payment preparation. An explicit statement of no allergies does not block the group. Other indispensable medical/access needs remain Required; ordinary wishes and budgets are Preferred. Unknown venue facts remain unverified.
+Different tastes call for compromise. Qwen balances the group's preferences to propose one shared place. Unknown venue facts remain unverified.
 
 Each friend decides whether to agree with the proposal. Agreeing on dinner does not yet authorize a payment.
 
@@ -77,7 +77,7 @@ Plans change. Converge needs to keep agreement and spending permission in step w
 
 If someone changes a preference, membership changes or the group searches again, earlier proposal agreements are cleared. Everyone reviews the new proposal. If payment terms change, they need a new decision and fresh approvals; an already locked policy cannot be edited.
 
-Ordinary preferences can be balanced. Reported allergies stop automated planning; other genuinely incompatible essential needs also stop the proposal. Unknown venue facts remain visible so the group can check them.
+Ordinary preferences can be balanced. Unknown venue facts remain visible so the group can check them.
 
 A recorded example from our earlier test catalog shows this adaptation: one friend lowers their meal budget from $35 to $25. A fresh run switches from Restaurant A to Restaurant B, reduces the group payment from 45 to 36 USDC and returns the unused contribution. The [receipts and Kiln logs](#per-flow-on-chain-proof-and-kiln-logs) are below.
 
@@ -140,7 +140,7 @@ The [guided demo record](docs/LIVE_DEMO_BOOKING.md#verification) covers local pa
 
 ### Per-Flow On-chain Proof and Kiln Logs
 
-The following runs use the earlier synthetic restaurant catalog. Every linked JSON includes confirmed synthetic inputs, Kiln API attempts, usage, policy, transaction receipts/logs and application history. These historical amounts and budget eligibility rules are **not** current friends pricing rules or a recording of today's xAPI/30%/allergy flow.
+The following runs use the earlier synthetic restaurant catalog. Every linked JSON includes confirmed synthetic inputs, Kiln API attempts, usage, policy, transaction receipts/logs and application history. These historical amounts and budget eligibility rules are **not** current friends pricing rules or a recording of today's xAPI search and 30% deposit flow.
 
 **Fresh verification:** [this report](docs/evidence/submission-proof-verification.json) rechecks all three payment receipts as canonical and finalized and groups their saved Kiln call metadata by flow. Payment logs contain `Transfer`, `PaymentExecuted` and `DecisionCompleted`; the source artifacts also retain contributions/refunds.
 
