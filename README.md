@@ -58,7 +58,9 @@ The [friends flow](https://converge-iota-seven.vercel.app/discover) supports **2
 | **4. Authorize** | Review the shared policy and independently approve and contribute through wallets. | Freezes the participants, recipient, exact deposit, spending limits and expiry. |
 | **5. Execute** | Inspect the receipt and claim eligible refunds. | The executor requests payment; the contract enforces the policy and accounts for the remainder. |
 
-Each friend contributes 10 MockUSDC and needs Sepolia gas. Automated funding belongs to the guided demo. [Friends workflow details](docs/LIVE_GROUP_PLANS.md).
+After everyone chooses the same place, the organizer sets the total MockUSDC payment and test recipient wallet. The policy divides the total equally among the actual participants, rounding each share up to the token's smallest unit; any rounding remainder is refundable. For example, a 12 MockUSDC payment shared by two people requires 6 each. Every member reviews the fixed terms and signs their own approval and contribution.
+
+The hybrid processor supplies missing test tokens for each share and tops up eligible wallets toward 0.001 Sepolia ETH, within the shared group execution budget. Friends groups use their actual members' wallets; the five automated participants belong to Explore Demo. These are test payments, not venue quotes or real bookings. [Friends workflow details](docs/LIVE_GROUP_PLANS.md).
 
 ### When Conditions Change
 
@@ -218,7 +220,7 @@ For connected development, create an ignored `.env.development` from [`.env.exam
 | Wallet actions | Sepolia RPC, the deployed contract addresses above, a browser wallet, MockUSDC and Sepolia gas. |
 | Payment execution | A running processor with test executor/signers. Follow [processor setup](docs/HYBRID_PC.md). |
 
-The migration command expects an isolated branch named `dev-preferences` and matching `NEON_BRANCH=dev-preferences`. Apply all checked-in migrations through **`0018_group_before_search.sql`**, even where older setup notes mention `0017`:
+The migration command expects an isolated branch named `dev-preferences` and matching `NEON_BRANCH=dev-preferences`. Apply all checked-in migrations through **`0018_group_before_search.sql`** before running the current web app and processor:
 
 ```sh
 pnpm db:migrate:dev

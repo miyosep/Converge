@@ -9,7 +9,7 @@ browser does not stop processing; losing power, sleep or internet pauses it.
 ## Configure the shared database and web
 
 Use the same pooled `DATABASE_URL` on the PC and Vercel. Apply all checked-in
-migrations through `0017_live_group_preferences.sql` before deploying the updated
+migrations through `0018_group_before_search.sql` before deploying the updated
 web app and processor. The preflight checks acknowledgements and live preference tables. Use the direct URL
 with the migration runner. Test in a Neon branch first.
 
@@ -170,6 +170,6 @@ all 31 local contract tests, including fuzz and invariant tests, then passed.
 
 ## Shared test payments and readiness
 
-After all real members confirm their preferences and vote for one place, the organizer can set a Sepolia MockUSDC amount and test recipient. The saved policy freezes those terms; every member must approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens and up to a 0.001 Sepolia ETH wallet balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` budget; no automated demo participant joins a real group.
+After all real members confirm their preferences and vote for one place, the organizer can set a total Sepolia MockUSDC amount and test recipient. Each member's share is the total divided by the actual participant count, rounded up to the token's smallest unit; any rounding remainder is refundable. The saved policy freezes those terms; every member must review, approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens up to each member's required share and tops up eligible wallets toward a 0.001 Sepolia ETH balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` lifetime budget with group execution; no automated demo participant joins a real group.
 
 The worker sends a heartbeat every 20 seconds during long jobs. Idle demo sessions without transactions or queued/in-flight work (including an unfunded draft policy) stop consuming admission capacity after 30 minutes. Their history remains available, and resumed work must reacquire capacity under the admission lock.
