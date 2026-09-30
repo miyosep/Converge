@@ -30,8 +30,8 @@ before running the updated app.
 Invites and joins use the saved capacity while holding the group row lock.
 Every expected member must join and confirm before group search or evaluation.
 The archived fixture flow limits recommendation spending to the group's total
-contribution and its configured caps. In the live friends flow, the organizer
-sets the total test payment after unanimous place choice; the policy divides
+contribution and its configured caps. In the live friends flow, the server
+prepares configured test payment terms after unanimous place agreement; the policy divides
 that amount equally among the actual participants, rounding up to token base units.
 
 New ordinary policies use the deployed v2 contract with 2–100 members and
@@ -63,7 +63,7 @@ merchant conditions require a new group and policy. See the
 [three-scenario acceptance runner](GROUP_ACCEPTANCE.md) for full HTTP, Kiln,
 Sepolia, authorization, and process-restart checks using six separate wallets.
 
-Live friends groups first agree on the same xAPI candidate. The organizer then sets the total MockUSDC payment and test recipient. Each member reviews the frozen terms and their equal share, rounded up to the token's smallest unit; any rounding remainder is refundable. See [friends payment and funding details](LIVE_GROUP_PLANS.md).
+Live friends groups first agree on the same xAPI candidate. The server prepares the configured MockUSDC payment and test recipient; users never enter those values. Each member reviews the frozen terms and their equal share, rounded up to the token's smallest unit; any rounding remainder is refundable. See [friends payment and funding details](LIVE_GROUP_PLANS.md).
 
 After preparing a signing policy, open `/group/:id/approve`. Any participant listed in that policy can register it. Every listed participant must allow their exact contribution amount and contribute through their own wallet before payment can execute. The page checks the session wallet, configured deployment, policy hash, chain state, token balance and allowance before simulating and requesting each transaction. For live test-payment policies, the hybrid processor supplies missing MockUSDC for each share and tops up eligible wallets toward 0.001 Sepolia ETH within the group execution budget. Friends groups have no automated participants. Archived fixture groups continue to supply their own funds.
 

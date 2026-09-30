@@ -16,6 +16,7 @@ import {
 import {
   groupEvaluationOptions,
   currentGroupPolicyConfig,
+  automaticGroupPaymentTerms,
   groupPolicyConfigFor,
 } from "../../../../../src/lib/server/group-config.js";
 import {
@@ -256,7 +257,7 @@ export async function POST(request: NextRequest, context: Context) {
           groupId,
           actor,
           currentGroupPolicyConfig(),
-          body,
+          automaticGroupPaymentTerms(body, overview.group.targetMemberCount),
         );
       else {
         z.strictObject({}).parse(body);

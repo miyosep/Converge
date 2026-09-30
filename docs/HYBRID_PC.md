@@ -173,3 +173,15 @@ all 31 local contract tests, including fuzz and invariant tests, then passed.
 After all real members confirm their preferences and vote for one place, the organizer can set a total Sepolia MockUSDC amount and test recipient. Each member's share is the total divided by the actual participant count, rounded up to the token's smallest unit; any rounding remainder is refundable. The saved policy freezes those terms; every member must review, approve and contribute using their own wallet. No venue booking or real payment is implied. The hybrid worker prepares missing test tokens up to each member's required share and tops up eligible wallets toward a 0.001 Sepolia ETH balance, recording signed grants separately under `funding:` in the group journal. Grants share the existing `GROUP_EXECUTION_MAX_ETH` lifetime budget with group execution; no automated demo participant joins a real group.
 
 The worker sends a heartbeat every 20 seconds during long jobs. Idle demo sessions without transactions or queued/in-flight work (including an unfunded draft policy) stop consuming admission capacity after 30 minutes. Their history remains available, and resumed work must reacquire capacity under the admission lock.
+
+
+### Automatic friends test-payment terms
+
+Friends never enter a payment amount or recipient. After unanimous place agreement,
+the organizer selects Continue to approval. The API prepares immutable Sepolia terms
+from GROUP_TEST_PAYMENT_PER_PERSON_USDC (default 10 MockUSDC per actual member)
+and GROUP_TEST_PAYMENT_RECIPIENT (default the existing public Sepolia merchant A test wallet).
+These optional settings belong on the Vercel server. They are test configuration, not
+restaurant prices or verified restaurant wallets. Exact terms appear in the policy
+review; every real member must separately approve and contribute. Request bodies
+cannot override either amount or recipient. Existing fixed policies remain unchanged.

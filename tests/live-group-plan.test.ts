@@ -131,6 +131,20 @@ test("friends review unverified venue conditions and separate place choice from 
   assert.match(html, /Agree to this place/);
   assert.match(html, /Needs confirmation/);
   assert.doesNotMatch(html, /type="radio"/);
+  const organizerHtml = renderToStaticMarkup(
+    createElement(LiveGroupPanel, {
+      initial: {
+        ...overview,
+        group: { ...overview.group, isCreator: true },
+      },
+    }),
+  );
+  assert.match(organizerHtml, /Continue to approval/);
+  assert.doesNotMatch(
+    organizerHtml,
+    /Test recipient wallet|Group payment \(MockUSDC\)|Set payment terms|group-payment-amount|group-payment-recipient|Enter the agreed test amount/,
+  );
+
   const searching = renderToStaticMarkup(
     createElement(LiveGroupPanel, {
       initial: {
@@ -189,8 +203,8 @@ test("friends review unverified venue conditions and separate place choice from 
     /Old second candidate|Agree to this place|type="radio"/,
   );
 
-  assert.match(html, /Your shared payment/);
-  assert.match(html, /Your organizer will set the amount/);
+  assert.match(html, /Ready to approve together/);
+  assert.match(html, /Your organizer can continue to approval/);
   assert.doesNotMatch(
     html,
     /10 MockUSDC|15 MockUSDC|demo booking wallet|Prepare agreed payment/,

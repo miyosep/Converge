@@ -171,3 +171,40 @@ test("group grants use actual member wallets and chosen shares, skip paid member
   await fundGroupMembers(worker, saved, async () => ({ ...chain, status: 2 }));
   assert.equal(calls.length, 0);
 });
+
+test("server prepares group-sized test terms and rejects client-selected amounts or recipients", async () => {
+  const { automaticGroupPaymentTerms } =
+    await import("../src/lib/server/group-config");
+  const request = {
+    placeId: "place",
+    recommendationRevision: "revision",
+    acknowledgeTestPayment: true,
+  };
+  const prepared = automaticGroupPaymentTerms(request, 2, {});
+  assert.equal(prepared.amount, "20");
+  assert.equal(automaticGroupPaymentTerms(request, 3, {}).amount, "30");
+  assert.equal(
+    automaticGroupPaymentTerms(request, 3, {
+      GROUP_TEST_PAYMENT_PER_PERSON_USDC: "2.5",
+    }).amount,
+    "7.5",
+  );
+  assert.throws(() =>
+    automaticGroupPaymentTerms({ ...request, amount: "999" }, 2, {}),
+  );
+  assert.throws(() =>
+    automaticGroupPaymentTerms({ ...request, recipient: address(9) }, 2, {}),
+  );
+  assert.throws(() =>
+    automaticGroupPaymentTerms(request, 2, {
+      GROUP_TEST_PAYMENT_PER_PERSON_USDC: "0",
+    }),
+  );
+  const saved = buildLivePayment({
+    ...input,
+    members: members.slice(0, 2),
+    terms: prepared,
+  });
+  assert.equal(saved.policy.contributionPerParticipant, "10000000");
+  assert.equal(saved.policy.approvalThreshold, 2);
+});

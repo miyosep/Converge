@@ -1,3 +1,6 @@
+import { formatUnits, parseUnits } from "viem";
+import { z } from "zod";
+import { livePaymentTermsSchema } from "../discovery/live-payment";
 import deployment from "../../../contracts/deployments/11155111.json";
 import deploymentV2 from "../../../contracts/deployments/11155111-v2.json";
 import publicRoles from "../../../contracts/deployments/demo-roles.11155111.json";
@@ -58,4 +61,28 @@ export function groupEvaluationOptions(
     maxDeposit: "60000000",
     maxTotalSpend: "60000000",
   };
+}
+
+const automaticPaymentRequestSchema = livePaymentTermsSchema.pick({
+  placeId: true,
+  recommendationRevision: true,
+  acknowledgeTestPayment: true,
+});
+
+// Owner-authorized Sepolia test configuration, never inferred from a venue quote.
+export function automaticGroupPaymentTerms(
+  request: unknown,
+  memberCount: number,
+  environment: Record<string, string | undefined> = process.env,
+) {
+  const input = automaticPaymentRequestSchema.parse(request);
+  z.number().int().min(2).max(100).parse(memberCount);
+  const perPerson = livePaymentTermsSchema.shape.amount.parse(
+    environment.GROUP_TEST_PAYMENT_PER_PERSON_USDC ?? "10",
+  );
+  return livePaymentTermsSchema.parse({
+    ...input,
+    amount: formatUnits(parseUnits(perPerson, 6) * BigInt(memberCount), 6),
+    recipient: environment.GROUP_TEST_PAYMENT_RECIPIENT ?? roles.merchants.A,
+  });
 }
