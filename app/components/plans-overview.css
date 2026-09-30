@@ -530,3 +530,9 @@
     font-size: 22px;
   }
 }
+
+/* Keep saved gatherings below the persistent welcome card. */
+.plans-first-frame + .plans-collection,
+.plans-first-frame + .plans-feedback {
+  margin-top: 36px;
+}

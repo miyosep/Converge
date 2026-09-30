@@ -43,6 +43,12 @@ test("saved plan cards preserve real membership, dates, status and group destina
     }),
   );
   assert.match(html, /href="\/group\/dinner%2Fone"/);
+  assert.match(html, /converge-together.webp/);
+  assert.match(html, /Start a plan/);
+  assert.ok(
+    html.indexOf("plans-first-photo") < html.indexOf("plans-collection"),
+  );
+  assert.equal((html.match(/href="\/group\/new"/g) ?? []).length, 1);
   assert.match(html, /3 of 6 joined/);
   assert.match(html, /2 confirmed/);
   assert.match(html, /Gathering preferences/);

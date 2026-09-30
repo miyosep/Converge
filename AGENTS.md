@@ -14,3 +14,8 @@ Before planning or editing project code, read [docs/PRODUCT_RULES.md](docs/PRODU
 - Prepare terms from an authorized server configuration or verified quote. Do not invent a restaurant price, copy demo defaults into friends, or ask users to enter infrastructure values as a workaround.
 - Show exact prepared amounts and test-payment status at wallet review; each real participant still approves separately. Removing configuration forms must not hide payment terms or imply consent.
 - If the source of automatic terms has not been decided, clarify that source; do not silently restore the manual form. Check every affected path before completion.
+
+## Preserve the approved My plans welcome
+
+- The photo welcome card, Start a plan action and pointer interaction remain visible even when saved plans exist. Render saved plans below the card; never replace it with the list or hide it based on group count.
+- Do not remove or replace approved visual elements while fixing unrelated behavior. Follow the owner's explicit design changes.

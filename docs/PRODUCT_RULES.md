@@ -79,7 +79,7 @@ Current scope is simulated booking with test tokens and a test recipient. A list
 - Short copy without duplicate explanations. Keep infrastructure details out of normal user flows.
 - Keep the connected-wallet control on Discover.
 - My plans: no sidebar, rounded top navigation, title "My plans" without a period. Keep "Your people, Your next good memory." in its established right-hand position, green serif italic with a thin vertical divider.
-- Empty-state title: "Something good starts with a plan", with "a plan" italic. CTA: "Start a plan". Preserve the approved layout and restrained pointer interaction.
+- Persistent welcome card title: "Something good starts with a plan", with "a plan" italic. CTA: "Start a plan". Preserve the approved photo, layout and restrained pointer interaction even when saved groups exist. Show the saved plans below the welcome card, never instead of it.
 - No background photo in the demo. Never turn single-place agreement into a multiple-choice interface.
 - No manual payment configuration form in ANY user flow, including My plans/friend groups. Show prepared payment amounts for review at the approval stage; preserve each user's separate consent.
 

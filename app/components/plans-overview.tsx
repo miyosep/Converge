@@ -7,7 +7,6 @@ import {
   CalendarDays,
   LockKeyhole,
   LogOut,
-  Plus,
   Users,
   Wallet,
 } from "lucide-react";
@@ -35,7 +34,7 @@ export function PlansOverview({
   onSignOut: () => void;
 }) {
   const empty = !loading && !error && groups.length === 0;
-  const cardFrame = useCardTilt(empty);
+  const cardFrame = useCardTilt(true);
   const shortWallet = `${wallet.slice(0, 6)}…${wallet.slice(-4)}`;
   return (
     <div className="shell plans-shell">
@@ -61,17 +60,40 @@ export function PlansOverview({
               <em>Your people, Your next good memory.</em>
             </p>
           </div>
-          {!empty && (
-            <Link href="/group/new" className="primary plans-create">
-              <Plus size={18} aria-hidden="true" /> New plan
-            </Link>
-          )}
         </header>
         {notice && (
           <p className="notice" role="status">
             {notice}
           </p>
         )}
+        <div className="plans-first-frame" ref={cardFrame}>
+          <section className="plans-first" aria-labelledby="first-plan-title">
+            <div className="plans-first-copy">
+              <h2 id="first-plan-title">
+                Something good
+                <br />
+                starts with <em>a plan</em>
+              </h2>
+              <Link href="/group/new" className="primary plans-create">
+                Start a plan <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="plans-first-photo">
+              <img
+                src="/images/converge-together.webp"
+                alt="Friends spending time together around a table outdoors"
+                width={1536}
+                height={1024}
+              />
+              <div className="plans-photo-caption">
+                <span>FROM ‘WE SHOULD.’</span>
+                <strong>
+                  To <em>‘see you there.’</em>
+                </strong>
+              </div>
+            </div>
+          </section>
+        </div>
         {loading ? (
           <section className="plans-feedback" role="status" aria-live="polite">
             <span className="plans-loading-mark" aria-hidden="true" />
@@ -86,36 +108,7 @@ export function PlansOverview({
               Try again
             </button>
           </section>
-        ) : empty ? (
-          <div className="plans-first-frame" ref={cardFrame}>
-            <section className="plans-first" aria-labelledby="first-plan-title">
-              <div className="plans-first-copy">
-                <h2 id="first-plan-title">
-                  Something good
-                  <br />
-                  starts with <em>a plan</em>
-                </h2>
-                <Link href="/group/new" className="primary plans-create">
-                  Start a plan <ArrowRight size={18} aria-hidden="true" />
-                </Link>
-              </div>
-              <div className="plans-first-photo">
-                <img
-                  src="/images/converge-together.webp"
-                  alt="Friends spending time together around a table outdoors"
-                  width={1536}
-                  height={1024}
-                />
-                <div className="plans-photo-caption">
-                  <span>FROM ‘WE SHOULD.’</span>
-                  <strong>
-                    To <em>‘see you there.’</em>
-                  </strong>
-                </div>
-              </div>
-            </section>
-          </div>
-        ) : (
+        ) : !empty ? (
           <section
             className="plans-collection"
             aria-labelledby="plans-collection-title"
@@ -202,7 +195,7 @@ export function PlansOverview({
               })}
             </div>
           </section>
-        )}
+        ) : null}
         {empty && (
           <section
             className="plans-how"
