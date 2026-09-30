@@ -18,7 +18,7 @@ Six friends want dinner together. Their budgets differ, some preferences are pri
 
 **The key idea.** Group consent becomes part of payment authorization. An AI recommendation can become an action only after everyone approves its terms; a changed plan requires renewed agreement.
 
-> **Demo scope:** real Kiln calls, real place listings and testnet transactions; **MockUSDC, a demo payment recipient and simulated booking confirmation**. Venue availability and USDC acceptance are assumed for the hackathon. Converge does not currently book a real venue or transfer real USDC.
+> **Demo scope:** real Kiln calls, real place listings and testnet transactions; **a testnet USDC token, a demo payment recipient and simulated booking confirmation**. The test token has no claim on real USDC. Venue availability and USDC acceptance are assumed for the hackathon; Converge does not currently book a real venue.
 
 ## What to Look For
 
@@ -37,8 +37,8 @@ Six friends want dinner together. Their budgets differ, some preferences are pri
 The guided flow uses **one human reviewer and five disclosed automated participants**. Bring a Sepolia browser wallet; the deployment may request an event access code. The app supplies missing test funds within a bounded session.
 
 1. **Find a place.** Enter English restaurant requirements around Gangnam Station and choose a returned candidate.
-2. **Review the terms.** Select a demo deposit of 1–60 MockUSDC, review unknown venue conditions and acknowledge the demo assumptions.
-3. **Approve your share.** Freeze the policy, prepare test funds, approve the allowance and contribute 10 MockUSDC. The automated participants contribute after you.
+2. **Review the terms.** Select a demo deposit of 1–60 USDC, review unknown venue conditions and acknowledge the demo assumptions.
+3. **Approve your share.** Freeze the policy, prepare test funds, approve the allowance and contribute 10 USDC. The automated participants contribute after you.
 4. **Follow the payment.** Observe the permitted transaction and its receipt, followed by the simulator's reservation confirmation.
 5. **Recover the remainder.** Claim your share of unused funds. Completed, cancelled or expired rounds can be followed by a new round from the same wallet.
 
@@ -58,7 +58,7 @@ The [friends flow](https://converge-iota-seven.vercel.app/discover) supports **2
 | **4. Authorize** | Review the shared policy and independently approve and contribute through wallets. | Freezes the participants, recipient, exact deposit, spending limits and expiry. |
 | **5. Execute** | Inspect the receipt and claim eligible refunds. | The executor requests payment; the contract enforces the policy and accounts for the remainder. |
 
-After everyone chooses the same place, the organizer sets the total MockUSDC payment and test recipient wallet. The policy divides the total equally among the actual participants, rounding each share up to the token's smallest unit; any rounding remainder is refundable. For example, a 12 MockUSDC payment shared by two people requires 6 each. Every member reviews the fixed terms and signs their own approval and contribution.
+After everyone chooses the same place, the organizer sets the total USDC payment and test recipient wallet. The policy divides the total equally among the actual participants, rounding each share up to the token's smallest unit; any rounding remainder is refundable. For example, a 12 USDC payment shared by two people requires 6 each. Every member reviews the fixed terms and signs their own approval and contribution.
 
 The hybrid processor supplies missing test tokens for each share and tops up eligible wallets toward 0.001 Sepolia ETH, within the shared group execution budget. Friends groups use their actual members' wallets; the five automated participants belong to Explore Demo. These are test payments, not venue quotes or real bookings. [Friends workflow details](docs/LIVE_GROUP_PLANS.md).
 
@@ -71,7 +71,7 @@ The hybrid processor supplies missing test tokens for each share and tops up eli
 | The approved recipient or financial terms need to change | A new decision and fresh approvals are required. A locked policy cannot be edited. |
 | A participant cancels before payment, or an unpaid policy expires | Eligible contributions can be recovered under that decision's contract rules. |
 
-**Recorded budget adaptation:** six people contribute 60 MockUSDC in total. The baseline fixture run selects Restaurant A and pays 45. In a fresh run, one person reduces their meal budget from $35 to $25; the system selects B, pays 36 and makes 4 refundable to each participant. Both runs include fresh Kiln interpretations, approvals and receipts.
+**Recorded budget adaptation:** six people contribute 60 USDC in total. The baseline fixture run selects Restaurant A and pays 45. In a fresh run, one person reduces their meal budget from $35 to $25; the system selects B, pays 36 and makes 4 refundable to each participant. Both runs include fresh Kiln interpretations, approvals and receipts.
 
 **Track A refusal:** the fixture decision engine has `NO_MATCH` coverage and blocks policy creation for an unmet goal. A recorded live refusal still needs to be added. The excluded-merchant run below finds a valid alternative and therefore demonstrates adaptation, not refusal.
 
@@ -119,7 +119,7 @@ The Next.js app handles member interaction and server-side provider calls. Neon 
 
 ## Verification and Evidence
 
-**Three earlier ordinary-group runs completed the full Kiln → approval → Sepolia payment → refund lifecycle.** Their 45 lifecycle receipts were verified as canonical and finalized. Across those runs, 180 MockUSDC was contributed, 117 paid and 63 refunded. Each record uses synthetic preferences and six distinct keys controlled by one test operator.
+**Three earlier ordinary-group runs completed the full Kiln → approval → Sepolia payment → refund lifecycle.** Their 45 lifecycle receipts were verified as canonical and finalized. Across those runs, 180 USDC was contributed, 117 paid and 63 refunded. Each record uses synthetic preferences and six distinct keys controlled by one test operator.
 
 The newer friends flow also passed live-provider and payment integration checks, performed separately. The table identifies the coverage of each record.
 
@@ -138,9 +138,9 @@ The following runs use the earlier synthetic restaurant catalog. Every linked JS
 
 | Flow and changed condition | Observed outcome | Inspect the proof |
 | --- | --- | --- |
-| **Baseline:** six $35-per-person meal budgets with a quietness preference | A; 45 MockUSDC paid; 2.5 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0xd24fa24c9a0d84c514330abca00b28ee186e833fddee92e5ef63a4baf7d9a7fd) · [Kiln and chain logs](docs/evidence/group-acceptance-001-baseline.json) |
-| **Lower budget:** first member changes $35 → $25 | B; 36 MockUSDC paid; 4 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0x3f6a846511de38ad8fabb3486e0fddb032c57ecc0d19d9ddda8692cd462a58a4) · [Kiln and chain logs](docs/evidence/group-acceptance-001-lower-budget.json) |
-| **Merchant excluded:** restore $35 and exclude A | B; 36 MockUSDC paid; 4 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb) · [Kiln and chain logs](docs/evidence/group-acceptance-001-merchant-excluded.json) |
+| **Baseline:** six $35-per-person meal budgets with a quietness preference | A; 45 USDC paid; 2.5 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0xd24fa24c9a0d84c514330abca00b28ee186e833fddee92e5ef63a4baf7d9a7fd) · [Kiln and chain logs](docs/evidence/group-acceptance-001-baseline.json) |
+| **Lower budget:** first member changes $35 → $25 | B; 36 USDC paid; 4 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0x3f6a846511de38ad8fabb3486e0fddb032c57ecc0d19d9ddda8692cd462a58a4) · [Kiln and chain logs](docs/evidence/group-acceptance-001-lower-budget.json) |
+| **Merchant excluded:** restore $35 and exclude A | B; 36 USDC paid; 4 refunded per member | [Payment transaction](https://sepolia.etherscan.io/tx/0x08914573a043f0c9ecca3c22624dd80af928cb06beab881cf372e0cee1d1cbfb) · [Kiln and chain logs](docs/evidence/group-acceptance-001-merchant-excluded.json) |
 
 <details>
 <summary>Full payment transaction hashes — Ethereum Sepolia</summary>
@@ -156,7 +156,7 @@ Merchant excluded:
 
 </details>
 
-**Spending controls:** an 80 MockUSDC request was rejected in the first two runs; a payment to A under B's policy was rejected in the third. These were read-only `eth_call` rejections, not mined failed transactions.
+**Spending controls:** an 80 USDC request was rejected in the first two runs; a payment to A under B's policy was rejected in the third. These were read-only `eth_call` rejections, not mined failed transactions.
 
 **Recovery:** lost-broadcast and database-confirmation failures recovered across separate processes, retaining the original payment hash without duplicate payment. [Recovery checks](docs/GROUP_ACCEPTANCE.md#recovery-and-privacy-checks).
 
@@ -189,7 +189,7 @@ There is no administrator withdrawal or policy-editing path. Eligible participan
 
 | Contract on Ethereum Sepolia (`11155111`) | Address |
 | --- | --- |
-| MockUSDC | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) |
+| USDC (test token) | [`0x4707bde238399a27f88855a34bfb31f20b386b17`](https://sepolia.etherscan.io/address/0x4707bde238399a27f88855a34bfb31f20b386b17) |
 | Group wallet v1 — six-member demo and earlier policies | [`0xd43172d5bd904b68004d69545fd01dbcfdb82a89`](https://sepolia.etherscan.io/address/0xd43172d5bd904b68004d69545fd01dbcfdb82a89) |
 | Group wallet v2 — 2–100 members | [`0xe06073db9ee37801f593a040cc1f8c1f11af16bb`](https://sepolia.etherscan.io/address/0xe06073db9ee37801f593a040cc1f8c1f11af16bb) |
 
@@ -217,7 +217,7 @@ For connected development, create an ignored `.env.development` from [`.env.exam
 | --- | --- |
 | Groups and login | Isolated Neon database; `DATABASE_URL`, direct `DATABASE_URL_UNPOOLED`, `SESSION_SECRET`, `APP_ORIGIN=http://localhost:3000`. |
 | Interpretation and search | Server-only `KILN_API_KEY` and `XAPI_KEY`; `KILN_MODEL=qwen3-32b`, `RESTAURANT_SEARCH_PROVIDER=xapi`. |
-| Wallet actions | Sepolia RPC, the deployed contract addresses above, a browser wallet, MockUSDC and Sepolia gas. |
+| Wallet actions | Sepolia RPC, the deployed contract addresses above, a browser wallet, USDC and Sepolia gas. |
 | Payment execution | A running processor with test executor/signers. Follow [processor setup](docs/HYBRID_PC.md). |
 
 The migration command expects an isolated branch named `dev-preferences` and matching `NEON_BRANCH=dev-preferences`. Apply all checked-in migrations through **`0018_group_before_search.sql`** before running the current web app and processor:
