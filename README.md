@@ -24,11 +24,11 @@ Six friends want dinner together. Their budgets differ, some preferences are pri
 
 | Judging criterion | What Converge demonstrates | Where to verify |
 | --- | --- | --- |
-| **Technical · 30** | Kiln interpretation and search-tool calls; contract-enforced payments and refunds; recovery without duplicate payment. | [Architecture](#architecture) · [Kiln usage](#kiln-integration-and-measured-usage) · [Execution evidence](#per-flow-on-chain-proof-and-kiln-logs) |
-| **Task fit · 25** | Private requirements lead to a jointly approved policy and a bounded deposit payment. | [User flow](#how-it-works) · [Verification scope](#verification-and-evidence) |
-| **Innovation · 20** | The agent coordinates interpretation, search and execution around versioned group agreement and a fixed spending authority. | [AI, code and contract responsibilities](#what-the-agent-does) · [Changed conditions](#when-conditions-change) |
-| **Usability · 15** | A shared planning workflow for friends, plus a guided demo that one reviewer can try. | [Live demo](https://converge-iota-seven.vercel.app/demo) · [Friends planning](docs/LIVE_GROUP_PLANS.md) |
-| **Presentation · 10** | A running app, an explorable evidence page and per-flow receipts linked to Kiln records. | [Public evidence](https://converge-iota-seven.vercel.app/evidence) · [Demo walkthrough](#try-the-demo) |
+| **Technical** | Kiln interpretation and search-tool calls; contract-enforced payments and refunds; recovery without duplicate payment. | [Architecture](#architecture) · [Kiln usage](#kiln-integration-and-measured-usage) · [Execution evidence](#per-flow-on-chain-proof-and-kiln-logs) |
+| **Task fit** | Private requirements lead to a jointly approved policy and a bounded deposit payment. | [User flow](#how-it-works) · [Verification scope](#verification-and-evidence) |
+| **Innovation** | The agent coordinates interpretation, search and execution around versioned group agreement and a fixed spending authority. | [AI, code and contract responsibilities](#what-the-agent-does) · [Changed conditions](#when-conditions-change) |
+| **Usability** | A shared planning workflow for friends, plus a guided demo that one reviewer can try. | [Live demo](https://converge-iota-seven.vercel.app/demo) · [Friends planning](docs/LIVE_GROUP_PLANS.md) |
+| **Presentation** | A running app, an explorable evidence page and per-flow receipts linked to Kiln records. | [Public evidence](https://converge-iota-seven.vercel.app/evidence) · [Demo walkthrough](#try-the-demo) |
 
 ## Try the Demo
 
